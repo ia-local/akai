@@ -1,0 +1,162 @@
+openapi: 3.0.0
+info:
+  title: Studio Multimedia AV API
+  description: API de contrôle pour le Studio d'Enregistrement Multimédia (Audio/Vidéo/MIDI/IA).
+  version: 1.1.0
+  contact:
+    name: Dev Team
+servers:
+  - url: http://localhost:3145
+    description: Serveur Local de Développement
+
+tags:
+  - name: Assets
+    description: Gestion dynamique des fichiers (Audio, Vidéo, Images, Scripts)
+  - name: State
+    description: État global du contrôleur (MIDI, Transport, Paramètres)
+  - name: AI Services
+    description: Services d'intelligence artificielle (Vision, NLP)
+
+paths:
+  # --- GESTION DES ACTIFS ---
+  /api/assets:
+    get:
+      summary: Récupérer tous les actifs disponibles
+      description: Scanne les dossiers /public/data et retourne les fichiers classés par type.
+      tags: [Assets]
+      responses:
+        '200':
+          description: Liste des actifs chargée avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  assets:
+                    $ref: '#/components/schemas/AssetLibrary'
+
+  # --- ÉTAT GLOBAL ---
+  /api/state:
+    get:
+      summary: Obtenir l'état actuel du système
+      description: Retourne la position des curseurs, l'état du transport et les paramètres EQ.
+      tags: [State]
+      responses:
+        '200':
+          description: État global actuel.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalState'
+
+  # --- SERVICES IA ---
+  /api/ia/vision-analyze:
+    post:
+      summary: Analyser une image via IA (Groq/Llama)
+      description: Envoie l'ID d'un actif image au script Python pour analyse visuelle.
+      tags: [AI Services]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - assetId
+              properties:
+                assetId:
+                  type: string
+                  description: L'ID de l'actif à analyser (ex: "img_scene").
+                  example: "img_scene"
+      responses:
+        '200':
+          description: Analyse réussie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  description:
+                    type: string
+                    example: "Je vois une scène sombre avec des formes géométriques..."
+        '500':
+          description: Erreur lors de l'exécution du script Python.
+
+components:
+  schemas:
+    # Structure de la bibliothèque d'actifs
+    AssetLibrary:
+      type: object
+      properties:
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetItem'
+        audio:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetItem'
+        video:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetItem'
+        scripts:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetItem'
+
+    # Objet Actif unitaire
+    AssetItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "vid_story"
+        name:
+          type: string
+          example: "Storyboard_codex.mp4"
+        type:
+          type: string
+          example: "video/mp4"
+        category:
+          type: string
+          enum: [VISUEL, AUDIO, VIDEO, CAMERA, SCRIPT]
+        url:
+          type: string
+          description: Chemin relatif accessible via le navigateur.
+          example: "/data/video/storyboard.mp4"
+        duration:
+          type: number
+          description: Durée en secondes (si applicable).
+          example: 35.5
+
+    # État Global (Source de vérité)
+    GlobalState:
+      type: object
+      properties:
+        transport:
+          type: string
+          enum: [PLAYING, STOPPED, PAUSED, RECORDING]
+        cursor_x:
+          type: number
+          description: Position X (0-100)
+        cursor_y:
+          type: number
+          description: Position Y (0-100)
+        av_chroma_angle:
+          type: number
+          description: Angle chromatique (0-360)
+        av_saturation:
+          type: number
+          description: Saturation globale (0.0-1.0)
+        eq_bass:
+          type: number
+          description: Equalizer Basses (-12 à +12)
+        eq_treble:
+          type: number
+          description: Equalizer Aiguës (-12 à +12)

@@ -1,0 +1,349 @@
+/* ----------------------------------------------------------------------
+   GLOBAL & TYPOGRAPHIE
+---------------------------------------------------------------------- */
+:root {
+    /* Palette de couleurs "Dark Studio" */
+    --color-background: #121212;
+    --color-surface: #1a1a1a;
+    --color-panel: #242424;
+    --color-text-light: #f0f0f0;
+    --color-text-muted: #888888;
+    
+    /* Couleurs d'accentuation (Technique / Néon) */
+    --color-accent-green: #00ff88; 
+    --color-accent-red: #ff3333;   
+    --color-accent-yellow: #ffaa00; 
+
+    /* Dimensions */
+    --spacing: 1rem;
+    --border-radius: 6px;
+    
+    /* Variable de rotation globale pour les Knobs (JS-controlled) */
+    --knob-rotation: -135deg; 
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text-light);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ----------------------------------------------------------------------
+   GRILLE PRINCIPALE (LAYOUT) - DASHBOARD
+---------------------------------------------------------------------- */
+.l-dashboard {
+    width: 95vw;
+    height: 95vh;
+    grid-template-columns: 280px 1fr; 
+    grid-template-rows: 60px 1fr 40px;
+    grid-template-areas: 
+        "header header"
+        "aside-left main"
+        "footer footer";
+    gap: 10px;
+    padding: var(--spacing);
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    display: grid;
+}
+
+/* ----------------------------------------------------------------------
+   HEADER & FOOTER (Styles inchangés)
+---------------------------------------------------------------------- */
+.l-header { grid-area: header; display: flex; justify-content: space-between; align-items: center; background-color: var(--color-panel); padding: 0 var(--spacing); border-radius: var(--border-radius); }
+.l-footer { grid-area: footer; background-color: var(--color-panel); padding: 0 var(--spacing); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 0.8em; }
+
+.c-user-profile {
+    color: var(--color-text-light);
+    font-size: 0.9em;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+.c-btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: all 0.2s ease;
+    background-color: var(--color-accent-green);
+    color: var(--color-background);
+}
+.c-btn--stop { background-color: var(--color-accent-red); }
+
+
+/* ----------------------------------------------------------------------
+   ASIDE GAUCHE (CONTRÔLES RAPIDES)
+---------------------------------------------------------------------- */
+.l-aside--left {
+    grid-area: aside-left;
+    background-color: var(--color-panel);
+    padding: var(--spacing);
+    border-radius: var(--border-radius);
+}
+
+.c-panel-title {
+    color: var(--color-accent-yellow);
+    margin-bottom: var(--spacing);
+    padding-bottom: 5px;
+    border-bottom: 1px solid #333;
+    font-size: 1.1em;
+}
+
+.c-param-summary {
+    padding: 10px;
+    background-color: #1a1a1a;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing);
+}
+.c-param-summary p {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    color: var(--color-text-muted);
+}
+.c-param-summary span {
+    color: var(--color-accent-green);
+    font-family: monospace;
+}
+hr {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 15px 0;
+}
+
+
+/* ----------------------------------------------------------------------
+   MAIN (SÉQUENCEUR PIANO ROLL)
+---------------------------------------------------------------------- */
+.l-main {
+    grid-area: main;
+    background-color: var(--color-panel);
+    padding: var(--spacing);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+}
+
+.c-sequencer-module {
+    display: grid;
+    grid-template-columns: 100px 1fr; /* Étiquettes | Grille */
+    height: 100%;
+    overflow: hidden;
+    gap: 5px;
+}
+
+.c-sequencer-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 20px;
+}
+
+.c-sample-label {
+    width: 100%;
+    padding: 3px 5px;
+    background-color: #333;
+    border-radius: 3px;
+    font-size: 0.7em;
+    border: 1px solid #444;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.c-sample-label.active {
+    background-color: var(--color-accent-yellow);
+    color: var(--color-background);
+    box-shadow: 0 0 5px var(--color-accent-yellow);
+}
+
+
+.c-sequencer-timeline {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    /* Les lignes sont gérées par JS (12 notes) */
+    grid-gap: 2px;
+    padding: 2px;
+    background-color: #111;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+
+.c-step {
+    background-color: #333;
+    border-radius: 2px;
+    transition: background-color 0.05s ease;
+    cursor: pointer;
+}
+
+.c-step.step-on {
+    background-color: var(--color-accent-green); /* Pas programmé */
+    border: 1px solid #444;
+}
+
+.c-step.step-current {
+    background-color: var(--color-accent-yellow);
+    box-shadow: 0 0 8px rgba(255, 170, 0, 0.8);
+    transform: scale(1.05);
+}
+
+
+/* ----------------------------------------------------------------------
+   MODAL (REPRÉSENTATION DU CONTRÔLEUR MIDI MPD218)
+---------------------------------------------------------------------- */
+.c-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.c-modal-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.c-modal-content {
+    background-color: #2e2e2e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    z-index: 1001;
+}
+
+/* --- Styles spécifiques au MPD218 (pour la Modale) --- */
+
+.c-mpd-layout {
+    background-color: #111; 
+    border: 3px solid #333;
+    padding: 20px;
+    width: 600px; 
+    min-height: 400px;
+}
+
+.mpd-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+/* A. Section KNOBS (Côté Gauche dans la Modale) */
+.mpd-knobs-section {
+    width: 160px; 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 25px 15px;
+    padding: 10px 0;
+    
+    /* Regrouper les knobs dans un conteneur simple */
+    grid-auto-flow: row; 
+    
+    /* Retirer le titre de section pour plus de fidélité MPD */
+    /* .mpd-section-title { display: none; } */
+}
+
+/* Conteneur des 6 Knobs (utilisé dans la Modale pour le placement) */
+.c-knob-container {
+    display: contents; /* Utiliser contents pour que les enfants participent à la grille */
+}
+
+
+/* --- Styles des Knobs (Appliqué ici et dans la Modale) --- */
+.c-knob-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 0;
+}
+.c-knob-group label {
+    order: 2; 
+    margin-top: 5px;
+    color: var(--color-text-muted);
+    font-size: 0.7em;
+}
+
+.c-knob {
+    width: 45px; /* Plus grands dans la modale */
+    height: 45px;
+    background: linear-gradient(145deg, #1c1c1c, #2a2a2a);
+    border-radius: 50%;
+    border: 1px solid #444;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.8), 0 0 3px rgba(0, 0, 0, 0.5);
+    position: relative;
+    cursor: grab;
+    margin-bottom: 5px;
+    transform: rotate(var(--knob-rotation));
+    transition: transform 0.05s linear; 
+}
+.c-knob-value {
+    order: 3;
+    font-family: monospace;
+    font-size: 0.8em;
+    color: var(--color-accent-yellow);
+}
+
+
+/* B. Section PADS (Côté Droit dans la Modale) */
+.c-pad-controller.mpd-pad-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    grid-auto-rows: 1fr;
+    gap: 8px;
+    width: 100%;
+    max-width: 380px; 
+    transform: none; 
+}
+
+.c-midi-pad {
+    height: 60px; 
+    background-color: #440000; 
+    border: 2px solid var(--color-accent-red); /* Bordure rouge pour simuler les LEDs */
+    transition: 0.1s ease-out;
+    transform: none; 
+    font-weight: bold;
+    color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7em;
+}
+.c-midi-pad.active {
+    background-color: var(--color-accent-red); 
+    box-shadow: 0 0 15px var(--color-accent-red);
+}
+
+/* Styles pour les boutons auxiliaires de la Modale */
+.mpd-aux-buttons {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+}
+.c-aux-btn {
+    background-color: #444;
+    color: var(--color-text-light);
+    border: 1px solid #666;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    cursor: not-allowed;
+}

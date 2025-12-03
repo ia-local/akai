@@ -1,0 +1,131 @@
+{
+    "device": "AKAI MPD218",
+    "version": "1.1",
+    "description": "Configuration complète avec 3 banques de pads (48 actions) et 3 banques de contrôles (18 paramètres).",
+    "globalSettings": {
+        "activePadBank": "A",
+        "activeCtrlBank": "A",
+        "defaultVelocity": 127,
+        "tempoBPM": 120,
+        "swingFactor": 0.0,
+        "isFullLevel": false,
+        "isNoteRepeat": false
+    },
+    
+    "controlMidiMap": {
+        "FULL_LEVEL": 1, 
+        "NOTE_REPEAT": 2,
+        "PROG_SELECT": 3,
+        "PAD_BANK_A": 4, 
+        "PAD_BANK_B": 5, 
+        "PAD_BANK_C": 6, 
+        "CTRL_BANK_A": 7, 
+        "CTRL_BANK_B": 8, 
+        "CTRL_BANK_C": 9 
+    },
+
+    "banks": {
+        
+        "PADS": {
+            "A": {
+                "name": "Bank A - Primary Drums & Timing",
+                "mappings": [
+                    { "id": "P1", "midiNote": 36, "label": "Kick 1/4", "sampleUrl": "audio/bankA_kick.wav", "actionType": "PlaySample", "timing": "1/4" },
+                    { "id": "P2", "midiNote": 37, "label": "Snare 1/8", "sampleUrl": "audio/bankA_snare.wav", "actionType": "PlaySample", "timing": "1/8" },
+                    { "id": "P3", "midiNote": 38, "label": "HiHat 1/16", "sampleUrl": "audio/bankA_hat.wav", "actionType": "PlaySample", "timing": "1/16" },
+                    { "id": "P4", "midiNote": 39, "label": "Clap 1/32", "sampleUrl": "audio/bankA_clap.wav", "actionType": "PlaySample", "timing": "1/32" },
+                    
+                    { "id": "P5", "midiNote": 40, "label": "Perc 1/4T", "sampleUrl": "audio/bankA_perc.wav", "actionType": "PlaySample", "timing": "1/4t" },
+                    { "id": "P6", "midiNote": 41, "label": "FX Up 1/8T", "sampleUrl": "audio/bankA_fx_up.wav", "actionType": "PlaySample", "timing": "1/8t" },
+                    { "id": "P7", "midiNote": 42, "label": "FX Down 1/16T", "sampleUrl": "audio/bankA_fx_down.wav", "actionType": "PlaySample", "timing": "1/16t" },
+                    { "id": "P8", "midiNote": 43, "label": "Crash 1/32T", "sampleUrl": "audio/bankA_crash.wav", "actionType": "PlaySample", "timing": "1/32t" },
+                    
+                    { "id": "P9", "midiNote": 44, "label": "Swing OFF", "sampleUrl": null, "actionType": "SetSwing", "value": 0.00 },
+                    { "id": "P10", "midiNote": 45, "label": "Swing 54%", "sampleUrl": null, "actionType": "SetSwing", "value": 0.04 },
+                    { "id": "P11", "midiNote": 46, "label": "Swing 56%", "sampleUrl": null, "actionType": "SetSwing", "value": 0.06 },
+                    { "id": "P12", "midiNote": 47, "label": "Swing 59%", "sampleUrl": null, "actionType": "SetSwing", "value": 0.09 },
+                    
+                    { "id": "P13", "midiNote": 48, "label": "Swing 60%", "sampleUrl": null, "actionType": "SetSwing", "value": 0.10 },
+                    { "id": "P14", "midiNote": 49, "label": "Swing 62%", "sampleUrl": null, "actionType": "SetSwing", "value": 0.12 },
+                    { "id": "P15", "midiNote": 50, "label": "Ext Clock", "sampleUrl": null, "actionType": "SetClock", "source": "External" },
+                    { "id": "P16", "midiNote": 51, "label": "TAP TEMPO", "sampleUrl": null, "actionType": "TapTempo" }
+                ]
+            },
+            
+            "B": {
+                "name": "Bank B - Live Clips & Visual FX",
+                "mappings": [
+                    { "id": "P1", "midiNote": 36, "label": "Clip A 5s", "sampleUrl": "video/clip_A_5s.mp4", "actionType": "TriggerClip", "modalId": "clipA_modal" },
+                    { "id": "P2", "midiNote": 37, "label": "Clip B 10s", "sampleUrl": "video/clip_B_10s.mp4", "actionType": "TriggerClip", "modalId": "clipB_modal" },
+                    { "id": "P3", "midiNote": 38, "label": "Image Fade", "sampleUrl": "img/image_static.jpg", "actionType": "ShowImage", "effect": "FadeIn" },
+                    { "id": "P4", "midiNote": 39, "label": "FX Color INV", "sampleUrl": null, "actionType": "ToggleCSS", "targetClass": "filter-invert" },
+                    
+                    { "id": "P5", "midiNote": 40, "label": "Loop 1", "sampleUrl": "audio/loop_1.wav", "actionType": "ToggleLoop" },
+                    { "id": "P6", "midiNote": 41, "label": "Loop 2", "sampleUrl": "audio/loop_2.wav", "actionType": "ToggleLoop" },
+                    { "id": "P7", "midiNote": 42, "label": "Loop Stop All", "sampleUrl": null, "actionType": "StopAllLoops" },
+                    { "id": "P8", "midiNote": 43, "label": "Quantize 1/4", "sampleUrl": null, "actionType": "SetQuantize", "value": "4n" },
+                    
+                    { "id": "P9", "midiNote": 44, "label": "Synth C4", "sampleUrl": null, "actionType": "PlaySynth", "note": "C4", "synthType": "PluckSynth" },
+                    { "id": "P10", "midiNote": 45, "label": "Synth D4", "sampleUrl": null, "actionType": "PlaySynth", "note": "D4", "synthType": "PluckSynth" },
+                    { "id": "P11", "midiNote": 46, "label": "Synth E4", "sampleUrl": null, "actionType": "PlaySynth", "note": "E4", "synthType": "PluckSynth" },
+                    { "id": "P12", "midiNote": 47, "label": "Synth F4", "sampleUrl": null, "actionType": "PlaySynth", "note": "F4", "synthType": "PluckSynth" },
+                    
+                    { "id": "P13", "midiNote": 48, "label": "FX Reverb ON", "sampleUrl": null, "actionType": "ToggleFX", "fxName": "reverb" },
+                    { "id": "P14", "midiNote": 49, "label": "FX Delay ON", "sampleUrl": null, "actionType": "ToggleFX", "fxName": "delay" },
+                    { "id": "P15", "midiNote": 50, "label": "FX Filter ON", "sampleUrl": null, "actionType": "ToggleFX", "fxName": "filter" },
+                    { "id": "P16", "midiNote": 51, "label": "FX All OFF", "sampleUrl": null, "actionType": "AllFXOff" }
+                ]
+            },
+            
+            "C": {
+                "name": "Bank C - Groq AI & Utility",
+                "mappings": [
+                    { "id": "P1", "midiNote": 36, "label": "IA Tag", "sampleUrl": null, "actionType": "CallGroq", "groqPrompt": "Generate three live hashtags related to EDM" },
+                    { "id": "P2", "midiNote": 37, "label": "IA Summary", "sampleUrl": null, "actionType": "CallGroq", "groqPrompt": "Generate a summary tweet of the last 15 seconds of sound performance" },
+                    { "id": "P3", "midiNote": 38, "label": "Open Modal", "sampleUrl": null, "actionType": "OpenComponent", "component": "/component_modal" },
+                    { "id": "P4", "midiNote": 39, "label": "Next Track", "sampleUrl": null, "actionType": "PlaylistControl", "command": "next" },
+                    
+                    { "id": "P16", "midiNote": 51, "label": "Panic Reset", "sampleUrl": null, "actionType": "GlobalReset" }
+                ]
+            }
+        },
+
+        "CONTROLS": {
+            "A": {
+                "name": "Bank A - Tone.js Mix",
+                "mappings": [
+                    { "id": "K1", "midiCC": 71, "label": "Master Volume", "targetProperty": "Tone.Destination.volume", "unit": "dB", "minVal": -60, "maxVal": 0, "initial": -12 },
+                    { "id": "K2", "midiCC": 72, "label": "Filter Cutoff", "targetProperty": "filter.frequency", "unit": "Hz", "minVal": 100, "maxVal": 10000, "initial": 8000 },
+                    { "id": "K3", "midiCC": 73, "label": "Delay Wet", "targetProperty": "delay.wet.value", "unit": "ratio", "minVal": 0, "maxVal": 1, "initial": 0.3 },
+                    { "id": "K4", "midiCC": 74, "label": "Reverb Wet", "targetProperty": "reverb.wet.value", "unit": "ratio", "minVal": 0, "maxVal": 1, "initial": 0.2 },
+                    { "id": "K5", "midiCC": 75, "label": "LFO Rate", "targetProperty": "lfo.frequency.value", "unit": "Hz", "minVal": 0, "maxVal": 10, "initial": 0.5 },
+                    { "id": "K6", "midiCC": 76, "label": "Pan Spread", "targetProperty": "pan.pan.value", "unit": "ratio", "minVal": -1, "maxVal": 1, "initial": 0 }
+                ]
+            },
+            
+            "B": {
+                "name": "Bank B - Video/Visual FX",
+                "mappings": [
+                    { "id": "K1", "midiCC": 71, "label": "Clip Opacity", "targetProperty": "clipModal.style.opacity", "unit": "ratio", "minVal": 0, "maxVal": 1, "initial": 1 },
+                    { "id": "K2", "midiCC": 72, "label": "CSS Hue", "targetProperty": "cssFilter.hueRotate", "unit": "deg", "minVal": 0, "maxVal": 360, "initial": 0 },
+                    { "id": "K3", "midiCC": 73, "label": "CSS Blur", "targetProperty": "cssFilter.blur", "unit": "px", "minVal": 0, "maxVal": 10, "initial": 0 },
+                    { "id": "K4", "midiCC": 74, "label": "Canvas Zoom", "targetProperty": "canvas.scale", "unit": "ratio", "minVal": 1, "maxVal": 2, "initial": 1 },
+                    { "id": "K5", "midiCC": 75, "label": "IA Volume", "targetProperty": "iaVoice.volume", "unit": "ratio", "minVal": 0, "maxVal": 1, "initial": 0.8 },
+                    { "id": "K6", "midiCC": 76, "label": "FX Mix Master", "targetProperty": "masterFX.mix", "unit": "ratio", "minVal": 0, "maxVal": 1, "initial": 0 }
+                ]
+            },
+            
+            "C": {
+                "name": "Bank C - Groq IA Tuning",
+                "mappings": [
+                    { "id": "K1", "midiCC": 71, "label": "IA Temperature", "targetProperty": "groqConfig.temperature", "unit": "ratio", "minVal": 0.1, "maxVal": 1.0, "initial": 0.7 },
+                    { "id": "K2", "midiCC": 72, "label": "IA Max Tokens", "targetProperty": "groqConfig.maxTokens", "unit": "integer", "minVal": 10, "maxVal": 500, "initial": 100 },
+                    { "id": "K3", "midiCC": 73, "label": "IA Context", "targetProperty": "groqConfig.contextSize", "unit": "integer", "minVal": 100, "maxVal": 1000, "initial": 500 },
+                    { "id": "K4", "midiCC": 74, "label": "BPM Fine Tune", "targetProperty": "Tone.Transport.bpm", "unit": "BPM", "minVal": 60, "maxVal": 180, "initial": 120 },
+                    { "id": "K5", "midiCC": 75, "label": "Metronome Vol", "targetProperty": "metronome.volume", "unit": "dB", "minVal": -60, "maxVal": 0, "initial": -20 },
+                    { "id": "K6", "midiCC": 76, "label": "Unassigned", "targetProperty": null, "unit": "N/A", "minVal": 0, "maxVal": 127, "initial": 0 }
+                ]
+            }
+        }
+    }
+}

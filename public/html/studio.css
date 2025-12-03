@@ -1,0 +1,204 @@
+/* Base et Grid Layout */
+body { 
+    margin: 0; 
+    overflow: hidden; 
+    font-family: 'Inter', sans-serif; 
+    background-color: #121212; /* Fond sombre studio */
+    color: #ddd;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* 1. HEADER / TOOLBAR */
+header {
+    height: 50px;
+    background-color: #1e1e1e;
+    border-bottom: 1px solid #333;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 100;
+}
+
+/* 2. MAIN WORKSPACE GRID */
+#workspace {
+    display: flex;
+    flex-grow: 1; 
+    overflow: hidden;
+}
+
+/* 2.1 ASIDE GAUCHE: LIBRARY */
+#asset-library {
+    width: 250px;
+    background-color: #1a1a1a;
+    border-right: 1px solid #333;
+    padding: 1rem;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+/* 2.2 CENTER COLUMN: PREVIEW & CONTROLS */
+#center-area {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #0d0d0d;
+}
+
+/* Preview Zone */
+#preview-zone {
+    flex-grow: 1;
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #333;
+    overflow: hidden;
+    position: relative;
+}
+
+/* 3. FOOTER: TIMELINE */
+#timeline-editor {
+    height: 200px; 
+    background-color: #1e1e1e;
+    border-top: 1px solid #333;
+    flex-shrink: 0;
+    padding: 10px;
+    overflow-x: auto;
+}
+
+/* --- Styles Multi-Calques / Timeline --- */
+#timeline-tracks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    padding-top: 15px;
+    width: fit-content; 
+    min-width: 100%;
+}
+.timeline-track {
+    height: 45px;
+    background-color: #2a2a2a;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 5px;
+    position: relative;
+    border: 1px solid transparent; /* Pour éviter le saut lors du dragover */
+}
+.track-label {
+    position: absolute;
+    left: 5px;
+    top: -15px;
+    font-size: 0.6rem;
+    color: #777;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+/* Styles Spécifiques aux Actifs */
+.asset-group-title {
+    color: #00ffaa;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+.asset-item {
+    padding: 6px;
+    border-radius: 4px;
+    background-color: #2a2a2a;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    cursor: grab;
+    transition: background-color 0.15s;
+    border-left: 3px solid transparent;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.asset-item:hover {
+    background-color: #3a3a3a;
+    border-left-color: #00ffaa;
+}
+.asset-item:active {
+    cursor: grabbing;
+}
+
+/* Codes couleurs par Type */
+.asset-video { border-left-color: #ff6347; }
+.asset-audio { border-left-color: #4a7bed; }
+.asset-script { border-left-color: #f7d04e; }
+.asset-text { border-left-color: #8c9eff; }
+
+/* Clips Timeline */
+.timeline-clip {
+    height: 35px;
+    border-radius: 4px;
+    padding: 0 8px;
+    display: inline-block;
+    margin-right: 5px;
+    line-height: 35px;
+    font-size: 0.8rem;
+    color: white;
+    min-width: 50px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+    cursor: grab;
+    position: absolute;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.timeline-clip:hover {
+    filter: brightness(1.2);
+}
+
+/* --- STYLES MODAL SYSTEM --- */
+#asset-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 500;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+#asset-modal.show {
+    display: flex;
+}
+.modal-content {
+    background-color: #1e1e1e;
+    max-width: 700px;
+    width: 90%;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* --- COUCHE DESSIN (SVG OVERLAY) --- */
+#drawing-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20; /* Au-dessus de la vidéo/image */
+    pointer-events: none; /* Laisse passer les clics si besoin */
+}
+
+/* Le Curseur (Viseur) */
+#drawing-cursor {
+    transition: cx 0.05s linear, cy 0.05s linear, r 0.05s linear, fill 0.05s linear;
+    mix-blend-mode: screen; /* Effet de fusion sympa */
+}
+
+/* --- UPDATE TIMELINE TRACKS --- */
+/* Couleur spécifique pour la piste IMAGE */
+.asset-image { border-left-color: #d946ef; /* Fuchsia */ }

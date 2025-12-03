@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interface AV - Contrôle MIDI MPD218</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Utilisation du module Three.js -->
+    <script type="module">
+        import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
+        window.THREE = THREE; // Rendre THREE disponible globalement pour la compatibilité
+    </script>
+    <style>
+        /* Styles pour un look de console AV */
+        body { margin: 0; overflow: hidden; font-family: 'Inter', sans-serif; background-color: #000; color: #fff; }
+        
+        /* Conteneur pour le rendu Three.js */
+        #canvas-container { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            z-index: 1; 
+        }
+
+        /* HUD (Affichage Tête Haute) */
+        #hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background-color: rgba(10, 10, 10, 0.85);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #333; 
+            max-width: 300px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.5s ease-out;
+        }
+
+        #hud p { margin: 5px 0; font-size: 14px; font-weight: 300; }
+        #hud strong { font-weight: 600; color: #ccc; }
+
+        .separator { border: 0; height: 1px; background-color: #333; margin: 10px 0; }
+        .cc-label { font-family: 'Consolas', monospace; font-size: 13px; }
+        .highlight { color: #8cffb5; font-weight: bold; }
+        
+        /* Indicateur de Statut */
+        .state-indicator {
+            padding: 5px 10px; border-radius: 6px; font-weight: bold;
+            display: inline-block; margin-bottom: 10px;
+            min-width: 80px; text-align: center; text-transform: uppercase;
+        }
+        .state-indicator.stopped { background-color: #d63031; }
+        .state-indicator.playing { background-color: #00b894; }
+        .state-indicator.record { background-color: #ff7675; }
+
+        /* Notification de Pad */
+        #notification {
+            position: fixed; bottom: 20px; left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            background-color: #ffcc00; color: #000;
+            padding: 10px 20px; border-radius: 8px;
+            font-weight: bold; opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 100;
+        }
+        #notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- Conteneur pour le Canvas Three.js -->
+    <div id="canvas-container"></div>
+
+    <!-- Affichage Tête Haute (HUD) -->
+    <div id="hud">
+        <div class="state-indicator" id="transport-display">STOPPED</div>
+        <p>MIDI Status: <span id="midi-status">Connecting...</span></p>
+        <p>Style Actif: <strong><span id="style-display">NONE</span></strong></p>
+        <hr class="separator"/>
+        
+        <!-- Curseur X/Y/Z (CC 0, 1, 2) -->
+        <p class="cc-label">Curseur X/Y: (<span id="val-x">0</span>, <span id="val-y">0</span>)</p>
+        <p class="cc-label">Échelle (Z): <span id="val-z">1.00</span></p>
+        
+        <!-- Chroma (CC 3, 4) -->
+        <hr class="separator"/>
+        <p class="cc-label">Angle Chroma: <span id="val-chroma">0</span>°</p>
+        <p class="cc-label">Saturation: <span id="val-saturation">1.00</span></p>
+
+        <!-- Nouveaux Paramètres AV (CC 5, 6, 7) -->
+        <hr class="separator"/>
+        <p class="cc-label highlight">CC 5 (Cam Rot): <span id="val-p1">0</span>°</p>
+        <p class="cc-label">CC 6 (Effet Index): <span id="val-p2">0</span></p>
+        <p class="cc-label">CC 7 (Vitesse): <span id="val-p3">0</span></p>
+    </div>
+
+    <!-- Notification d'événement -->
+    <div id="notification"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="./app.js"></script>
+</body>
+</html>

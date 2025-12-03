@@ -1,0 +1,103 @@
+/* public/css/modalData.css */
+
+.md-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.md-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.md-window {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 8px;
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.md-overlay.active .md-window {
+    transform: translateY(0);
+}
+
+.md-header {
+    background: #252525;
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.md-title {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.md-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+}
+.md-close:hover { color: #fff; }
+
+.md-body {
+    padding: 20px;
+    color: #ccc;
+    font-size: 0.9rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.md-grid {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.md-label {
+    color: #666;
+    font-weight: bold;
+    text-align: right;
+    padding-right: 10px;
+}
+
+.md-value {
+    color: #eee;
+    font-family: 'Consolas', monospace;
+    word-break: break-all;
+}
+
+.md-actions {
+    padding: 15px;
+    background: #151515;
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

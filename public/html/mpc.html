@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKAI MPD218 - Contrôleur Visuel MIDI</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'akai-base': '#1e1e1e',
+                        'akai-accent': '#d6455d', 
+                        'akai-pad-off': '#333333',
+                        'akai-pad-active': '#ff0000', 
+                        'midi-blue': '#4a7bed',
+                        'midi-green': '#32c865',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Consolas', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Styles Globaux */
+        body { background-color: #0d1117; display: flex; justify-content: center; align-items: center; min-height: 100vh; } 
+
+        /* Cadre du MPD218 */
+        #mpd-frame {
+            max-width: 650px;
+            width: 90vw;
+            background-color: #1a1a1a;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            padding: 24px;
+            border: 2px solid #333;
+            display: flex;
+            flex-direction: row;
+        }
+
+        /* Panneau de Contrôle Gauche (Knobs & Fonctions) */
+        .control-panel {
+            flex-basis: 35%;
+            padding-right: 16px;
+            border-right: 1px solid #333;
+        }
+
+        /* --- Styles des Knobs Visuels --- */
+        .knob-grid-6 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap-x: 4px; 
+            gap-y: 12px;
+        }
+        .knob-visual {
+            width: 45px;
+            height: 45px;
+            background-color: #0d0d0d;
+            border-radius: 50%;
+            border: 2px solid #333;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+        .knob-indicator-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 50%; 
+            background-color: #fff;
+            transform-origin: bottom center;
+            transition: transform 0.05s linear;
+        }
+        
+        /* --- Styles des Pads --- */
+        .pad-grid-area {
+            flex-basis: 65%;
+            padding-left: 24px;
+        }
+        #active-pad-grid-visuel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            flex-grow: 1;
+        }
+        .pad-item-display {
+            background-color: #4a4a4a; 
+            border-radius: 4px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8);
+            border: 1px solid #555;
+            transition: background-color 0.1s ease, box-shadow 0.1s ease;
+            color: #ccc;
+            font-size: 0.7rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 80px;
+        }
+        
+        /* Simuler l'état Rétroéclairé */
+        .pad-item-display.active {
+            background-color: #ff0000; 
+            box-shadow: 0 0 10px #ff0000;
+            color: #fff;
+        }
+        
+        /* Styles des Boutons de Fonction */
+        .func-button {
+            background-color: #2b2b2b;
+            border-radius: 4px;
+            color: #ddd;
+            font-size: 0.7rem;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.2;
+            padding: 4px;
+            border: 1px solid #444;
+            transition: background-color 0.15s;
+        }
+        .func-button.accent {
+             background-color: #d6455d;
+             color: white;
+             box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+        }
+
+        /* Modal (inchangé) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); z-index: 50;
+            display: flex; visibility: hidden; opacity: 0; justify-content: center; align-items: center; 
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+        }
+        .modal-content { background-color: #1e1e1e; max-width: 90%; width: 700px; padding: 24px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); transform: translateY(-50px); transition: transform 0.3s ease; }
+        .modal-overlay.active { visibility: visible; opacity: 1; transition: opacity 0.3s ease; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .pad-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .pad-item { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; background-color: #2b2b2b; border-radius: 8px; cursor: pointer; transition: background-color 0.15s, transform 0.1s; height: 80px; }
+        .pad-item.active { background-color: #4a7bed; } 
+    </style>
+</head>
+<body>
+
+    <div id="mpd-frame">
+        <!-- Colonne de Gauche : Knobs et Boutons de Fonction -->
+        <div class="control-panel flex flex-col justify-between">
+            <h1 class="text-xl font-bold text-gray-300 mb-4">AKAI MPD218</h1>
+            
+            <!-- Ligne des 6 Knobs (CC 0 à CC 5) -->
+            <div class="knob-grid-6">
+                <!-- RANGÉE 5 & 6 (CC 0 & CC 1) -->
+                <!-- CC 0 (Knob 5 - X) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="0">
+                        <div id="knob-line-0" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 0 (X)</span>
+                    <span id="val-0" class="text-xs text-midi-green font-mono">0</span>
+                </div>
+                <!-- CC 1 (Knob 6 - Y) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="1">
+                        <div id="knob-line-1" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 1 (Y)</span>
+                    <span id="val-1" class="text-xs text-midi-green font-mono">100</span>
+                </div>
+                
+                <!-- RANGÉE 3 & 4 (CC 2 & CC 3) -->
+                <!-- CC 2 (Knob 3 - Z) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="2">
+                        <div id="knob-line-2" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 2 (Z)</span>
+                    <span id="val-2" class="text-xs text-midi-green font-mono">1.00</span>
+                </div>
+                <!-- CC 3 (Knob 4 - Chroma) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="3">
+                        <div id="knob-line-3" class="knob-indicator-line" style="transform: rotate(0deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 3 (Hue)</span>
+                    <span id="val-3" class="text-xs text-midi-green font-mono">0°</span>
+                </div>
+                
+                <!-- RANGÉE 1 & 2 (CC 4 & CC 5) -->
+                <!-- CC 4 (Knob 1 - Sat) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="4">
+                        <div id="knob-line-4" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 4 (Sat)</span>
+                    <span id="val-4" class="text-xs text-midi-green font-mono">1.00</span>
+                </div>
+                <!-- CC 5 (Knob 2 - Cam Rot) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="5">
+                        <div id="knob-line-5" class="knob-indicator-line" style="transform: rotate(0deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 5 (Cam)</span>
+                    <span id="val-5" class="text-xs text-midi-green font-mono">0°</span>
+                </div>
+            </div>
+
+
+            <!-- Zone MIDI/BANKS/Fonctions -->
+            <div class="mt-6 flex flex-col space-y-2">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <!-- Indicateurs A/B/C (A et B visibles sur l'image) -->
+                    <div class="flex items-center space-x-1">
+                        <div id="bank-a-led" class="w-2 h-2 rounded-full bg-midi-green/30"></div>
+                        <span class="text-xs text-gray-400">A</span>
+                    </div>
+                    <div class="flex items-center space-x-1 justify-end">
+                        <span class="text-xs text-gray-400">B</span>
+                        <div id="bank-b-led" class="w-2 h-2 rounded-full bg-midi-green/30"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <!-- Boutons de fonction -->
+                    <button class="func-button h-10 accent">FULL LEVEL</button>
+                    <button class="func-button h-10">NOTE REPEAT</button>
+                    <button id="open-pad-modal" class="func-button h-10 bg-midi-blue hover:bg-blue-700">MAPPING</button>
+                    
+                    <button class="func-button h-10">CTRL BANK</button>
+                    <button class="func-button h-10">PROG SELECT</button>
+                    <button class="func-button h-10">PAD BANK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne de Droite : Grille des Pads -->
+        <div class="pad-grid-area flex flex-col justify-between">
+            <div class="text-xs text-gray-500 mb-2 flex justify-between">
+                <span>AKAI MPD218</span>
+                <span id="socket-status" class="text-midi-green">CONNECTÉ</span>
+            </div>
+            
+            <!-- Grille 4x4 des Pads (où le Pad 1 est en bas à gauche) -->
+            <div id="active-pad-grid-visuel" class="grid grid-cols-4 gap-4 flex-grow">
+                <!-- Les pads A1-A16 seront injectés ici par JS -->
+            </div>
+
+            <div class="text-xs text-gray-500 mt-4 flex justify-between">
+                <span>PAD MODE: <strong id="style-display">NONE</strong></span>
+                <span>TRANSPORT: <strong id="transport-display">STOPPED</strong></span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Composant Modal de Mappage des Pads (Identique au Dashboard) -->
+    <div id="pad-mapping-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-midi-blue">Mappage des Pads (Banques A, B, C)</h2>
+            
+            <div id="pad-pagination" class="flex justify-center space-x-4 mb-6">
+                <button data-bank="A" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque A</button>
+                <button data-bank="B" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque B</button>
+                <button data-bank="C" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque C</button>
+            </div>
+
+            <div id="active-pad-grid" class="pad-grid">
+                <!-- Les 16 pads seront injectés ici par JS -->
+            </div>
+
+            <button id="close-pad-modal" class="mt-6 bg-akai-accent hover:bg-midi-red/80 text-white font-bold py-2 px-4 rounded-lg float-right">
+                Fermer
+            </button>
+        </div>
+    </div>
+
+    <!-- Le fichier dashboard.js est lié à cette structure -->
+    <script src="../js/mpc.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+/* public/css/timeline.css */
+
+/* Tête de lecture (Ligne rouge verticale) */
+#playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #ff0000;
+    z-index: 50;
+    pointer-events: none; /* Permet de cliquer à travers */
+    transform: translateX(0);
+    will-change: transform; /* Optimisation GPU pour l'animation */
+}
+
+/* Tête (Triangle) */
+#playhead::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -6px;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 10px solid #ff0000;
+}
+
+/* Ajustement pour que le curseur soit dans le conteneur relatif */
+#timeline-content-wrapper {
+    position: relative;
+    min-height: 100%;
+}

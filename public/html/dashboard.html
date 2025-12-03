@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration MIDI MPD218 - Tableau de Bord</title>
+    <!-- Chargement de Tailwind CSS pour le style rapide et responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Consolas', 'monospace'],
+                    },
+                    colors: {
+                        'midi-blue': '#4a7bed',
+                        'midi-green': '#32c865',
+                        'midi-red': '#d6455d',
+                        'bg-dark': '#121212',
+                        'card-dark': '#1e1e1e',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS personnalisé */
+        .knob-indicator {
+            transition: width 0.1s ease-out, background-color 0.3s;
+        }
+        .mode-tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .relative {
+            background-color: #4a7bed; /* Bleu MIDI */
+            color: white;
+        }
+        .absolute {
+            background-color: #32c865; /* Vert MIDI */
+            color: white;
+        }
+        /* Styles spécifiques pour l'anneau angulaire */
+        .ring-bg {
+            background-color: #2b2b2b;
+            border-radius: 9999px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .ring-indicator-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.1s linear; 
+        }
+        .ring-dot {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translate(-50%, -50%); 
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d6455d; 
+        }
+
+        /* --- CORRECTION: Styles Modal System --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            z-index: 50;
+            /* Changement: Rendre invisible et non interactif par défaut */
+            display: flex; 
+            visibility: hidden; 
+            opacity: 0;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.3s ease, visibility 0s 0.3s;
+        }
+        .modal-content {
+            background-color: #1e1e1e;
+            max-width: 90%;
+            width: 700px;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active {
+            /* Changement: Rendre visible et interactif */
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            /* Ramener le contenu à sa position normale */
+            transform: translateY(0);
+        }
+
+        /* Styles PAD GRID */
+        .pad-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .pad-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            background-color: #2b2b2b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.15s, transform 0.1s;
+            height: 80px;
+        }
+        .pad-item:hover {
+            background-color: #3a3a3a;
+            transform: scale(1.02);
+        }
+        .pad-item.active {
+            background-color: #4a7bed;
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-gray-100 min-h-screen font-sans p-4 sm:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-2 text-white">Tableau de Bord MIDI MPD218 AV</h1>
+        <p class="text-gray-400 mb-4">Visualisation en temps réel de l'état des Contrôles Continus (CC) et de leur configuration (Relatif/Absolu).</p>
+
+        <!-- Section Statut Général -->
+        <div class="bg-card-dark p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-midi-blue">Statut du Routage & Connexion</h2>
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <div class="text-sm">
+                    <p class="mb-1"><strong class="text-gray-300">Port MIDI :</strong> <span id="midi-port-name" class="font-mono">MPD218</span></p>
+                    <p class="mb-1"><strong class="text-gray-300">Serveur :</strong> <span class="font-mono">http://localhost:3145</span></p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex space-x-4">
+                    <button id="open-pad-modal" class="bg-midi-blue hover:bg-midi-blue/80 text-white font-bold py-2 px-4 rounded-lg transition duration-200 shadow-md">
+                        Mappage PADs (A, B, C)
+                    </button>
+                    <span id="socket-status" class="px-4 py-2 rounded-full font-bold text-sm text-white bg-gray-600">Déconnecté</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Configuration Knobs CC 0-7 -->
+        <div class="bg-card-dark p-6 rounded-xl shadow-xl">
+            <h2 class="text-xl font-semibold mb-6 text-midi-green">Configuration des Contrôles (CC 0 - 7)</h2>
+
+            <div id="knob-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Les cartes des Knobs seront injectées ici par JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- NOUVEAU: Composant Modal de Mappage des Pads -->
+    <div id="pad-mapping-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-midi-blue">Mappage des Pads (Banques A, B, C)</h2>
+            
+            <!-- Pagination des Banques (A, B, C) -->
+            <div id="pad-pagination" class="flex justify-center space-x-4 mb-6">
+                <button data-bank="A" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque A</button>
+                <button data-bank="B" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque B</button>
+                <button data-bank="C" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque C</button>
+            </div>
+
+            <!-- Grille des Pads pour la Banque Active -->
+            <div id="active-pad-grid" class="pad-grid">
+                <!-- Les 16 pads seront injectés ici par JS -->
+            </div>
+
+            <button id="close-pad-modal" class="mt-6 bg-midi-red hover:bg-midi-red/80 text-white font-bold py-2 px-4 rounded-lg float-right">
+                Fermer
+            </button>
+        </div>
+    </div>
+
+    <!-- SCRIPT JS pour la logique du tableau de bord -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html>

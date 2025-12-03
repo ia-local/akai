@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio AV - Fusion</title>
+    
+    <link rel="stylesheet" href="../css/studio.css">
+    <link rel="stylesheet" href="../css/fusion_visuel.css"> 
+    <link rel="stylesheet" href="../css/modalSystem.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 'akai-base': '#1e1e1e' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Consolas', 'monospace'] },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="flex items-center">
+            <span class="text-xl font-bold text-white mr-6">Studio AV (v1.5)</span>
+            <div id="mode-indicator" class="px-3 py-1 rounded text-xs font-bold bg-green-900 text-green-400 border border-green-700 transition-colors">
+                MODE: PERFORM - FUSION
+            </div>
+            <span class="ml-4 text-xs text-gray-500 border-l border-gray-600 pl-4 uppercase tracking-widest">Visual Compositing</span>
+        </div>
+
+        <div class="space-x-4 flex items-center pr-4">
+             <div class="text-xs text-gray-400 flex items-center space-x-2 border-r border-gray-700 pr-4">
+                <button id="zoom-out-btn" class="bg-gray-800 w-6 h-6 rounded hover:bg-gray-700">-</button>
+                <span id="zoom-level-display">1.0x</span>
+                <button id="zoom-in-btn" class="bg-gray-800 w-6 h-6 rounded hover:bg-gray-700">+</button>
+             </div>
+             
+             <button id="toggle-gl-btn" class="flex items-center gap-2 bg-gray-800 border border-gray-600 px-3 py-1 rounded text-gray-400 text-xs hover:text-white transition-colors">
+                <span>✨</span> GL FX: OFF
+             </button>
+
+             <button id="render-btn" class="bg-red-600 px-3 py-1 rounded text-white text-xs hover:bg-red-700 font-bold">EXPORT</button>
+        </div>
+    </header>
+
+    <div id="workspace">
+        
+        <aside class="collapsed-aside left-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">✨</span>
+                <span class="vertical-text">NODES</span>
+            </div>
+            
+            <div class="aside-content">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <h2 class="text-white font-bold text-sm uppercase">Tools Library</h2>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-2">
+                    <div class="text-xs font-bold text-gray-500 mb-1 mt-2 px-2">I/O</div>
+                    <ul class="space-y-1 mb-4">
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">📥 Media In</li>
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">📤 Media Out</li>
+                    </ul>
+
+                    <div class="text-xs font-bold text-gray-500 mb-1 px-2">GENERATORS</div>
+                    <ul class="space-y-1 mb-4">
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">🔡 ASCII Generator</li>
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">🌌 WebGL Shader</li>
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">📝 Text+</li>
+                    </ul>
+
+                    <div class="text-xs font-bold text-gray-500 mb-1 px-2">EFFECTS</div>
+                    <ul class="space-y-1">
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">🌫️ Blur / Glow</li>
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">🎨 Color Corrector</li>
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer">🔄 Transform</li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <div id="center-area" class="bg-[#0d0d0d] flex-1 flex flex-col relative z-0">
+            
+            <div class="h-1/2 bg-black border-b border-gray-700 relative flex justify-center items-center overflow-hidden">
+                <div id="preview-media-container" class="w-full h-full relative flex justify-center items-center">
+                    <img id="player-image" class="preview-player" src="" />
+                    <video id="player-video" class="preview-player" muted playsinline preload="auto"></video>
+                    <canvas id="ruler-layer" class="preview-player active" style="z-index: 19; pointer-events: none;"></canvas>
+                    <canvas id="paint-layer" class="preview-player active" style="z-index: 18; pointer-events: none;"></canvas>
+                    <canvas id="ascii-canvas" class="preview-player" style="z-index: 15; pointer-events: none;"></canvas>
+                    <canvas id="webgl-canvas" class="preview-player" style="z-index: 12; pointer-events: none; mix-blend-mode: screen; opacity: 0.8;"></canvas>
+                    
+                    <div id="player-placeholder" class="preview-player active flex justify-center items-center text-gray-500 bg-black h-full w-full">
+                        <span class="text-xs">FUSION VIEWER</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-1/2 bg-[#111] relative overflow-hidden" id="node-graph-area">
+                <div class="absolute inset-0 opacity-10 pointer-events-none" 
+                     style="background-image: radial-gradient(#444 1px, transparent 1px); background-size: 20px 20px;">
+                </div>
+
+                <div class="fusion-node absolute bg-[#252525] border border-gray-600 rounded w-24 h-12 flex items-center justify-center text-xs text-white shadow-lg cursor-pointer hover:border-yellow-500" style="left: 100px; top: 80px;">
+                    MediaIn1
+                    <div class="absolute -right-1 top-1/2 w-2 h-2 bg-blue-500 rounded-full transform -translate-y-1/2"></div>
+                </div>
+
+                <svg class="absolute top-0 left-0 w-full h-full pointer-events-none z-0">
+                    <path d="M 200 104 C 250 104, 250 104, 300 104" stroke="#666" stroke-width="2" fill="none" />
+                    <path d="M 400 104 C 450 104, 450 104, 500 104" stroke="#666" stroke-width="2" fill="none" />
+                </svg>
+
+                <div class="fusion-node absolute bg-[#252525] border-2 border-green-500 rounded w-28 h-12 flex items-center justify-center text-xs text-white shadow-lg cursor-pointer" style="left: 300px; top: 80px;">
+                    ASCII_Gen
+                    <div class="absolute -left-1 top-1/2 w-2 h-2 bg-yellow-500 rounded-full transform -translate-y-1/2"></div>
+                    <div class="absolute -right-1 top-1/2 w-2 h-2 bg-blue-500 rounded-full transform -translate-y-1/2"></div>
+                </div>
+
+                <div class="fusion-node absolute bg-[#252525] border border-gray-600 rounded w-24 h-12 flex items-center justify-center text-xs text-white shadow-lg cursor-pointer hover:border-yellow-500" style="left: 500px; top: 80px;">
+                    MediaOut1
+                    <div class="absolute -left-1 top-1/2 w-2 h-2 bg-yellow-500 rounded-full transform -translate-y-1/2"></div>
+                </div>
+            </div>
+        </div>
+
+        <aside id="right-panel" class="collapsed-aside right-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">🎚️</span>
+                <span class="vertical-text">INSPECTOR</span>
+            </div>
+
+            <div class="aside-content">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a] flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-white uppercase">ASCII_Gen Settings</h3>
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                </div>
+                
+                <div class="p-4 flex-1 overflow-y-auto space-y-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-400 uppercase font-bold">Density Charset</label>
+                        <select class="w-full bg-black border border-gray-600 text-white text-xs p-1 rounded">
+                            <option>Standard ( .:-=+*#%@)</option>
+                            <option>Binary (01)</option>
+                            <option>Matrix (Kanji)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-400 uppercase font-bold flex justify-between">
+                            <span>Grid Size</span>
+                            <span class="text-white">10px</span>
+                        </label>
+                        <input type="range" class="w-full h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-400 uppercase font-bold">Color Mode</label>
+                        <div class="flex gap-2">
+                            <button class="flex-1 bg-gray-700 text-xs py-1 rounded hover:bg-green-600 text-white">Mono</button>
+                            <button class="flex-1 bg-blue-600 text-xs py-1 rounded text-white font-bold border border-blue-400">Source</button>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-700">
+
+                    <div class="space-y-1">
+                        <label class="text-[10px] text-gray-400 uppercase font-bold">Blending</label>
+                        <select class="w-full bg-black border border-gray-600 text-white text-xs p-1 rounded">
+                            <option>Normal</option>
+                            <option>Screen</option>
+                            <option>Overlay</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer id="studio-footer">
+        <a href="media_data.html" class="nav-tab">
+            <span class="nav-icon">📁</span> MEDIA
+        </a>
+        <a href="cut_timeline.html" class="nav-tab">
+            <span class="nav-icon">✂️</span> CUT
+        </a>
+        <a href="editor.html" class="nav-tab">
+            <span class="nav-icon">🎬</span> EDIT
+        </a>
+        <a href="fusion_visuel.html" class="nav-tab active">
+            <span class="nav-icon">🎨</span> FUSION/AI
+        </a>
+        <a href="fairlight_audio.html" class="nav-tab">
+            <span class="nav-icon">🎵</span> FAIRLIGHT
+        </a>
+        <a href="delivery.html" class="nav-tab">
+            <span class="nav-icon">🚀</span> DELIVER
+        </a>
+    </footer>
+
+    <script src="http://localhost:3145/socket.io/socket.io.js"></script>
+    <script type="module" src="../js/main.js"></script>
+    </body>
+</html>

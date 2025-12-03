@@ -1,0 +1,435 @@
+/* ----------------------------------------------------------------------
+   GLOBAL & TYPOGRAPHIE
+---------------------------------------------------------------------- */
+:root {
+    /* Palette de couleurs "Dark Studio" */
+    --color-background: #121212;
+    --color-surface: #1a1a1a;
+    --color-panel: #242424;
+    --color-text-light: #f0f0f0;
+    --color-text-muted: #888888;
+    
+    /* Couleurs d'accentuation (Technique / Néon) */
+    --color-accent-green: #00ff88; 
+    --color-accent-red: #ff3333;   
+    --color-accent-yellow: #ffaa00; 
+
+    /* Dimensions */
+    --spacing: 1rem;
+    --border-radius: 6px;
+    
+    /* Variable de rotation globale pour les Knobs (JS-controlled) */
+    --knob-rotation: -135deg; 
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--color-background);
+    color: var(--color-text-light);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+/* --- Bouton REC --- */
+.c-btn--rec {
+    color: #555; /* Inactif par défaut */
+    border-color: #555;
+}
+
+.c-btn--rec:hover {
+    color: var(--color-accent-red);
+    border-color: var(--color-accent-red);
+}
+
+/* État actif (enregistrement en cours) */
+.c-btn--rec.is-recording {
+    background-color: var(--color-accent-red);
+    color: white;
+    box-shadow: 0 0 10px var(--color-accent-red);
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0% { opacity: 1; box-shadow: 0 0 5px var(--color-accent-red); }
+    50% { opacity: 0.7; box-shadow: 0 0 15px var(--color-accent-red); }
+    100% { opacity: 1; box-shadow: 0 0 5px var(--color-accent-red); }
+}
+/* ----------------------------------------------------------------------
+   GRILLE PRINCIPALE (LAYOUT) - DASHBOARD
+---------------------------------------------------------------------- */
+.l-dashboard {
+    width: 95vw;
+    height: 95vh;
+    grid-template-columns: 280px 1fr; 
+    grid-template-rows: 60px 1fr 40px;
+    grid-template-areas: 
+        "header header"
+        "aside-left main"
+        "footer footer";
+    gap: 10px;
+    padding: var(--spacing);
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius);
+    display: grid;
+}
+
+.l-aside--left { grid-area: aside-left; background-color: var(--color-panel); padding: var(--spacing); border-radius: var(--border-radius); }
+.l-main { grid-area: main; background-color: var(--color-panel); padding: var(--spacing); border-radius: var(--border-radius); display: flex; flex-direction: column; }
+.l-header { grid-area: header; display: flex; justify-content: space-between; align-items: center; background-color: var(--color-panel); padding: 0 var(--spacing); border-radius: var(--border-radius); }
+.l-footer { grid-area: footer; background-color: var(--color-panel); padding: 0 var(--spacing); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 0.8em; }
+
+/* ----------------------------------------------------------------------
+   ASIDE GAUCHE (CONTRÔLES RAPIDES) - NOUVELLES CLASSES POUR LE RÉSUMÉ
+---------------------------------------------------------------------- */
+.c-panel-title {
+    color: var(--color-accent-yellow);
+    margin-bottom: var(--spacing);
+    padding-bottom: 5px;
+    border-bottom: 1px solid #333;
+    font-size: 1.1em;
+}
+.c-param-summary {
+    padding: 10px;
+    background-color: #1a1a1a;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing);
+}
+.c-param-summary p {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    color: var(--color-text-muted);
+}
+.c-param-summary span {
+    color: var(--color-accent-green);
+    font-family: monospace;
+}
+hr {
+    border: none;
+    border-top: 1px solid #333;
+    margin: 15px 0;
+}
+
+/* ----------------------------------------------------------------------
+   MAIN (SÉQUENCEUR PIANO ROLL) - RÉINTÉGRATION DU STYLE DU SÉQUENCEUR
+---------------------------------------------------------------------- */
+.c-sequencer-module {
+    display: grid;
+    grid-template-columns: 100px 1fr; /* Étiquettes | Grille */
+    height: 100%;
+    overflow: hidden;
+    gap: 5px;
+}
+.c-sequencer-header {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 20px;
+}
+.c-sample-label {
+    width: 100%;
+    padding: 3px 5px;
+    background-color: #333;
+    border-radius: 3px;
+    font-size: 0.7em;
+    border: 1px solid #444;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+.c-sample-label.active {
+    background-color: var(--color-accent-yellow);
+    color: var(--color-background);
+    box-shadow: 0 0 5px var(--color-accent-yellow);
+}
+.c-sequencer-timeline {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    /* Les lignes sont gérées par JS (12 notes) */
+    grid-gap: 2px;
+    padding: 2px;
+    background-color: #111;
+    border-radius: 4px;
+    border: 1px solid #333;
+}
+.c-step {
+    background-color: #333;
+    border-radius: 2px;
+    transition: background-color 0.05s ease;
+    cursor: pointer;
+}
+.c-step.step-on {
+    background-color: var(--color-accent-green); /* Pas programmé */
+    border: 1px solid #444;
+}
+.c-step.step-current {
+    background-color: var(--color-accent-yellow);
+    box-shadow: 0 0 8px rgba(255, 170, 0, 0.8);
+    transform: scale(1.05);
+}
+
+
+/* ----------------------------------------------------------------------
+   MODAL (REPRÉSENTATION DU CONTRÔLEUR MIDI MPD218)
+---------------------------------------------------------------------- */
+.c-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.c-modal-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.c-modal-content {
+    /* Dimensions et styles fixes pour simuler le MPD218 */
+    width: 850px; 
+    height: 680px; 
+    background-color: #111; 
+    border: 10px solid #222; /* Cadre sombre et épais */
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 1001;
+}
+
+.c-modal-title {
+    color: var(--color-text-light);
+    font-size: 1.5em;
+    font-weight: 500;
+    text-align: right;
+    padding-right: 10px;
+    margin-bottom: 5px;
+}
+.c-modal-title::before {
+    content: "AKAI PROFESSIONAL";
+    float: left;
+    font-size: 0.5em;
+    color: var(--color-text-muted);
+    letter-spacing: 2px;
+    margin-top: 5px;
+}
+
+.mpd-body {
+    display: flex;
+    justify-content: flex-start; /* Aligner à gauche */
+    align-items: flex-start;
+    padding: 10px 0;
+    height: 90%; 
+    gap: 20px;
+}
+
+/* --- A. Section KNOBS (Côté Gauche) --- */
+.mpd-knobs-section {
+    width: 150px; 
+    display: flex;
+    flex-direction: column;
+    grid-gap: 30px 10px; 
+    padding-right: 15px;
+    border-right: 1px solid #333;
+    height: 60%; 
+}
+
+/* Styles des Knobs (Synthèse du style minimaliste) */
+.c-knob-container {
+    display: contents; 
+}
+.c-knob-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0;
+}
+.c-knob-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(3, 1fr); /* 3 lignes pour les 6 Knobs */
+}
+.c-knob {
+    width: 30px; 
+    height: 30px;
+    border-radius: 50%;
+    transform: rotate(var(--knob-rotation));
+    transition: transform 0.05s linear; 
+    background: #2b2b2b;
+    border: 1px solid #444;
+}
+.c-knob--large {
+    width: 35px;
+    height: 35px;
+}
+.c-knob::before {
+    background-color: #ff0000; 
+}
+.c-knob-group label {
+    order: 2; 
+    font-size: 0.6em;
+    color: var(--color-text-muted);
+    margin-top: 5px;
+}
+.c-knob-value {
+    display: none; 
+}
+
+/* Boutons Auxiliaires (CTRL BANK, FULL LEVEL, etc.) - Positionnement absolu pour plus de fidélité */
+.mpd-aux-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    position: absolute;
+    bottom: 20px;
+    left: 15px;
+    width: 150px;
+}
+.c-aux-btn {
+    background-color: #333;
+    color: var(--color-text-light);
+    border: 1px solid #555;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.65em;
+    text-transform: uppercase;
+}
+.c-aux-btn:nth-child(1) { background-color: var(--color-accent-red); color: black; } /* CTRL BANK/FULL LEVEL */
+
+
+/* --- B. Section PADS (Côté Droit) --- */
+.mpd-pads-section {
+    height: 100%;
+    flex-grow: 1; 
+    padding-left: 15px;
+}
+.c-pad-controller.mpd-pad-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    grid-template-rows: repeat(4, 1fr); 
+    gap: 15px; /* Espacement ajusté */
+    width: 100%;
+    height: 100%;
+}
+
+.c-midi-pad {
+    background-color: #222; 
+    border: 2px solid var(--color-accent-red); 
+    border-radius: 6px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    font-size: 0.7em;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.c-midi-pad.active {
+    background-color: var(--color-accent-red); 
+    box-shadow: 0 0 15px var(--color-accent-red);
+    color: var(--color-text-light);
+}
+/* --- VISUAL STAGE --- */
+.c-visual-stage {
+    height: 120px; /* Hauteur fixe pour le visuel */
+    background-color: #000;
+    border: 1px solid #333;
+    border-radius: var(--border-radius);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+.c-stage-placeholder {
+    color: #444;
+    font-family: monospace;
+    letter-spacing: 2px;
+}
+
+/* --- TIMELINE ARRANGER --- */
+.c-timeline-container {
+    height: 80px; /* Hauteur fixe pour la timeline */
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.c-timeline-header {
+    height: 25px;
+    background-color: #2a2a2a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 0.7em;
+    border-bottom: 1px solid #333;
+}
+
+.c-timeline-tracks {
+    flex-grow: 1;
+    position: relative;
+    background: repeating-linear-gradient(
+        90deg,
+        #222,
+        #222 19px,
+        #333 20px /* Lignes de mesure simples */
+    );
+}
+
+.c-track-lane {
+    height: 100%;
+    position: relative;
+    padding: 5px 0;
+}
+
+.c-clip-block {
+    position: absolute;
+    height: 80%;
+    background-color: rgba(0, 255, 136, 0.2); /* Accent Green transparent */
+    border: 1px solid var(--color-accent-green);
+    border-radius: 4px;
+    color: var(--color-accent-green);
+    font-size: 0.7em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 10%;
+}
+
+.c-playhead {
+    position: absolute;
+    top: 0;
+    left: 0; /* Sera bougé par JS */
+    width: 2px;
+    height: 100%;
+    background-color: var(--color-accent-red);
+    z-index: 10;
+    pointer-events: none;
+    transition: left 0.1s linear;
+}
+.c-btn-mini {
+    background: none; border: none; color: #888; cursor: pointer;
+}
+.c-btn-mini:hover { color: #fff; }
+/* ----------------------------------------------------------------------
+   Styles du Dashboard (inchangés)
+---------------------------------------------------------------------- */
+/* Le reste du CSS pour le Dashboard, le Séquenceur et le Footer est conservé. */

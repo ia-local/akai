@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPD218 Three.js AV Controller</title>
+    <style>
+        /* Styles pour un look de console haute-tech */
+        body { 
+            margin: 0; 
+            background-color: #0d1117; /* Dark GitHub color */
+            color: #00ffaa; 
+            font-family: 'Consolas', monospace; 
+            overflow: hidden; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #canvas-zone { 
+            position: relative; 
+            width: 100vw; 
+            height: 100vh; 
+            box-sizing: border-box; 
+        }
+        #info-overlay { 
+            position: fixed; 
+            top: 10px; 
+            left: 10px; 
+            padding: 10px 15px; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            border: 1px solid #00ffaa;
+            z-index: 10;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            box-shadow: 0 0 10px rgba(0, 255, 170, 0.3);
+        }
+        .info-label {
+            font-weight: bold;
+            color: #ffffff;
+        }
+        .status-ready { color: #00ffaa; }
+        .status-error { color: #ff5555; }
+        .status-record { color: #ff0000; animation: pulse 1s infinite alternate; }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="info-overlay">
+        <span class="info-label">MIDI Status:</span> <span id="midi-status" class="status-error">Connecting...</span><br>
+        <span class="info-label">Transport:</span> <span id="transport-display" class="status-ready">STOPPED</span><br>
+        <span class="info-label">Style:</span> <span id="style-display">NONE</span>
+
+        <hr style="border-color: #00ffaa22; margin: 5px 0;">
+        <span class="info-label">X:</span> <span id="val-x">0</span> | 
+        <span class="info-label">Y:</span> <span id="val-y">0</span> | 
+        <span class="info-label">Z:</span> <span id="val-z">0</span>
+        <hr style="border-color: #00ffaa22; margin: 5px 0;">
+        <span class="info-label">Chroma:</span> <span id="val-chroma">0</span>° | 
+        <span class="info-label">Sat:</span> <span id="val-saturation">1.0</span>
+    </div>
+
+    <!-- Le conteneur pour le rendu Three.js -->
+    <div id="canvas-zone"></div>
+
+    <!-- Bibliothèques nécessaires -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="../app.js"></script>
+</body>
+</html>

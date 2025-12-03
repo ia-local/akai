@@ -1,0 +1,54 @@
+/* public/css/multiCalc.css */
+
+/* --- GESTION DES COUCHES (LAYERING) --- */
+
+/* 1. Fond (Média) : Z-Index 0-10 */
+.preview-player {
+    z-index: 1;
+}
+.preview-player.active {
+    z-index: 10; /* Le média actif passe devant les autres médias */
+}
+
+/* 2. Couche Dessin (SVG) : Z-Index 20 (TOUJOURS AU DESSUS) */
+#drawing-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20 !important; /* Force la visibilité au-dessus du "No Signal" */
+    pointer-events: none; /* Laisse passer les clics vers le média */
+    overflow: visible; /* Permet au curseur de toucher les bords */
+}
+
+/* --- STYLE DU CURSEUR TENSOR --- */
+#drawing-cursor {
+    transition: x 0.05s linear, y 0.05s linear, width 0.05s linear, height 0.05s linear;
+    mix-blend-mode: exclusion; /* Inversion des couleurs pour visibilité max */
+    vector-effect: non-scaling-stroke; /* Bordure fine même en zoom */
+    shape-rendering: crispEdges; /* Rendu "Pixel Perfect" (Carré net) */
+    
+    /* Animation subtile "Respiration" quand inactif */
+    animation: tensor-pulse 2s infinite alternate;
+}
+
+@keyframes tensor-pulse {
+    from { stroke-opacity: 0.5; }
+    to { stroke-opacity: 1.0; }
+}
+
+/* --- HUD & DEBUG (Futur MultiCalc display) --- */
+.multicalc-overlay {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: 'Consolas', monospace;
+    font-size: 10px;
+    color: #00ffaa;
+    background: rgba(0,0,0,0.7);
+    padding: 5px;
+    border-radius: 4px;
+    z-index: 30;
+    pointer-events: none;
+}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio AV - Deliver</title>
+    
+    <link rel="stylesheet" href="../css/studio.css"> 
+    <link rel="stylesheet" href="../css/delivery.css"> 
+    <link rel="stylesheet" href="../css/modalSystem.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 'akai-base': '#1e1e1e' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Consolas', 'monospace'] },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="flex items-center">
+            <span class="text-xl font-bold text-white mr-6">Studio AV (v1.5)</span>
+            <div id="mode-indicator" class="px-3 py-1 rounded text-xs font-bold bg-green-900 text-green-400 border border-green-700 transition-colors">
+                MODE: PERFORM
+            </div>
+            <span class="ml-4 text-xs text-gray-500 border-l border-gray-600 pl-4 uppercase tracking-widest">Delivery Page</span>
+        </div>
+
+        <div class="space-x-4 flex items-center pr-4">
+             <div class="text-xs text-gray-400 flex items-center space-x-2 border-r border-gray-700 pr-4">
+                <button id="zoom-out-btn" class="bg-gray-800 w-6 h-6 rounded hover:bg-gray-700">-</button>
+                <span id="zoom-level-display">1.0x</span>
+                <button id="zoom-in-btn" class="bg-gray-800 w-6 h-6 rounded hover:bg-gray-700">+</button>
+             </div>
+             
+             <button id="toggle-tools-btn" class="flex items-center gap-2 bg-gray-800 border border-gray-600 px-3 py-1 rounded text-white text-xs hover:bg-gray-700 transition-colors">
+                <span>🤖</span> AI ASSISTANTS
+             </button>
+
+             <button id="render-btn" class="bg-red-600 px-3 py-1 rounded text-white text-xs hover:bg-red-700 font-bold">EXPORT</button>
+        </div>
+    </header>
+
+    <div id="workspace">
+        
+        <aside class="collapsed-aside left-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">⚙️</span>
+                <span class="vertical-text">SETTINGS</span>
+            </div>
+
+            <div class="aside-content">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <h2 class="text-white font-bold text-sm uppercase">Render Settings</h2>
+                </div>
+                
+                <div class="p-4 overflow-y-auto flex-1">
+                    <div class="space-y-4 text-xs">
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-bold">Filename</label>
+                            <input type="text" value="Timeline_1_Export" class="w-full bg-black border border-gray-600 text-white p-2 rounded focus:border-blue-500 outline-none">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-bold">Location</label>
+                            <div class="flex gap-2">
+                                <input type="text" value="/public/render/" class="w-full bg-black border border-gray-600 text-gray-400 p-2 rounded font-mono" readonly>
+                                <button class="bg-gray-700 text-white px-2 rounded hover:bg-gray-600">...</button>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-700 my-4">
+
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-bold">Format</label>
+                            <select class="w-full bg-black border border-gray-600 text-white p-2 rounded focus:border-blue-500 outline-none">
+                                <option>MP4 (H.264)</option>
+                                <option>QuickTime (ProRes)</option>
+                                <option>MXF (DNxHD)</option>
+                                <option>WebM (VP9)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-bold">Resolution</label>
+                            <select class="w-full bg-black border border-gray-600 text-white p-2 rounded focus:border-blue-500 outline-none">
+                                <option>3840 x 2160 Ultra HD</option>
+                                <option selected>1920 x 1080 HD</option>
+                                <option>1280 x 720 HD</option>
+                                <option>1080 x 1920 (Vertical)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-bold">Frame Rate</label>
+                            <select class="w-full bg-black border border-gray-600 text-white p-2 rounded focus:border-blue-500 outline-none">
+                                <option>24</option>
+                                <option>25</option>
+                                <option selected>30</option>
+                                <option>60</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-400 mb-1 font-bold">Quality</label>
+                            <div class="flex items-center gap-2">
+                                <input type="range" class="flex-1 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                                <span class="text-white w-10 text-right">High</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded mt-8 text-xs border border-gray-500 transition-colors">
+                        ADD TO RENDER QUEUE
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <div id="center-area" class="bg-[#0d0d0d] flex-1 flex flex-col relative z-0 p-8">
+            <div class="flex justify-between items-end mb-4 border-b border-gray-800 pb-2">
+                <h3 class="text-xl font-bold text-gray-400 uppercase tracking-widest">Render Queue</h3>
+                <div class="text-xs text-gray-600">Total Jobs: 1</div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto space-y-2">
+                
+                <div class="render-queue-item bg-[#1a1a1a] p-4 rounded border border-gray-700 flex justify-between items-center hover:border-gray-500 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <div class="h-10 w-10 bg-black rounded flex items-center justify-center text-gray-600 font-bold border border-gray-800">1</div>
+                        <div>
+                            <div class="text-white font-bold text-sm">Timeline_1_Export</div>
+                            <div class="text-gray-500 text-xs font-mono">1920x1080 | 30fps | H.264 | AAC</div>
+                            <div class="text-gray-600 text-[10px] mt-1">/public/render/Timeline_1_Export.mp4</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-orange-400 text-xs font-bold uppercase tracking-wider mb-1">Waiting</div>
+                        <button class="text-gray-500 hover:text-red-500 text-xs underline">Remove</button>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-800 flex justify-end gap-4">
+                <button class="text-gray-400 hover:text-white text-xs px-4 py-2">Clear All</button>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-8 py-2 rounded text-sm font-bold shadow-lg shadow-red-900/20 transition-transform active:scale-95">
+                    START RENDER
+                </button>
+            </div>
+        </div>
+
+        <aside id="right-panel" class="collapsed-aside right-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">🤖</span>
+                <span class="vertical-text">TOOLS</span>
+            </div>
+
+            <div class="aside-content">
+                <div class="panel-header p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <span class="text-white font-bold text-xs uppercase">Assistants & Logs</span>
+                    <button id="close-tools-btn" class="hover:text-white text-gray-500">×</button>
+                </div>
+                <div class="panel-content text-sm text-gray-400 p-4 overflow-y-auto">
+                    
+                    <div class="p-4 border border-dashed border-gray-700 rounded text-center mb-4">
+                        <div class="text-2xl mb-2">🚀</div>
+                        <p class="text-xs mb-2">Export Optimization</p>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-white py-1 rounded text-xs">Auto-Bitrate AI</button>
+                    </div>
+
+                    <div class="mt-4">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Render Logs</h4>
+                        <div class="bg-black p-2 rounded border border-gray-800 font-mono text-[10px] text-green-500 h-48 overflow-y-auto">
+                            > System Ready.<br>
+                            > GPU: WebGL Context Active.<br>
+                            > Waiting for jobs...
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer id="studio-footer">
+        <a href="media_data.html" class="nav-tab">
+            <span class="nav-icon">📁</span> MEDIA
+        </a>
+        <a href="cut_timeline.html" class="nav-tab">
+            <span class="nav-icon">✂️</span> CUT
+        </a>
+        <a href="editor.html" class="nav-tab">
+            <span class="nav-icon">🎬</span> EDIT
+        </a>
+        <a href="fusion_visuel.html" class="nav-tab">
+            <span class="nav-icon">🎨</span> FUSION/AI
+        </a>
+        <a href="fairlight_audio.html" class="nav-tab">
+            <span class="nav-icon">🎵</span> FAIRLIGHT
+        </a>
+        <a href="delivery.html" class="nav-tab active">
+            <span class="nav-icon">🚀</span> DELIVER
+        </a>
+    </footer>
+    <script src="http://localhost:3145/socket.io/socket.io.js"></script>
+    <script src="../js/delivery.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+/* Styles pour la console du terminal (basé sur un fond sombre) */
+
+#terminal-output {
+    /* Assurez-vous que l'arrière-plan est sombre, ex: #151515 */
+}
+
+.terminal-system-log {
+    color: #94A3B8; /* Gris clair/bleu pour les messages système (SYS >) */
+}
+
+.terminal-user-command {
+    color: #4ADE80; /* Vert clair pour les commandes utilisateur (>) */
+    /* Optionnel : mettre en gras le prompt utilisateur */
+}
+
+.terminal-user-command .terminal-user-command-prefix { /* Si vous voulez styliser le ">" */
+    color: #FACC15; /* Jaune */
+    font-weight: bold;
+}
+
+.terminal-ai-response {
+    color: #38BDF8; /* Bleu vif pour les réponses de l'IA (AI >) */
+    font-style: italic;
+}
+
+/* Vous pouvez aussi cibler spécifiquement les préfixes si vous les laissez dans des span */
+#terminal-output .terminal-user-command > span { /* Le span qui contient le ">" */
+    color: #FACC15; /* Jaune pour le prompt ">" */
+    font-weight: bold;
+}
+
+#terminal-output .terminal-ai-response > span { /* Le span qui contient le "AI >" */
+    color: #38BDF8; /* Bleu pour le préfixe AI */
+    font-weight: bold;
+}
+
+#terminal-output .terminal-system-log > span { /* Le span qui contient le "SYS >" */
+    color: #A78BFA; /* Violet pour le préfixe SYS */
+    font-weight: bold;
+}

@@ -1,0 +1,84 @@
+/* =========================================
+   CODE PLAYGROUND STYLES
+   Styles spécifiques à l'environnement de codage.
+   ========================================= */
+
+/* --- 1. GÉNÉRAL --- */
+/* Pour que le terminal s'affiche bien */
+#ai-terminal {
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+/* --- 2. ÉDITEUR DE CODE --- */
+/* Les zones de texte (HTML/CSS/JS) */
+#html-source,
+#css-source,
+#js-source {
+    background-color: #111; /* Fond très sombre */
+    border: none;
+    color: #f8f8f2; /* Texte principal (clair) */
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    padding: 10px;
+    line-height: 1.4;
+    caret-color: #a9f0d1; /* Curseur vert Matrix */
+    outline: none; /* Supprimer la bordure de focus par défaut */
+    /* Le style Studio.css gère le flex: 1 */
+}
+
+/* Bordures des boutons de langage */
+#code-editor-area button {
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.15s;
+}
+
+#code-editor-area button.active {
+    border-color: #3b82f6; /* Bleu pour l'onglet actif */
+    color: #fff;
+}
+
+
+/* --- 3. PRÉVISUALISATION (IFRAME) --- */
+#live-render-area {
+    background-color: #333; /* Fond par défaut si l'iframe est vide */
+}
+
+#live-preview-iframe {
+    border: none;
+    background-color: white; /* L'iframe elle-même est blanche par défaut */
+}
+
+
+/* --- 4. TERMINAL IA --- */
+#terminal-output {
+    background-color: #000;
+    font-family: 'Consolas', monospace;
+    color: #a9f0d1; /* Texte vert clair pour la console */
+    /* overflow-y: auto; est géré par l'HTML */
+    padding: 8px;
+}
+
+/* Style de la ligne de commande */
+#terminal-input {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 4px 0;
+    font-size: 12px;
+}
+#ai-terminal > div:last-child {
+    background-color: #000;
+    border-top: 1px solid #1a1a1a;
+}
+
+/* Styles spécifiques pour le feedback de l'IA */
+.terminal-ai-response {
+    color: #4ade80; /* Vert vif */
+}
+.terminal-user-command {
+    color: #3b82f6; /* Bleu */
+    font-weight: bold;
+}
+.terminal-system-log {
+    color: #f59e0b; /* Orange */
+}

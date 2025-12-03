@@ -1,0 +1,150 @@
+/* =========================================
+   AKAI MPD218 STYLE (Photorealistic)
+   ========================================= */
+
+/* CONTENEUR PRINCIPAL (La Coque) */
+#mpd-wrapper {
+    background-color: #1a1a1a; /* Noir Mat */
+    background-image: linear-gradient(135deg, #222 0%, #111 100%);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,0.8), /* Ombre portée */
+        inset 0 1px 1px rgba(255,255,255,0.1); /* Reflet bord haut */
+    border: 1px solid #000;
+    font-family: 'Arial', sans-serif;
+    position: relative;
+    display: flex;
+    gap: 20px;
+}
+
+/* --- SECTION GAUCHE (KNOBS) --- */
+.mpd-left-col {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* LOGO (Simulation Texte) */
+.akai-logo {
+    color: #ddd;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 1px 2px black;
+    border-bottom: 2px solid #aaa;
+    display: inline-block;
+    padding-bottom: 2px;
+}
+
+/* KNOBS (Potards) */
+.knob-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.knob-visual {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #3a3a3a, #000); /* Effet 3D */
+    box-shadow: 
+        0 5px 10px rgba(0,0,0,0.8),
+        0 0 0 1px #000;
+    position: relative;
+    cursor: ns-resize; /* Curseur de réglage */
+}
+
+/* La ligne blanche indicatrice */
+.knob-indicator {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    width: 3px;
+    height: 40%; /* Demi-hauteur */
+    background-color: #eee;
+    border-radius: 2px;
+    transform-origin: bottom center; /* Pivote depuis le centre du potard */
+    transform: translateX(-50%) rotate(0deg); /* Rotation par défaut */
+    pointer-events: none;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.knob-label {
+    font-size: 0.6rem;
+    color: #888;
+    margin-top: 5px;
+    text-transform: uppercase;
+}
+
+/* BANQUES (LEDs) */
+.bank-led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #330000; /* Éteint */
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+    margin: 2px;
+    display: inline-block;
+}
+.bank-led.active {
+    background-color: #ff0000; /* Allumé */
+    box-shadow: 0 0 5px #ff0000;
+}
+
+
+/* --- SECTION DROITE (PADS) --- */
+.mpd-right-col {
+    width: 65%;
+}
+
+.pad-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    background: #111;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+/* PAD (Carré Gomme) */
+.pad-visual {
+    aspect-ratio: 1/1; /* Carré parfait */
+    background-color: #181818;
+    border: 2px solid #333;
+    border-radius: 6px;
+    position: relative;
+    box-shadow: inset 0 0 15px rgba(0,0,0,1); /* Creux au centre */
+    transition: all 0.05s ease-out;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 5px;
+}
+
+/* Texte "PAD 1" */
+.pad-label {
+    font-size: 0.55rem;
+    color: #555;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+/* ÉTAT ACTIF (Frappe) */
+.pad-visual.active {
+    background-color: #330000; /* Fond rouge très sombre */
+    border-color: #ff0000;      /* Bordure rouge vif */
+    box-shadow: 
+        0 0 15px rgba(255, 0, 0, 0.4), 
+        inset 0 0 10px rgba(255, 0, 0, 0.2);
+    transform: scale(0.97); /* Enfoncement physique */
+}
+
+.pad-visual.active .pad-label {
+    color: #ffaaaa;
+}

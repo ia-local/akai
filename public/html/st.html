@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio de Montage AV - Gestion des Actifs</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Base et Grid Layout */
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            font-family: 'Inter', sans-serif; 
+            background-color: #121212; /* Fond sombre studio */
+            color: #ddd;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 1. HEADER / TOOLBAR */
+        header {
+            height: 50px;
+            background-color: #1e1e1e;
+            border-bottom: 1px solid #333;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        /* 2. MAIN WORKSPACE GRID */
+        #workspace {
+            display: flex;
+            flex-grow: 1; 
+            overflow: hidden;
+        }
+
+        /* 2.1 ASIDE GAUCHE: LIBRARY */
+        #asset-library {
+            width: 250px;
+            background-color: #1a1a1a;
+            border-right: 1px solid #333;
+            padding: 1rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        /* 2.2 CENTER COLUMN: PREVIEW & CONTROLS */
+        #center-area {
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #0d0d0d;
+        }
+
+        /* Preview Zone (simule le moniteur vidéo) */
+        #preview-zone {
+            flex-grow: 1;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 3. FOOTER: TIMELINE */
+        #timeline-editor {
+            height: 200px; 
+            background-color: #1e1e1e;
+            border-top: 1px solid #333;
+            flex-shrink: 0;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        
+        /* --- Styles Multi-Calques / Timeline --- */
+        #timeline-tracks-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; 
+            padding-top: 15px;
+            width: fit-content; 
+            min-width: 100%;
+        }
+        .timeline-track {
+            height: 45px;
+            background-color: #2a2a2a;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 5px;
+            position: relative;
+        }
+        .track-label {
+            position: absolute;
+            left: 5px;
+            top: -15px;
+            font-size: 0.6rem;
+            color: #777;
+            text-transform: uppercase;
+        }
+        
+        /* Styles Spécifiques aux Actifs */
+        .asset-group-title {
+            color: #00ffaa;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .asset-item {
+            padding: 6px;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+            margin-bottom: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            border-left: 3px solid transparent;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .asset-item:hover {
+            background-color: #3a3a3a;
+            border-left-color: #00ffaa;
+        }
+        
+        .asset-video { border-left-color: #ff6347; }
+        .asset-audio { border-left-color: #4a7bed; }
+        .asset-script { border-left-color: #f7d04e; }
+        .asset-text { border-left-color: #8c9eff; }
+
+        .timeline-clip {
+            height: 35px;
+            border-radius: 4px;
+            padding: 0 8px;
+            display: inline-block;
+            margin-right: 5px;
+            line-height: 35px;
+            font-size: 0.8rem;
+            color: white;
+            min-width: 100px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+            cursor: grab;
+            position: absolute;
+        }
+
+        /* --- STYLES MODAL SYSTEM (modalSystem.css) --- */
+        #asset-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 500; /* Très haut pour couvrir tout */
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        #asset-modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background-color: #1e1e1e;
+            max-width: 700px;
+            width: 90%;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. HEADER / TOOLBAR -->
+    <header>
+        <span class="text-xl font-bold text-white">Studio de Montage AV (v1.0)</span>
+        <div class="space-x-4 flex items-center">
+             <div class="text-xs text-gray-400 flex items-center space-x-2">
+                <button id="zoom-out-btn" class="bg-gray-700 w-6 h-6 rounded hover:bg-gray-600">-</button>
+                <span id="zoom-level-display">1.0x</span>
+                <button id="zoom-in-btn" class="bg-gray-700 w-6 h-6 rounded hover:bg-gray-600">+</button>
+             </div>
+             
+             <span id="preview-timecode" class="text-sm font-mono text-white">00:00:00.00</span>
+             <!-- Bouton de Rendu / Simulation FFmpeg -->
+             <button id="render-btn" class="bg-red-600 px-3 py-1 rounded text-white text-xs hover:bg-red-700">RENDER (FFMPEG SIM.)</button>
+        </div>
+    </header>
+
+    <!-- 2. MAIN WORKSPACE GRID -->
+    <div id="workspace">
+        
+        <!-- 2.1 ASIDE GAUCHE: BIBLIOTHÈQUE D'ACTIFS -->
+        <aside id="asset-library">
+            <h2 class="text-white font-semibold mb-3">Bibliothèque Actifs (Source: /data/)</h2>
+            <div id="assets-list-container">
+                <!-- Les groupes d'actifs seront injectés ici -->
+                <div class="text-gray-500 text-sm">Chargement des actifs...</div>
+            </div>
+        </aside>
+
+        <!-- 2.2 CENTER COLUMN: PREVIEW & CONTROLS -->
+        <div id="center-area">
+            
+            <!-- Zone de Prévisualisation -->
+            <div id="preview-zone">
+                <p class="text-gray-400">Glissez-déposez des actifs sur la Timeline ci-dessous pour prévisualiser.</p>
+                <!-- Conteneur pour le média chargé -->
+                <div id="preview-media-container" class="absolute w-full h-full p-4 flex justify-center items-center">
+                    <!-- Images, Vidéos, Audio visuels seront injectés ici -->
+                </div>
+            </div>
+
+            <!-- Contrôles de Lecture (Temporaire) -->
+            <div class="h-10 bg-2a2a2a flex items-center justify-center space-x-4 border-t border-gray-700">
+                <button class="bg-gray-700 px-3 py-1 rounded text-white text-xs hover:bg-gray-600">PLAY</button>
+                <button class="bg-gray-700 px-3 py-1 rounded text-white text-xs hover:bg-gray-600">PAUSE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. FOOTER: TIMELINE -->
+    <div id="timeline-editor">
+        <div class="flex">
+            <h3 class="text-xs text-gray-500 mr-4">TIMELINE</h3>
+            <div id="timecode-area" class="text-xs text-gray-500">
+                <!-- Affichage des marqueurs de temps sera ici -->
+            </div>
+        </div>
+        
+        <div id="timeline-tracks-container">
+            <!-- Pistes Multi-Modales (Visual, Audio, Effet) -->
+            <div id="track-video" class="timeline-track" data-track-type="video">
+                <span class="track-label">VIDEO / VISUEL</span>
+                <!-- Clips de la piste Vidéo/Image -->
+            </div>
+            <div id="track-audio" class="timeline-track" data-track-type="audio">
+                <span class="track-label">AUDIO / MUSIQUE</span>
+                <!-- Clips de la piste Audio -->
+            </div>
+            <div id="track-fx" class="timeline-track" data-track-type="fx">
+                <span class="track-label">FX / SCRIPT (CC Control)</span>
+                <!-- Clips de la piste Effets/Scripts -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 4. MODAL D'AFFICHAGE DES ACTIFS (Ex: Image, Script Code) -->
+    <div id="asset-modal">
+        <div class="modal-content">
+            <h3 id="modal-title" class="text-xl font-bold mb-4 text-white">Détails de l'Actif</h3>
+            <div id="modal-content-body" class="text-gray-300">
+                <!-- Contenu dynamique (image, code, etc.) -->
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button id="modal-close-btn" class="bg-gray-700 px-4 py-2 rounded text-white text-sm hover:bg-gray-600">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- LOGIQUE JAVASCRIPT -->
+    <script>
+        // Le code de studio.js est placé ici
+        
+// Logique Studio de Montage
+// Gère le chargement des actifs depuis l'API, l'interface d'édition, et simule la Timeline.
+
+// Constantes Globales (Déclarées pour être utilisées par toutes les fonctions)
+let assetsData = {
+    // ⬅️ DONNÉES STATIQUES INTÉGRÉES (pour bypasser l'erreur fetch)
+    images: [
+        { id: 'img_glitch', name: 'Vague Glitch', type: 'image', url: 'https://placehold.co/400x300/2a66e0/white?text=GLITCH', duration: 0, category: 'VISUEL' },
+        { id: 'img_scene', name: 'Scene.jpeg', type: 'image/jpeg', url: 'https://placehold.co/400x300/0d0d0d/808080?text=SCENE_01', duration: 0, category: 'VISUEL' },
+    ],
+    audio: [
+        { id: 'aud_synth', name: 'Synth Pulse Loop', type: 'audio', duration: 8.0, category: 'AUDIO', path: '/data/audio/pulse.mp3' },
+    ],
+    video: [
+        { id: 'vid_story', name: 'Storyboard_codex.mp4', type: 'video', duration: 35, category: 'VIDEO', path: '/data/video/storyboard_tablette_histoire_de_codex_ia_dessiner.mp4' },
+    ],
+    scripts: [
+        { id: 'fx_cam_zoom', name: 'Caméra Zoom', type: 'script/md', category: 'CAMERA', path: '/data/Fx/plan_camera/zoom.md', code: 'function zoom(time) { return Math.sin(time) * 0.5; }' },
+    ],
+};
+let timelineTracks = {};
+let PIXELS_PER_SECOND = 50; // Base: 50px par seconde (Zoom 1.0x)
+const MIN_ZOOM = 20; // 0.4x
+const MAX_ZOOM = 200; // 4.0x
+
+// Éléments DOM critiques (Déclarés ici mais initialisés dans initStudio)
+let assetsListContainer;
+let timelineTracksContainer;
+let zoomLevelDisplay;
+let renderBtn;
+let assetModal, modalContentBody, modalTitle;
+let previewMediaContainer;
+
+
+// --- 1. CHARGEMENT DES ACTIFS (Bypasse fetch pour l'intégration) ---
+
+async function loadAssets() {
+    // ⬅️ LE FETCH EST RETIRÉ : Nous utilisons assetsData statique intégré
+    
+    // Si l'on souhaite réactiver le fetch un jour:
+    // const API_URL = '/api/assets/list'; 
+    // try { const response = await fetch(API_URL); ... } catch {}
+    
+    // Nous appelons directement le rendu car les données sont disponibles
+    renderAssetsList(); 
+    setupTimelineControls(); 
+}
+
+
+// --- 2. RENDU DE LA BIBLIOTHÈQUE D'ACTIFS ---
+
+function getAssetClass(type) {
+    if (type.includes('image') || type.includes('video') || type.includes('VISUEL')) return 'asset-video';
+    if (type.includes('audio') || type.includes('AUDIO')) return 'asset-audio';
+    if (type.includes('script') || type.includes('EFFET') || type.includes('CAMERA') || type.includes('STYLE')) return 'asset-script';
+    return '';
+}
+
+function renderAssetsList() {
+    assetsListContainer.innerHTML = '';
+    
+    const orderedKeys = ['images', 'video', 'audio', 'scripts'];
+    
+    orderedKeys.forEach(key => {
+        const assets = assetsData[key];
+        if (assets && assets.length > 0) {
+            const groupTitle = document.createElement('h3');
+            groupTitle.className = 'asset-group-title';
+            groupTitle.textContent = key.toUpperCase();
+            assetsListContainer.appendChild(groupTitle);
+            
+            assets.forEach(asset => {
+                const item = document.createElement('div');
+                item.className = `asset-item ${getAssetClass(asset.type || asset.category)}`;
+                
+                const info = asset.duration > 0 ? asset.duration.toFixed(1) + 's' : asset.category || asset.type;
+                
+                item.textContent = `${asset.name} [${info}]`;
+                item.draggable = true;
+                item.dataset.assetId = asset.id;
+                item.dataset.assetType = asset.type || asset.category; 
+                item.dataset.duration = asset.duration || 3; 
+                
+                // ⬅️ Écouteur pour ouvrir le Modal de Preview
+                item.addEventListener('click', () => showAssetModal(asset.id));
+                
+                assetsListContainer.appendChild(item);
+            });
+        }
+    });
+    
+    setupDragAndDrop(); 
+}
+
+
+// --- 3. LOGIQUE D'INTERACTIVITÉ (Timeline et Preview) ---
+
+function getTargetTrack(assetType) {
+    // La validation ici est critique pour l'erreur 468
+    if (assetType.includes('video') || assetType.includes('image') || assetType.includes('VISUEL')) return timelineTracks.video;
+    if (assetType.includes('audio') || assetType.includes('AUDIO')) return timelineTracks.audio;
+    if (assetType.includes('script') || assetType.includes('EFFET') || assetType.includes('CAMERA') || assetType.includes('STYLE') || assetType.includes('md')) return timelineTracks.fx;
+    return null;
+}
+
+function setupTimelineControls() {
+    // P5.2: Gestion du Zoom
+    document.getElementById('zoom-in-btn').addEventListener('click', () => adjustZoom(1.2));
+    document.getElementById('zoom-out-btn').addEventListener('click', () => adjustZoom(1 / 1.2));
+    
+    // P5.5: Simulation du rendu
+    renderBtn.addEventListener('click', simulateFFmpegRender);
+    
+    // Mettre à jour l'affichage initial du zoom
+    updateTimelineDisplay();
+    
+    // ⬅️ Configuration des écouteurs du Modal
+    document.getElementById('modal-close-btn').addEventListener('click', hideModal);
+}
+
+function adjustZoom(factor) {
+    const newPps = PIXELS_PER_SECOND * factor;
+    
+    if (newPps < MIN_ZOOM || newPps > MAX_ZOOM) {
+        return; 
+    }
+    
+    PIXELS_PER_SECOND = newPps;
+    const zoomLevel = (PIXELS_PER_SECOND / 50).toFixed(1); 
+    zoomLevelDisplay.textContent = `${zoomLevel}x`;
+    
+    document.querySelectorAll('.timeline-clip').forEach(clip => {
+        const duration = parseFloat(clip.dataset.duration);
+        const startTime = parseFloat(clip.dataset.startTime);
+        
+        clip.style.width = `${duration * PIXELS_PER_SECOND}px`;
+        clip.style.left = `${startTime * PIXELS_PER_SECOND}px`;
+    });
+    
+    updateTimelineDisplay();
+}
+
+function setupDragAndDrop() {
+    // CRITIQUE : Ajout de l'écouteur dragstart pour garantir le transfert des données
+    document.querySelectorAll('.asset-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.dataset.assetId);
+            e.dataTransfer.effectAllowed = 'copy';
+        });
+    });
+
+    Object.values(timelineTracks).forEach(track => {
+        if (!track) return;
+        track.addEventListener('dragover', (e) => {
+            e.preventDefault(); 
+            e.dataTransfer.dropEffect = 'copy';
+            track.style.border = '1px dashed #00ffaa'; 
+        });
+        track.addEventListener('dragleave', (e) => {
+            track.style.border = 'none';
+        });
+        track.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const assetId = e.dataTransfer.getData('text/plain');
+            
+            const trackRect = track.getBoundingClientRect();
+            const dropX = e.clientX - trackRect.left + track.scrollLeft;
+            
+            addClipToTimeline(assetId, e.currentTarget.id, dropX);
+            e.currentTarget.style.border = 'none'; 
+        });
+    });
+}
+
+
+function addClipToTimeline(assetId, trackId, dropX) {
+    if (!assetId || assetId.trim() === "") {
+         console.warn(`Actif ID non trouvé lors du drop. Tentative de drop invalide.`);
+         return; 
+    }
+
+    let asset = null;
+    Object.values(assetsData).forEach(group => {
+        const found = group.find(a => a.id === assetId);
+        if (found) asset = found;
+    });
+
+    if (asset) {
+        const targetTrack = document.getElementById(trackId);
+        if (!targetTrack) return;
+        
+        // ⬅️ VÉRIFICATION CRITIQUE DE LA COMPATIBILITÉ
+        const expectedTrackElement = getTargetTrack(asset.type || asset.category);
+        if (!expectedTrackElement || expectedTrackElement.id !== trackId) {
+             console.warn(`Type d'actif '${asset.type || asset.category}' non compatible avec la piste ${trackId}. Piste attendue: ${expectedTrackElement ? expectedTrackElement.id : 'N/A'}`);
+             return;
+        }
+
+        const duration = parseFloat(asset.duration) || 3;
+        const startTime = dropX / PIXELS_PER_SECOND; 
+        
+        const clip = document.createElement('div');
+        clip.className = `timeline-clip ${getAssetClass(asset.type || asset.category)}`;
+        clip.textContent = asset.name;
+        
+        clip.dataset.duration = duration; 
+        clip.dataset.startTime = startTime;
+        clip.dataset.assetId = asset.id;
+        
+        clip.style.width = `${duration * PIXELS_PER_SECOND}px`;
+        clip.style.left = `${dropX}px`;
+        
+        targetTrack.appendChild(clip);
+        
+        // Simulation de la prévisualisation
+        previewAsset(asset);
+
+        updateTimelineDisplay();
+        
+    } else {
+        console.warn(`Actif ID "${assetId}" non trouvé. Erreur de mappage après le drop.`);
+    }
+}
+
+// ⬅️ NOUVEAU: Fonction de prévisualisation multimodale
+function previewAsset(asset) {
+    previewMediaContainer.innerHTML = ''; // Nettoyer l'ancien contenu
+    
+    if (asset.type.includes('image')) {
+        previewMediaContainer.innerHTML = `<img src="${asset.url || 'https://placehold.co/400x300/1e1e1e/white?text=IMAGE_PREVIEW'}" class="max-h-full max-w-full object-contain border border-gray-700 rounded"/>`;
+    } else if (asset.type.includes('video')) {
+         previewMediaContainer.innerHTML = `<video controls autoplay src="${asset.path || asset.url || ''}" class="max-h-full max-w-full object-contain border border-red-500 rounded"><source src="${asset.path || asset.url}" type="video/mp4">Votre navigateur ne supporte pas la vidéo.</video>`;
+    } else if (asset.type.includes('audio') || asset.type.includes('AUDIO')) {
+        previewMediaContainer.innerHTML = `<div class="text-center p-8 bg-gray-900 rounded"><p class="text-xl text-blue-400">AUDIO : ${asset.name}</p><p class="text-sm text-gray-500">Visualisation de la forme d'onde simulée.</p><audio controls src="${asset.path || asset.source}"></audio></div>`;
+    } else if (asset.type.includes('script') || asset.type.includes('md')) {
+        modalTitle.textContent = asset.name;
+        modalContentBody.innerHTML = `
+            <p class="text-yellow-400 mb-2">Description : ${asset.description || 'Script de contrôle AV/CC.'}</p>
+            <pre class="bg-gray-900 p-3 rounded overflow-x-auto text-sm text-white">${asset.code || `Contenu du script non chargé. Chemin : ${asset.path}`}</pre>
+        `;
+        showModal('asset-modal'); // Afficher le script dans le modal
+        return; 
+    } else {
+        previewMediaContainer.textContent = `Aperçu indisponible pour : ${asset.type}`;
+    }
+    // Si c'est un média visuel/audio, on masque le modal (s'il était ouvert)
+    hideModal(); 
+}
+
+
+// --- 4. GESTION DU MODAL D'ACTIF ---
+
+function getAssetById(assetId) {
+    // Recherche de l'actif dans tous les groupes (images, audio, scripts)
+    for (const key in assetsData) {
+        const found = assetsData[key].find(a => a.id === assetId);
+        if (found) return found;
+    }
+    return null;
+}
+
+function showAssetModal(assetId) {
+    const asset = getAssetById(assetId);
+    if (!asset) return;
+    
+    // Si l'actif est un script, on utilise la logique de previewAsset pour le contenu
+    if (asset.type.includes('script') || asset.type.includes('md')) {
+        previewAsset(asset);
+    } else {
+        // Pour les autres types (Image, Audio, Vidéo), on utilise la prévisualisation dans la zone principale.
+        previewAsset(asset);
+        // Si le modal était ouvert, on le ferme.
+        hideModal();
+        return;
+    }
+
+    assetModal.classList.add('show');
+}
+
+function hideModal() {
+    if (assetModal) assetModal.classList.remove('show');
+}
+
+
+// --- 5. LOGIQUE DE TIMELINE (Zoom, FFmpeg, etc.) ---
+
+// P5.4: Affichage du Timecode (inchangé)
+function updateTimelineDisplay() {
+    const timeArea = document.getElementById('timecode-area');
+    timeArea.innerHTML = '';
+    
+    const maxSeconds = Math.max(60, getMaxClipEndTime()); 
+    const maxPx = maxSeconds * PIXELS_PER_SECOND;
+    
+    if (timelineTracksContainer) {
+        timelineTracksContainer.style.width = `${maxPx + 200}px`; 
+    }
+
+    for (let s = 0; s <= maxSeconds + 5; s += 5) {
+        const posPx = s * PIXELS_PER_SECOND;
+        if (posPx > maxPx + 50) break;
+
+        const timeLabel = document.createElement('span');
+        timeLabel.className = 'time-marker absolute text-gray-500 font-mono'; 
+        timeLabel.textContent = formatTime(s);
+        timeLabel.style.left = `${posPx}px`;
+        
+        const trackLine = document.createElement('div');
+        trackLine.style.position = 'absolute';
+        trackLine.style.left = `${posPx}px`;
+        trackLine.style.top = '0';
+        trackLine.style.height = '100%';
+        trackLine.style.borderLeft = '1px solid rgba(255, 255, 255, 0.2)';
+        
+        timelineTracksContainer.appendChild(trackLine);
+        timeArea.appendChild(timeLabel);
+    }
+}
+
+function getMaxClipEndTime() {
+    let maxTime = 0;
+    document.querySelectorAll('.timeline-clip').forEach(clip => {
+        const endTime = parseFloat(clip.dataset.startTime) + parseFloat(clip.dataset.duration);
+        if (endTime > maxTime) maxTime = endTime;
+    });
+    return maxTime;
+}
+
+function formatTime(totalSeconds) {
+    const seconds = Math.floor(totalSeconds % 60);
+    const minutes = Math.floor(totalSeconds / 60);
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+
+// --- 6. SIMULATION FFMPEG (Rendu) ---
+
+function simulateFFmpegRender() {
+    renderBtn.textContent = 'RENDERING... (0%)';
+    renderBtn.disabled = true;
+    
+    const clips = document.querySelectorAll('.timeline-clip');
+    if (clips.length === 0) {
+        console.warn("Rendu annulé : Aucune séquence sur la timeline.");
+        renderBtn.textContent = 'AJOUTER CLIPS';
+        renderBtn.disabled = false;
+        return;
+    }
+    
+    console.log(`Démarrage de la simulation de rendu FFmpeg pour ${clips.length} clips...`);
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        renderBtn.textContent = `RENDERING... (${progress}%)`;
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            renderBtn.textContent = 'RENDU TERMINÉ!';
+            renderBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            renderBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+            
+            setTimeout(() => {
+                renderBtn.textContent = 'RENDER (FFMPEG SIM.)';
+                renderBtn.disabled = false;
+                renderBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                renderBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+            }, 2000);
+            
+            console.log("Rendu terminé. Fichier exporté.");
+        }
+    }, 200);
+}
+
+
+// --- 7. DÉMARRAGE DU MODULE ---
+
+function initStudio() {
+    // ⬅️ Récupération des éléments DOM critiques (Résout les erreurs de null)
+    assetsListContainer = document.getElementById('assets-list-container');
+    timelineTracksContainer = document.getElementById('timeline-tracks-container');
+    zoomLevelDisplay = document.getElementById('zoom-level-display');
+    renderBtn = document.getElementById('render-btn');
+    assetModal = document.getElementById('asset-modal');
+    modalContentBody = document.getElementById('modal-content-body');
+    modalTitle = document.getElementById('modal-title');
+    previewMediaContainer = document.getElementById('preview-media-container');
+
+
+    // Récupérer les références directes des pistes pour la const globale
+    timelineTracks.video = document.getElementById('track-video');
+    timelineTracks.audio = document.getElementById('track-audio');
+    timelineTracks.fx = document.getElementById('track-fx');
+
+    // Assurez-vous que le Modal est bien initialisé
+    document.getElementById('modal-close-btn').addEventListener('click', hideModal);
+
+    loadAssets(); 
+}
+
+window.onload = initStudio;
+</script>
+</body>
+</html>

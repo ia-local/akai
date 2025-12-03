@@ -1,0 +1,97 @@
+/* CONFIGURATION MODAL STYLES */
+
+/* Navigation par Onglets (Interne à la modale) */
+.config-tabs {
+    display: flex;
+    border-bottom: 1px solid #333;
+    background: #151515;
+    margin-bottom: 20px;
+}
+
+.config-tab {
+    padding: 10px 20px;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.config-tab:hover { color: #ddd; background: #222; }
+.config-tab.active { color: #fff; border-bottom-color: #00ffaa; background: #1e1e1e; }
+
+/* Grille de paramètres */
+.config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 0 10px;
+}
+
+.config-section h4 {
+    color: #00ffaa;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+/* Groupe de contrôle */
+.config-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.config-label {
+    font-size: 0.8rem;
+    color: #ccc;
+}
+.config-label small {
+    display: block;
+    color: #666;
+    font-size: 0.65rem;
+}
+
+/* Toggle Switch (CSS Only) */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #333;
+    transition: .4s;
+    border-radius: 20px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px; width: 16px;
+    left: 2px; bottom: 2px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider { background-color: #00ffaa; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* Inputs numériques */
+.config-input {
+    background: #111;
+    border: 1px solid #444;
+    color: white;
+    padding: 2px 5px;
+    width: 60px;
+    text-align: right;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}

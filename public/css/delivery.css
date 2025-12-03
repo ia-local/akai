@@ -1,0 +1,10 @@
+.render-queue-item {
+    background: #252525;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    border-left: 3px solid orange; /* Status: Waiting */
+}
