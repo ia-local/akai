@@ -33,7 +33,7 @@
             <ul>
                 <li><a href="#architecture">Arborescence</a></li>
                 <li><a href="#quantum">Quantum Layering</a></li>
-                <li><a href="#midi">MIDI Mapping (MPD218)</a></li>
+                <li><a href="#midi">MIDI Mapping</a></li>
             </ul>
 
             <h3>Developers</h3>
@@ -79,7 +79,7 @@ npm run dev
 
             <section id="quantum">
                 <h2>⚛️ Logique Quantique (Pad 15)</h2>
-                <p>La particularité du Studio V2.2 est son moteur de superposition. Contrairement à un montage classique, les couches (Vidéo, Dessin, ASCII) changent de profondeur (Z-Index) dynamiquement grâce à l'Index Quantique piloté par le <strong>Pad 15</strong>.</p>
+                <p>La particularité du Studio V2.2 est son moteur de superposition. Les couches (Vidéo, Dessin, ASCII) changent de profondeur (Z-Index) dynamiquement grâce à l'Index Quantique piloté par le <strong>Pad 15</strong>.</p>
 
                 <div class="quantum-widget">
                     <h4 style="color:#aaa; text-transform:uppercase; margin-top:0;">Simulateur de Superposition</h4>
@@ -95,10 +95,18 @@ npm run dev
 
                     <button class="btn-quantum" onclick="cycleQuantumIndex()">TAP PAD 15 (CYCLE)</button>
                 </div>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 10px;"><em>Cliquez pour tester la logique du main.js.</em></p>
+            </section>
 
-                <p style="font-size: 0.8rem; color: #666; margin-top: 10px;">
-                    <em>Cliquez sur le bouton ci-dessus pour visualiser comment le code <code>main.js</code> manipule le DOM en temps réel.</em>
-                </p>
+            <section id="midi">
+                <h2>🎛️ MIDI Mapping (MPD218)</h2>
+                <p>Configuration par défaut du contrôleur Akai :</p>
+                <ul>
+                    <li><strong>PAD 15 :</strong> Cycle Quantum Index (1-8)</li>
+                    <li><strong>PAD 14 :</strong> Mutation IA (Llama Trigger)</li>
+                    <li><strong>KNOB 1 :</strong> Cursor X (Probabilité)</li>
+                    <li><strong>KNOB 2 :</strong> Cursor Y (Entanglement)</li>
+                </ul>
             </section>
 
             <section id="api">
@@ -113,11 +121,14 @@ POST /api/quantum/mutate
   "mood": "CHAOS"
 }
                 </code></pre>
-                <p>Accès local : <a href="http://localhost:3145/api-docs" style="color:var(--accent)">http://localhost:3145/api-docs</a></p>
+                <p>Accès local : <a href="http://localhost:3145/api-docs" target="_blank" style="color:var(--accent)">http://localhost:3145/api-docs</a></p>
             </section>
-<h2>📡 API Reference</h2>
-                <p>Le serveur expose une API REST documentée via Swagger.</p>
-                </section>
+
+            <section id="ai">
+                <h2>🧠 AI & Groq Integration</h2>
+                <p>Le système utilise le SDK Groq pour injecter du code en temps réel via le Chatbot.</p>
+                <p>Modèles supportés : <code>llama-3.1-8b-instant</code> et <code>gemini-pro</code>.</p>
+            </section>
 
             <div id="doc-pagination" class="pagination-nav">
                 <button id="btn-prev" class="nav-btn">
@@ -127,6 +138,7 @@ POST /api/quantum/mutate
                     <span class="label">NEXT</span> <span class="arrow">→</span>
                 </button>
             </div>
+
             <footer>
                 &copy; 2025 Studio AV Architecture. Documentation générée automatiquement.
             </footer>

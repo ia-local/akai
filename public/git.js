@@ -1,138 +1,102 @@
 /**
- * STUDIO AV DOCS - SCRIPT (v2.3)
- * Gère la navigation, l'Active State automatique et la Pagination.
+ * STUDIO AV DOCS - SPA CONTROLLER (v3.0 SECTION DISPLAY)
+ * Gestion d'affichage Synchrone (Display None/Block)
  */
 
 // --- CONFIGURATION ---
-const sections = ['intro', 'install', 'architecture', 'quantum', 'api'];
-let currentSectionIndex = 0;
+const sectionsIds = ['intro', 'install', 'architecture', 'quantum', 'midi', 'api', 'ai'];
 
 // --- DOM ELEMENTS ---
 const btnPrev = document.getElementById('btn-prev');
 const btnNext = document.getElementById('btn-next');
-const navLinks = document.querySelectorAll('nav a, aside a');
+const allNavLinks = document.querySelectorAll('nav a, aside a');
+const allSections = document.querySelectorAll('main section');
+const mainContainer = document.querySelector('main');
 
-// --- 1. NAVIGATION CLICK ---
-navLinks.forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        if(this.getAttribute('target') === '_blank') return;
-        e.preventDefault();
-        const targetId = this.getAttribute('href').substring(1); // enleve le #
-        scrollToSection(targetId);
+// --- 1. CORE : SHOW SECTION ---
+function activateSection(targetId) {
+    // 1. Masquer toutes les sections
+    allSections.forEach(sec => {
+        sec.classList.remove('active-section');
     });
-});
 
-// --- 2. SCROLL TO LOGIC ---
-function scrollToSection(id) {
-    const el = document.getElementById(id);
-    if(el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        // Mise à jour manuelle de l'index si clic
-        const idx = sections.indexOf(id);
-        if(idx !== -1) updatePaginationState(idx);
+    // 2. Afficher la cible
+    const targetSec = document.getElementById(targetId);
+    if (targetSec) {
+        targetSec.classList.add('active-section');
+        // Reset scroll du container main (remet en haut de page)
+        mainContainer.scrollTop = 0; 
     }
-}
 
-// --- 3. AUTO-DETECT SECTION ON SCROLL (Observer) ---
-const observerOptions = {
-    root: null,
-    rootMargin: '-20% 0px -70% 0px', // Active quand la section est en haut de page
-    threshold: 0
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            const id = entry.target.getAttribute('id');
-            const newIndex = sections.indexOf(id);
-            
-            if (newIndex !== -1) {
-                updatePaginationState(newIndex);
-                updateSidebarActive(id);
-            }
+    // 3. Mise à jour des Menus (Classes CSS)
+    allNavLinks.forEach(link => {
+        link.classList.remove('active');
+        const href = link.getAttribute('href');
+        if (href === `#${targetId}`) {
+            link.classList.add('active');
         }
     });
-}, observerOptions);
 
-// Observer toutes les sections
-sections.forEach(id => {
-    const el = document.getElementById(id);
-    if(el) observer.observe(el);
+    // 4. Mise à jour Pagination
+    const index = sectionsIds.indexOf(targetId);
+    if (index !== -1) updatePaginationButtons(index);
+}
+
+// --- 2. CLICK HANDLERS (NAVIGATION) ---
+allNavLinks.forEach(link => {
+    link.addEventListener('click', function (e) {
+        if (this.getAttribute('target') === '_blank') return;
+        
+        e.preventDefault();
+        const targetId = this.getAttribute('href').substring(1); // Enlève le #
+        activateSection(targetId);
+    });
 });
 
-// --- 4. UPDATE UI STATE ---
-function updatePaginationState(index) {
-    currentSectionIndex = index;
-
-    // Gestion Bouton Précédent
-    if (index === 0) {
+// --- 3. GESTION BOUTONS PREV/NEXT ---
+function updatePaginationButtons(index) {
+    // PREV
+    if (index <= 0) {
         btnPrev.disabled = true;
         btnPrev.querySelector('.label').innerText = "START";
+        btnPrev.onclick = null;
     } else {
         btnPrev.disabled = false;
-        btnPrev.querySelector('.label').innerText = sections[index - 1].toUpperCase();
+        btnPrev.querySelector('.label').innerText = sectionsIds[index - 1].toUpperCase();
+        btnPrev.onclick = () => activateSection(sectionsIds[index - 1]);
     }
 
-    // Gestion Bouton Suivant
-    if (index === sections.length - 1) {
+    // NEXT
+    if (index >= sectionsIds.length - 1) {
         btnNext.disabled = true;
         btnNext.querySelector('.label').innerText = "END";
+        btnNext.onclick = null;
     } else {
         btnNext.disabled = false;
-        btnNext.querySelector('.label').innerText = sections[index + 1].toUpperCase();
+        btnNext.querySelector('.label').innerText = sectionsIds[index + 1].toUpperCase();
+        btnNext.onclick = () => activateSection(sectionsIds[index + 1]);
     }
 }
 
-function updateSidebarActive(id) {
-    document.querySelectorAll('aside a, nav a').forEach(a => {
-        a.classList.remove('active');
-        if(a.getAttribute('href') === `#${id}`) {
-            a.classList.add('active');
-        }
-    });
-}
-
-// --- 5. PAGINATION CLICK LISTENERS ---
-btnPrev.addEventListener('click', () => {
-    if(currentSectionIndex > 0) {
-        scrollToSection(sections[currentSectionIndex - 1]);
-    }
-});
-
-btnNext.addEventListener('click', () => {
-    if(currentSectionIndex < sections.length - 1) {
-        scrollToSection(sections[currentSectionIndex + 1]);
-    }
-});
-
-
-// --- 6. SIMULATEUR QUANTUM (PAD 15 LOGIC) ---
-// (Code inchangé pour la démo)
+// --- 4. QUANTUM SIMULATOR (Inchangé) ---
 let quantumIndex = 1;
 const MAX_INDEX = 4;
-
 const indexDescriptions = {
-    1: "Standard (Reset)",
-    2: "Boost (Dessin Top)",
-    3: "Fusion (Blend Overlay)",
-    4: "Quantum Front (WebGL)"
+    1: "Standard (Reset)", 2: "Boost (Dessin Top)", 
+    3: "Fusion (Blend Overlay)", 4: "Quantum Front (WebGL)"
 };
 
-function cycleQuantumIndex() {
+window.cycleQuantumIndex = function() {
     quantumIndex++;
     if (quantumIndex > MAX_INDEX) quantumIndex = 1;
-    const displayVal = document.getElementById('idx-val');
-    const displayDesc = document.getElementById('idx-desc');
-    const vizContainer = document.getElementById('demo-viz');
+    document.getElementById('idx-val').innerText = quantumIndex;
+    document.getElementById('idx-desc').innerText = `(${indexDescriptions[quantumIndex]})`;
+    
+    const viz = document.getElementById('demo-viz');
+    viz.className = 'layer-viz';
+    viz.classList.add(`state-${quantumIndex}`);
+};
 
-    displayVal.innerText = quantumIndex;
-    displayDesc.innerText = `(${indexDescriptions[quantumIndex]})`;
-
-    vizContainer.className = 'layer-viz';
-    vizContainer.classList.add(`state-${quantumIndex}`);
-    console.log(`🌌 [DOCS SIMULATOR] Switched to Index ${quantumIndex}`);
-}
-window.cycleQuantumIndex = cycleQuantumIndex;
-
-// Init
-updatePaginationState(0);
+// --- INITIALISATION ---
+// Charge la première section au démarrage
+activateSection('intro');
