@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="css/multiCalc.css">
     <link rel="stylesheet" href="css/modalSystem.css">
     <link rel="stylesheet" href="css/modalConfig.css">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -32,7 +31,7 @@
                 MODE: PERFORM
             </div>
             <button id="btn-settings" class="text-gray-400 hover:text-white mx-2" title="Paramètres">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
         </div>
 
@@ -78,23 +77,17 @@
                 <div id="preview-media-container">
                     <img id="player-image" class="preview-player" src="" />
                     <video id="player-video" class="preview-player" muted playsinline preload="auto"></video>
-                    
+                    <canvas id="ruler-layer" class="preview-player active" style="z-index: 19; pointer-events: none;"></canvas>
+                    <canvas id="paint-layer" class="preview-player active" style="z-index: 18; pointer-events: none;"></canvas>
+                    <canvas id="ascii-canvas" class="preview-player" style="z-index: 15; pointer-events: none;"></canvas>
                     <canvas id="webgl-canvas" class="preview-player" 
                             style="z-index: 12; pointer-events: none; mix-blend-mode: screen; opacity: 0.8;">
                     </canvas>
-
-                    <canvas id="ascii-canvas" class="preview-player" style="z-index: 15; pointer-events: none;"></canvas>
-                    
-                    <canvas id="paint-layer" class="preview-player active" style="z-index: 18; pointer-events: none;"></canvas>
-                    
-                    <canvas id="ruler-layer" class="preview-player active" style="z-index: 19; pointer-events: none;"></canvas>
-
                     <svg id="drawing-layer" xmlns="http://www.w3.org/2000/svg">
                         <g id="drawn-paths"></g>
                         <rect id="drawing-cursor" x="0" y="0" width="10" height="10" 
                               fill="rgba(255, 255, 255, 0.5)" stroke="white" stroke-width="1" vector-effect="non-scaling-stroke" /> 
                     </svg>
-                    
                     <div id="player-placeholder" class="preview-player active flex justify-center items-center text-gray-500 bg-black h-full w-full">
                         <span class="text-xs">NO SIGNAL</span>
                     </div>
@@ -140,23 +133,18 @@
                 <div id="track-video" class="timeline-track mb-2" data-track-type="video">
                     <span class="track-label">VIDEO</span>
                 </div>
-                <div id="track-audio" class="timeline-track mb-2" data-track-type="audio">
-                    <span class="track-label">AUDIO</span>
-                </div>
+                
                 <div id="track-image" class="timeline-track mb-2" data-track-type="image">
                     <span class="track-label text-fuchsia-400">IMAGE / DESSIN</span>
                 </div>
-                <div id="track-image" class="timeline-track mb-2" data-track-type="image">
-                    <span class="track-label text-fuchsia-400">DRAW</span>
-                </div>
                 
                 <div id="track-text" class="timeline-track mb-2" data-track-type="text">
-                    <span class="track-label text-green-400">TEXTE / PROMPT</span>
+                    <span class="track-label text-green-400">TEXTE / ASCII</span>
                 </div>
-                <div id="track-text" class="timeline-track mb-2" data-track-type="text">
-                    <span class="track-label text-green-400">ASCII - PIXEL</span>
+                
+                <div id="track-audio" class="timeline-track mb-2" data-track-type="audio">
+                    <span class="track-label">AUDIO</span>
                 </div>
-
                 
                 <div id="track-fx" class="timeline-track" data-track-type="fx">
                     <span class="track-label">FX / CC</span>
@@ -170,7 +158,7 @@
         <a href="html/media_data.html" class="nav-tab">
             <span class="nav-icon">📁</span> MEDIA
         </a>
-        <a href="html/code_timeline.html" class="nav-tab">
+        <a href="html/cut_timeline.html" class="nav-tab">
             <span class="nav-icon">✂️</span> CODE
         </a>
         <a href="#" class="nav-tab active">
@@ -187,9 +175,9 @@
         </a>
     </footer>
     
-    <div id="generic-modal-overlay" class="c-modal-overlay"></div>
+    <div id="generic-modal-overlay" class="c-modal-overlay">
+        </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="http://localhost:3145/socket.io/socket.io.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>

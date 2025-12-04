@@ -1,21 +1,19 @@
 /**
- * STUDIO MAIN MODULE (V2.0 MODULAR)
- * Cœur de l'application Studio de Montage AV.
- * Orchestration des modules : Library, Preview, Drawing, MIDI, Transport, ToolSystem.
+ * STUDIO MAIN MODULE (V2.2 QUANTUM INDEX)
+ * - Restauration Configuration Initiale (Dessin/Tensor)
+ * - Intégration Pad 15 (Sélecteur Index Superposition 1-8)
+ * - Intégration Audio & Quantum Safe
  */
 
 // =================================================================
 // 1. IMPORTS
 // =================================================================
 
-// Core Systems
-import { Transport } from './timeCode.js'; // ou './core/Transport.js' selon ton nettoyage
-import { TimelineManager } from './timelineManager.js'; // ou './modules/TimelineManager.js'
+import { Transport } from './timeCode.js';
+import { TimelineManager } from './timelineManager.js';
 import { KeyboardController } from './core/eventKeyboard.js';
 import { MultiCalcSession } from './core/multiCalc.js';
 import { MidiInput } from './core/MidiInput.js';
-
-// UI Systems
 import { ModalSystem } from './ui/modalSystem.js';
 import { ConfigManager } from './ui/modalConfig.js';
 
@@ -24,28 +22,40 @@ import { AsciiSoupEngine } from './engines/AsciiSoupEngine.js';
 import { AsciiTensorEngine } from './engines/AsciiTensorEngine.js';
 import { AsciiCanvasEngine } from './engines/AsciiCanvasEngine.js';
 import { WebGLEngine } from './engines/WebGLEngine.js';
+import { PaintEngine } from './engines/PaintEngine.js';
+
+// MOTEURS ADDITIONNELS (Audio / Quantum)
+import { AudioEngine } from './modules/AudioEngine.js';
+import { QuantumComputeEngine } from './engines/QuantumComputeEngine.js';
 
 // Functional Modules
 import { AssetLibrary } from './modules/AssetLibrary.js';
 import { PreviewEngine } from './modules/PreviewEngine.js';
 import { DrawingEngine } from './modules/DrawingEngine.js';
 import { SoupManager } from './modules/SoupManager.js';
-import { ToolSystem } from './modules/ToolSystem.js'; // <--- NOUVEAU
-import { PaintEngine } from './engines/PaintEngine.js';
-// Data
-import { TENSOR_GLYPHS } from '../data/AsciiGlyphs.js'; // <--- NOUVEAU
-import { RulerOverlay } from './modules/RulerOverlay.js'; // <--- NOUVEAU
+import { ToolSystem } from './modules/ToolSystem.js';
+import { TENSOR_GLYPHS } from '../data/AsciiGlyphs.js';
+import { RulerOverlay } from './modules/RulerOverlay.js';
+
 // =================================================================
 // 2. CONSTANTES & GLOBALES
 // =================================================================
 const PIXELS_PER_SECOND = 50;
 const socket = io('http://localhost:3145');
 
-// Globales (Héritage V1)
+// Globales
 window.modalSystem = new ModalSystem(); 
+const audioEngine = new AudioEngine(); 
 const sessionMgr = new MultiCalcSession();
 const configMgr = new ConfigManager();
 const rulerSystem = new RulerOverlay('ruler-layer', 'preview-media-container');
+
+// Gestion de l'Index Quantique (PAD 15)
+window.quantumIndex = 1; 
+const MAX_QUANTUM_INDEX = 8; 
+
+console.log("✅ SYSTEME: AudioEngine Instantiated");
+
 // =================================================================
 // 3. SÉLECTION UI GLOBALE
 // =================================================================
@@ -60,14 +70,12 @@ const tracksContainer = document.getElementById('timeline-tracks-container');
 // 4. INITIALISATION DES MOTEURS DE RENDU
 // =================================================================
 
-// --- A. MOTEUR PAINT (Bitmap/Tensor) ---
-// Note: Assure-toi que <canvas id="paint-layer"> existe dans index.html
-
+// --- A. MOTEUR PAINT ---
 const paintCanvas = document.getElementById('paint-layer') || document.createElement('canvas'); 
-// On utilise la classe spécialisée PaintEngine
 const paintEngine = new PaintEngine(paintCanvas);
 console.log("✅ Moteur Paint : Activé sur #paint-layer");
-// --- B. MOTEUR ASCII MONITORING (Tensor avec fallback) ---
+
+// --- B. MOTEUR ASCII MONITORING ---
 const asciiCanvas = document.getElementById('ascii-canvas');
 let asciiEngine;
 try {
@@ -78,36 +86,79 @@ try {
     console.warn("⚠️ Moteur ASCII Monitoring : Fallback Canvas.");
 }
 
-// --- C. MOTEUR WEBGL (Shader) ---
-const webglCanvas = document.getElementById('webgl-canvas');
-let glEngine = null;
-if (webglCanvas) {
-    glEngine = new WebGLEngine(webglCanvas);
-    webglCanvas.style.display = 'none'; // Masqué par défaut
+// --- C. MOTEUR QUANTUM (Sur le layer WebGL Z-12) ---
+// On récupère le canvas qui servait au WebGL
+const quantumCanvas = document.getElementById('webgl-canvas');
+let glEngine = null; // On désactive WebGL standard pour éviter les conflits
+
+// Initialisation du Moteur Quantique (2D Safe)
+const quantumEngine = new QuantumComputeEngine(quantumCanvas);
+
+// On rend le canvas visible par défaut pour le mode Quantum
+if (quantumCanvas) {
+    quantumCanvas.style.display = 'block'; 
+    quantumCanvas.style.opacity = '1';
+    quantumCanvas.style.mixBlendMode = 'normal';
 }
 
-// Gestion du Redimensionnement (Responsive)
+console.log("✅ Moteur Quantum : Initialisé (Mode Superposition)");
+
+// --- Fonction Utilitaires Quantum ---
+
+function toggleQuantumMode(active) {
+    if (!quantumEngine) return;
+    if (active) {
+        previewContainer.classList.add('mode-quantum');
+        quantumEngine.isRunning = true;
+    } else {
+        previewContainer.classList.remove('mode-quantum');
+        quantumEngine.isRunning = false;
+        // Nettoyage safe
+        if (quantumCanvas) {
+            const ctx = quantumCanvas.getContext('2d');
+            if (ctx) ctx.clearRect(0, 0, quantumCanvas.width, quantumCanvas.height);
+        }
+    }
+}
+
+async function triggerQuantumMutation() {
+    console.log("🤖 Demande de mutation quantique à Llama-3...");
+    const payload = {
+        entanglement: quantumEngine.state.entanglement,
+        probability: quantumEngine.state.probability,
+        mood: window.quantumIndex > 4 ? "CHAOS" : "HARMONY"
+    };
+    try {
+        await fetch('http://localhost:3145/api/quantum/mutate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        console.log("✨ Mutation envoyée !");
+    } catch (e) { console.error(e); }
+}
+
+// --- Gestion du Redimensionnement ---
 function resizeRenderers() {
     if (asciiCanvas && previewContainer) {
         asciiCanvas.width = previewContainer.clientWidth;
         asciiCanvas.height = previewContainer.clientHeight;
+        
+        if (quantumEngine) {
+            quantumEngine.resize(previewContainer.clientWidth, previewContainer.clientHeight);
+        }
+
         if (rulerSystem) rulerSystem.resize();
-        // Mise à jour du monitoring 16:9
         if (asciiEngine && asciiEngine.setResolution) {
             asciiEngine.setResolution(previewContainer.clientWidth, previewContainer.clientHeight, '16:9');
         }
     }
-    // Mise à jour du moteur Paint pour qu'il suive la taille de la fenêtre
     if (paintCanvas && previewContainer) {
-        // On ne reset pas width/height ici sinon on perd le dessin ! 
-        // Idéalement, on gère ça via CSS ou un buffer offscreen, 
-        // mais pour l'instant on s'assure juste qu'il a une taille initiale.
         if (paintCanvas.width === 0) {
             paintCanvas.width = previewContainer.clientWidth;
             paintCanvas.height = previewContainer.clientHeight;
         }
     }
-    if (glEngine && glEngine.resize) glEngine.resize();
 }
 window.addEventListener('resize', resizeRenderers);
 setTimeout(resizeRenderers, 100);
@@ -116,20 +167,15 @@ setTimeout(resizeRenderers, 100);
 // 5. INSTANCIATION DES MODULES MÉTIER
 // =================================================================
 
-// Timeline Manager
 window.timelineMgr = new TimelineManager(tracksContainer, PIXELS_PER_SECOND);
-
-// Library Manager
 const library = new AssetLibrary('assets-list-container', window.modalSystem);
 
-// Drawing Engine (Vectoriel SVG)
 const drawEngine = new DrawingEngine(
     document.getElementById('drawing-cursor'),
     document.getElementById('drawing-layer'),
     document.getElementById('drawn-paths')
 );
 
-// Preview Engine (Synchronisation)
 const preview = new PreviewEngine({
     video: document.getElementById('player-video'),
     image: document.getElementById('player-image'),
@@ -138,11 +184,7 @@ const preview = new PreviewEngine({
     container: previewContainer
 }, asciiEngine, glEngine);
 
-// Soup Manager (Visualizer Matrix/Phi)
 const soupManager = new SoupManager(asciiEngine, new AsciiSoupEngine());
-
-// Tool System (Le Chef d'Orchestre Interaction)
-// Injection : Vecteur (drawEngine), Raster (paintEngine), Données (GLYPHS)
 const toolSystem = new ToolSystem(drawEngine, paintEngine, TENSOR_GLYPHS);
 
 // =================================================================
@@ -155,22 +197,31 @@ const transport = new Transport({
         document.getElementById('timecode-display').textContent = transport.formatTime(time);
         document.getElementById('playhead').style.transform = `translateX(${time * PIXELS_PER_SECOND}px)`;
         
-        // Sync Preview (Video/Img/Ascii)
+        // Sync Preview
         const activeClips = window.timelineMgr.getClipsAtTime(time);
         preview.sync(time, transport.isPlaying, activeClips);
 
-        // Sync WebGL Uniforms
-        if (isWebGLEnabled && glEngine) {
-            glEngine.updateUniforms(time, midiInput.getKnobState());
-            glEngine.render();
+        // --- MOTEUR QUANTUM ---
+        if (quantumEngine && quantumEngine.isRunning) {
+            const videoEl = preview.els.video;
+            if (videoEl && asciiCanvas) {
+                quantumEngine.render(videoEl, asciiCanvas);
+            }
         }
         
-        // Update Drawing Cursor (pour suivre la souris/midi)
+        // --- SYNC AUDIO ---
+        if(!transport.isPlaying) {
+             audioEngine.setTime(time);
+        }
+        
+        // Update Drawing Cursor
         drawEngine.updateCursor();
     },
     onStop: () => {
         document.getElementById('playhead').style.transform = `translateX(0px)`;
         preview.showPlaceholder();
+        audioEngine.stop();
+        toggleQuantumMode(false);
     }
 });
 
@@ -178,145 +229,160 @@ const transport = new Transport({
 // 7. LOGIQUE INTERACTION (UI & MIDI)
 // =================================================================
 
-let isSelectorMode = false; // False = PERFORM, True = EDIT/CLIP
+let isSelectorMode = false;
 let isWebGLEnabled = false;
 
-// --- MIDI CONTROLLER ---
-// --- MIDI CONTROLLER (Avec Logs de Debug) ---
+// --- MIDI CONTROLLER (CONFIGURATION FINALE) ---
 const midiInput = new MidiInput(socket, {
     onKnob: (cc, normVal, rawVal) => {
-        // Log Général Knob
-        console.log(`🎛️ [KNOB] CC:${cc} | Val:${rawVal} (${normVal.toFixed(2)})`);
+        // console.log(`🎛️ [KNOB] CC:${cc} | Val:${rawVal}`);
 
-        // Routing Dynamique
         if (isSelectorMode) {
-            // MODE EDIT
+            // MODE EDIT (Ta config originale)
             const activeClips = window.timelineMgr.getClipsAtTime(transport.currentTime);
             const targetClip = activeClips.find(c => c.trackId === 'track-video' || c.trackId === 'track-image');
             
             if (targetClip) {
                 const el = preview._isVideo(targetClip) ? preview.els.video : preview.els.image;
-                if(cc === 0) {
-                    el.style.opacity = normVal;
-                    console.log(`   ↳ 👁️ EDIT: Opacity -> ${normVal.toFixed(2)}`);
-                }
-                if(cc === 1) {
-                    el.style.transform = `scale(${1 + normVal * 2})`;
-                    console.log(`   ↳ 🔍 EDIT: Scale -> ${(1 + normVal * 2).toFixed(2)}`);
-                }
-            } else {
-                console.log(`   ↳ ⚠️ EDIT: Aucun clip actif sous la tête de lecture.`);
+                if(cc === 0) el.style.opacity = normVal;
+                if(cc === 1) el.style.transform = `scale(${1 + normVal * 2})`;
             }
         } else {
             // MODE PERFORM
-            if(cc === 0) { 
-                drawEngine.updateState('x', normVal * 100); 
-                console.log(`   ↳ ✏️ DRAW: X -> ${Math.round(normVal * 100)}%`);
+            
+            // 1. TENSOR CURSOR / TROUILLOMETRE (Ascii Cursor)
+            if (asciiEngine && previewContainer) {
+                if (!window.midiCursor) window.midiCursor = { x: 0, y: 0 };
+                const width = previewContainer.clientWidth;
+                const height = previewContainer.clientHeight;
+
+                if (cc === 0) {
+                    window.midiCursor.x = normVal * width;
+                    asciiEngine.updateCursor(window.midiCursor.x, window.midiCursor.y);
+                }
+                if (cc === 1) {
+                    window.midiCursor.y = (1 - normVal) * height; 
+                    asciiEngine.updateCursor(window.midiCursor.x, window.midiCursor.y);
+                }
             }
-            if(cc === 1) { 
-                drawEngine.updateState('y', 100 - (normVal * 100));
-                console.log(`   ↳ ✏️ DRAW: Y -> ${Math.round(100 - (normVal * 100))}%`);
-            }
-            if(cc === 2) { 
-                drawEngine.updateState('z', 2 + normVal * 50);
-                console.log(`   ↳ ✏️ DRAW: Size -> ${(2 + normVal * 50).toFixed(1)}px`);
-            }
-            if(cc === 3) { 
-                drawEngine.updateState('chroma', normVal * 360);
-                console.log(`   ↳ 🎨 DRAW: Color (Hue) -> ${Math.round(normVal * 360)}°`);
-            }
+
+            // 2. DESSIN VECTORIEL (Ta config originale)
+            if(cc === 0) drawEngine.updateState('x', normVal * 100); 
+            if(cc === 1) drawEngine.updateState('y', 100 - (normVal * 100));
+            if(cc === 2) drawEngine.updateState('z', 2 + normVal * 50);
+            if(cc === 3) drawEngine.updateState('chroma', normVal * 360);
         }
 
-        // COMMANDES TRANSPORT GLOBALES (Toujours actives)
+        // COMMANDES GLOBALES
         if(cc === 4) { 
             const newTime = normVal * 60;
             transport.setTime(newTime);
             preview.sync(newTime, false, window.timelineMgr.getClipsAtTime(newTime));
-            console.log(`   ↳ ⏩ TIMELINE: Scrub -> ${transport.formatTime(newTime)}`);
         }
-        if(cc === 5) { 
-            previewContainer.style.transform = `scale(${1 + normVal * 4})`;
-            console.log(`   ↳ 🔭 GLOBAL: Interface Zoom -> ${(1 + normVal * 4).toFixed(2)}x`);
-        }
+        if(cc === 5) previewContainer.style.transform = `scale(${1 + normVal * 4})`;
     },
 
     onPad: (note) => {
-        // Log Général Pad
         console.log(`🎹 [PAD] Note:${note}`);
 
-        // --- TRANSPORT (Pad 1-2) ---
-        if ([36, 48, 0].includes(note)) {
-            transport.toggle();
-            console.log(`   ↳ ▶️ ACTION: Play/Pause`);
-        }
-        if ([37, 49, 1].includes(note)) {
-            transport.stop();
-            console.log(`   ↳ ⏹️ ACTION: Stop`);
+        // --- LIGNE 1 : TRANSPORT ---
+        if ([36, 48, 0].includes(note)) transport.toggle();
+        if ([37, 49, 1].includes(note)) transport.stop();
+        
+        // --- DESSIN (START/STOP) ---
+        if ([38, 50, 2].includes(note)) {
+            if (!drawEngine.state.isDrawing) drawEngine.startStroke(); 
+            else drawEngine.endStroke();
         }
         
-        // --- DESSIN SVG (Pad 3) ---
-        if ([38, 50, 2].includes(note)) {
-            if (!drawEngine.state.isDrawing) {
-                drawEngine.startStroke(); 
-                console.log(`   ↳ ✏️ ACTION: Start Stroke (Vector)`);
-            } else {
-                drawEngine.endStroke();
-                console.log(`   ↳ ✏️ ACTION: End Stroke (Vector)`);
+        // --- SWITCH MODE ---
+        if ([39, 51, 3].includes(note)) toggleSelectorMode();
+
+        // --- LIGNE 2 : OUTILS ---
+        if (note === 4) toolSystem.setTool('brush-svg');
+        if (note === 5) toolSystem.setTool('stamp-ascii');
+        if (note === 6) toolSystem.nextGlyph();
+        if (note === 7) toolSystem.setTool('eraser');
+
+        // --- PAD 14 : IA MUTATION ---
+        if (note === 14) {
+            triggerQuantumMutation();
+        }
+
+        // --- PAD 15 : INDEX QUANTIQUE (BOUCLE 1-8) ---
+        if (note === 15) {
+            // 1. Incrémentation
+            if (!window.quantumIndex) window.quantumIndex = 1;
+            window.quantumIndex++;
+            if (window.quantumIndex > MAX_QUANTUM_INDEX) window.quantumIndex = 1;
+
+            console.log(`🌌 PAD 15 : QUANTUM LAYER > [ Index ${window.quantumIndex} / 8 ]`);
+
+            // 2. Sélection DOM
+            const container = document.getElementById('preview-media-container');
+            const drawingLayer = document.getElementById('drawing-layer');
+            const quantumCanvas = document.getElementById('webgl-canvas');
+
+            // 3. Reset États
+            container.classList.remove('layer-mode-top', 'layer-mode-blend', 'mode-quantum');
+            if(drawingLayer) drawingLayer.style.zIndex = '';
+            if(quantumCanvas) quantumCanvas.style.zIndex = '';
+
+            // 4. Application Mode via Index
+            switch (window.quantumIndex) {
+                case 1: // Standard (Initial)
+                    console.log("   ↳ Mode 1 : Standard (Reset)");
+                    break;
+                
+                case 2: // Boost (Dessin Prioritaire)
+                    container.classList.add('layer-mode-top');
+                    console.log("   ↳ Mode 2 🖌️ : Z-Boost (Dessin Top)");
+                    break;
+
+                case 3: // Fusion (Blend)
+                    container.classList.add('layer-mode-blend');
+                    console.log("   ↳ Mode 3 : Fusion Overlay");
+                    break;
+
+                case 4: // Quantum Front
+                    container.classList.add('mode-quantum');
+                    if(quantumCanvas) quantumCanvas.style.zIndex = 40;
+                    console.log("   ↳ Mode 4 : Quantum Dominant");
+                    break;
+                
+                default: // 5-8 Réservés
+                    console.log(`   ↳ Mode ${window.quantumIndex} : (Dimension Réservée)`);
+                    break;
             }
         }
         
-        // --- MODE SWITCH (Pad 4) ---
-        if ([39, 51, 3].includes(note)) {
-            toggleSelectorMode();
-            console.log(`   ↳ 🔄 ACTION: Switch Mode -> ${isSelectorMode ? 'EDIT' : 'PERFORM'}`);
-        }
-
-        // --- OUTILS DE DESSIN (Ligne 2) ---
-        
-        // PAD 5
-        if (note === 4) {
-            toolSystem.setTool('brush-svg');
-            console.log("   ↳ 🛠️ TOOL: Pinceau Vectoriel (SVG) Activé");
-        }
-        
-        // PAD 6
-        if (note === 5) {
-            toolSystem.setTool('stamp-ascii');
-            console.log("   ↳ 🛠️ TOOL: Tampon ASCII (Tensor) Activé");
-        }
-        
-        // PAD 7
-        if (note === 6) {
-            toolSystem.nextGlyph();
-            console.log(`   ↳ 🔠 TOOL: Next Glyph`); // Le ToolSystem fait déjà un log de la lettre
-        }
-        
-        // PAD 8
-        if (note === 7) {
-            toolSystem.setTool('eraser');
-            console.log("   ↳ 🧽 TOOL: Gomme Activée");
-        }
+        // Audio Trigger (Passif)
+        audioEngine.triggerPad(note, 1.0);
     }
 });
-// --- UI EVENT LISTENERS ---
 
-// Toggle WebGL
+// --- SOCKETS ---
+socket.on('init_state', (state) => {
+    if(audioEngine) {
+        audioEngine.updateSpatialState(state.cursor_x, state.cursor_y, state.cursor_z);
+        audioEngine.updateEQ(state.eq_bass, state.eq_treble);
+    }
+});
+socket.on('midi_cc', (data) => {
+    if (data.variable === 'eq_bass') audioEngine.updateEQ(data.value, null);
+    if (data.variable === 'eq_treble') audioEngine.updateEQ(null, data.value);
+});
+
+// --- UI LISTENERS ---
 if(toggleGlBtn) toggleGlBtn.addEventListener('click', () => {
     isWebGLEnabled = !isWebGLEnabled;
     if (isWebGLEnabled) {
-        toggleGlBtn.classList.add('bg-blue-900', 'text-blue-200', 'border-blue-700');
-        toggleGlBtn.classList.remove('bg-gray-800', 'text-gray-400', 'border-gray-600');
-        toggleGlBtn.innerHTML = `<span>✨</span> GL FX: ON`;
         if(webglCanvas) webglCanvas.style.display = 'block';
     } else {
-        toggleGlBtn.classList.remove('bg-blue-900', 'text-blue-200', 'border-blue-700');
-        toggleGlBtn.classList.add('bg-gray-800', 'text-gray-400', 'border-gray-600');
-        toggleGlBtn.innerHTML = `<span>✨</span> GL FX: OFF`;
         if(webglCanvas) webglCanvas.style.display = 'none';
     }
 });
 
-// Toggle Right Panel
 function togglePanel() {
     rightPanel.classList.toggle('is-open');
     toggleToolsBtn.classList.toggle('active');
@@ -325,7 +391,6 @@ function togglePanel() {
 if(toggleToolsBtn) toggleToolsBtn.addEventListener('click', togglePanel);
 document.getElementById('close-tools-btn')?.addEventListener('click', togglePanel);
 
-// Library View Switch
 document.getElementById('view-list-btn')?.addEventListener('click', (e) => {
     library.setViewMode('list');
     updateViewBtns(e.target, document.getElementById('view-grid-btn'));
@@ -340,14 +405,12 @@ function updateViewBtns(active, inactive) {
     inactive.classList.add('text-gray-500');
 }
 
-// Soup Button
 const soupBtn = document.querySelector('#right-panel button:last-child');
 if (soupBtn) {
     soupBtn.textContent = "SOUP VISUALIZER (PHI)";
     soupBtn.onclick = () => soupManager.runAnalysis(previewContainer.clientWidth, previewContainer.clientHeight);
 }
 
-// Mode Selector Visual Feedback
 function toggleSelectorMode() {
     isSelectorMode = !isSelectorMode;
     if(modeIndicator) {
@@ -372,7 +435,6 @@ document.querySelectorAll('.timeline-track').forEach(track => {
         const assetId = e.dataTransfer.getData('text/plain');
         if (!assetId) return;
 
-        // Recherche dans les data chargées par Library
         let asset = null;
         if (library.assetsData) {
             for (const group of Object.values(library.assetsData)) {
@@ -386,10 +448,13 @@ document.querySelectorAll('.timeline-track').forEach(track => {
             const dropX = e.clientX - rect.left;
             const startTime = Math.max(0, dropX / PIXELS_PER_SECOND);
 
-            window.timelineMgr.addClip(asset, track.id, startTime);
+            const newClip = window.timelineMgr.addClip(asset, track.id, startTime);
             sessionMgr.save(window.timelineMgr, drawEngine.state);
 
-            // Déplace la tête de lecture à l'endroit du drop
+            if (track.id === 'track-audio') {
+                audioEngine.loadTimelineClip(newClip);
+            }
+
             transport.setTime(startTime); 
             preview.sync(startTime, false, window.timelineMgr.getClipsAtTime(startTime));
         }
@@ -401,21 +466,33 @@ document.querySelectorAll('.timeline-track').forEach(track => {
 // =================================================================
 
 (async function init() {
-    // Listeners UI Transports
-    document.getElementById('btn-play').addEventListener('click', () => transport.play());
-    document.getElementById('btn-pause').addEventListener('click', () => transport.pause());
+    // Initialisation Audio Safe
+    document.getElementById('btn-play').addEventListener('click', async () => {
+        if (!audioEngine.isInitialized) await audioEngine.init();
+        transport.play();
+        audioEngine.play();
+    });
     
-    // Keyboard Controller (Raccourcis Clavier)
-    new KeyboardController({ togglePlayback: () => transport.toggle() });
+    document.getElementById('btn-pause').addEventListener('click', () => {
+        transport.pause();
+        audioEngine.pause();
+    });
+    
+    new KeyboardController({ togglePlayback: () => {
+        if(transport.isPlaying) {
+             transport.pause();
+             audioEngine.pause();
+        } else {
+             transport.play();
+             audioEngine.play();
+        }
+    }});
 
-    // Chargement Assets & Restore Session
     await library.init();
     
-    // Restauration Session (Découplée de Library)
-const savedData = sessionMgr.load();
+    const savedData = sessionMgr.load();
     if (savedData.drawState) {
         Object.keys(savedData.drawState).forEach(k => {
-            // ON EXCLUT LES PROPRIÉTÉS LIÉES AU DOM OU À L'ACTION TEMPS RÉEL
             if (k !== 'currentPath' && k !== 'isDrawing' && k !== 'points') {
                 drawEngine.updateState(k, savedData.drawState[k]);
             }
@@ -425,5 +502,5 @@ const savedData = sessionMgr.load();
         sessionMgr.restoreTimeline(window.timelineMgr, savedData.clips);
     }
 
-    console.log("✅ SYSTEME: Studio Main V2.0 Modular Loaded.");
+    console.log("✅ SYSTEME: Studio Main V2.2 Loaded (Index Quantum Ready).");
 })();

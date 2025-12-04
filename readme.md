@@ -1,1 +1,33 @@
-🚀 Présentation du Projet : Studio AV & Contrôleur MIDILe Studio AV est une console de production multimédia hybride (Audio/Visuel) qui lie les commandes physiques du contrôleur MIDI (Akai MPD218 ou similaire) à des processus logiciels complexes et à des algorithmes d'Intelligence Artificielle. Le but est de transformer l'interface MIDI en un contrôleur de production visuelle et interactive.Architecture Racine (Full-Stack Hybrid)Votre architecture est divisée en trois processus principaux communiquant via Socket.IO et API REST (Express/Node.js) :ComposantRôleTechnologie / CheminCommunication1. Processus Principal (Electron)Gère la fenêtre d'application, l'accès au système de fichiers et le lancement du serveur Node.js (Back-end).app.js, main.js (Electron)IPC (Inter-Process Communication)2. Processus de Rendu (Front-end)Affiche l'interface utilisateur (Timeline, Playground, Modals) et gère les interactions utilisateur.public/html/*.html, public/js/*.jsAPI REST, Socket.IO3. Serveur API/MIDI (Back-end)Gère la connexion physique MIDI, l'état global du studio (GLOBAL_STATE), et sert les requêtes IA et les assets.server.js, iaRouter.js, controllers/Socket.IO, API REST (Express)🎹 Rôle Central du Contrôleur MIDI (Akai)Le contrôleur MIDI ne sert pas seulement à déclencher des sons, il est le panneau de contrôle physique de votre application :Transport Global : Les pads MIDI sont mappés aux fonctions de Lecture/Pause/Stop (transport.toggle(), transport.stop()).Contrôle Paramétrique : Les boutons rotatifs (Knobs/CC) sont mappés aux variables de l'état global du serveur (GLOBAL_STATE), ce qui permet de contrôler en temps réel :Visuel : Angle Chroma (av_chroma_angle), Saturation (av_saturation).Dessin : Position XY du curseur, Taille du pinceau (via CC 0, CC 1, CC 2).Timeline : Déplacement de la tête de lecture (Scrub).🤖 Algorithmes et Fonctions d'Intelligence ArtificielleL'IA est injectée via l'endpoint /api/ia/chatbot du serveur, permettant au Front-end (via le Code Playground) d'interagir directement avec des modèles avancés.Fonction IAModule Back-endRôle AlgorithmiqueGénération de Code (LabCode)iaRouter.js (route generate-code)Utilise un Grand Modèle de Langage (LLM) comme Llama 3.1 (via Groq) pour analyser le contexte de code (HTML, CSS, JS) et générer les modifications demandées en JSON.Gestion des Convers. IAiaRouter.js (route chatbot)Maintient l'historique de conversation (history) pour fournir des réponses contextuelles et diriger l'utilisateur vers les commandes /code.Analyse d'Assets (Future)(/api/ia/analyze)Utiliserait des modèles de Vision par Ordinateur (Vision LLMs) pour tagger, décrire et analyser le contenu visuel (vidéos, images) et générer des métadonnées (mots-clés, descriptions).📁 Architecture des Fichiers (Logique Décentralisée)La solution aux problèmes de routage a confirmé la structure critique des fichiers :RépertoireContenuRôle./Scripts principaux (server.js, iaRouter.js)Cœur Node.js et Routage./public/Racine Web d'ExpressFichiers statiques et Front-end./public/js/modules/Classes JavaScript modulaires (PreviewEngine, AssetLibrary, etc.)Logique Front-end./public/labCode/Fichiers de projet (HTML, CSS, JS, JSON)Cible de l'API LabCode (lecture)./controllers/Logique Back-end non-route (AssetManager, MidiManager)Services Node.jsNous avons maintenant une base stable pour développer les fonctionnalités créatives du Studio AV ! Que souhaitez-vous développer en priorité maintenant : la logique de la Timeline, le contrôle MIDI avancé, ou l'interface du Code Playground ?
+# ⚛️ Studio AV - Quantum Compute Engine (v2.2)
+
+![Version](https://img.shields.io/badge/version-2.2.0-blue.svg) ![Electron](https://img.shields.io/badge/Electron-Desktop-lightgrey) ![Node](https://img.shields.io/badge/Node-Backend-green) ![Status](https://img.shields.io/badge/Quantum-Stable-purple)
+
+> **Une station de travail hybride (Audio/Vidéo/IA) pilotée par superposition quantique et contrôle MIDI.**
+
+## 📋 Description
+
+Studio AV est une application Electron modulaire conçue pour la performance live et l'édition non-linéaire expérimentale. Elle intègre un moteur de rendu multicouche (Vidéo, WebGL, ASCII, Vectoriel) piloté par une "logique quantique" (superposition d'états visuels) et une intégration IA (Llama/Groq) pour la mutation de code en temps réel.
+
+## 🚀 Architecture
+
+Le système repose sur une architecture Client-Serveur locale :
+
+* **Backend (Port 3145) :** Node.js + Express + Socket.io. Gère l'état global, le MIDI, et les appels API IA.
+* **Frontend :** Electron (Chromium). Interface "DaVinci-like" avec timeline, pool média et moteur de rendu composite.
+* **Moteur Quantique :** Système de gestion de Z-Index dynamique piloté par l'index Pad 15 (MPD218), permettant de basculer entre les dimensions visuelles (Standard, Boost Dessin, Fusion, Quantum Front).
+
+## 🛠️ Installation
+
+```bash
+# 1. Cloner le dépôt
+git clone [https://github.com/VOTRE_USER/studio-av-quantum.git](https://github.com/VOTRE_USER/studio-av-quantum.git)
+cd studio-av-quantum
+
+# 2. Installer les dépendances
+npm install
+
+# 3. Démarrer le Serveur API (Backend)
+node server.js
+
+# 4. Dans un autre terminal, lancer le Studio (Electron)
+npm start

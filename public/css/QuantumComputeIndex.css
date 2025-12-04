@@ -1,0 +1,85 @@
+/* Fichier: ../css/QuantumComputeIndex.css */
+
+:root {
+    /* --- DEFINITION DES COUCHES (LAYER TOPOLOGY) --- */
+    --z-background: 0;
+    --z-grid-base: 10;
+    --z-active-item: 100;
+    --z-overlay-ui: 500;
+    --z-modal: 1000;
+    --z-cursor-tooltip: 9999;
+
+    /* --- COUCHES SPECIFIQUES MULTIMODALES (Pour l'algo de superposition) --- */
+    /* L'idée est de pouvoir intervertir ces valeurs via JS */
+    --layer-server: 20;
+    --layer-midi: 25;
+    --layer-keyboard: 30;
+    --layer-tensor: 35;
+    --layer-quantum: 40; /* Priorité haute par défaut */
+    --layer-ai: 50;      /* Agent Neural au-dessus */
+}
+
+/* Container Global pour la gestion de l'espace 3D/Z */
+#center-area {
+    position: relative;
+    perspective: 1000px; /* Ajout de perspective pour de futurs effets 3D */
+    overflow: hidden;    /* Contient les éléments superposés */
+}
+
+/* Le Grid Container */
+.desktop-grid {
+    position: relative;
+    z-index: var(--z-grid-base);
+    transition: all 0.3s ease-in-out;
+}
+
+/* --- CONFIGURATION DES COMPOSANTS (NODES) --- */
+.desktop-icon {
+    position: relative; /* Nécessaire pour que z-index fonctionne */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s, opacity 0.3s;
+    background: rgba(30, 30, 30, 0.6); /* Légère transparence pour la superposition */
+    backdrop-filter: blur(4px);
+    border-radius: 16px;
+}
+
+/* --- CLASSES D'ETAT POUR ALGORITHME DE SUPERPOSITION --- */
+
+/* État actif (Quand cliqué ou sélectionné par l'IA) */
+.desktop-icon.is-active {
+    z-index: var(--z-active-item) !important;
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+    transform: scale(1.1) translateZ(20px); /* Effet de levée */
+}
+
+/* État 'Ghost' (Quand un autre élément est en superposition focus) */
+.desktop-icon.is-dimmed {
+    opacity: 0.3;
+    filter: grayscale(0.8);
+    transform: scale(0.95);
+}
+
+/* --- MAP DES COUCHES PAR MODULE (DEFAULT) --- */
+.desktop-icon[data-module="server"]   { z-index: var(--layer-server); }
+.desktop-icon[data-module="midi"]     { z-index: var(--layer-midi); }
+.desktop-icon[data-module="keyboard"] { z-index: var(--layer-keyboard); }
+.desktop-icon[data-module="tensor"]   { z-index: var(--layer-tensor); }
+.desktop-icon[data-module="quantum"]  { z-index: var(--layer-quantum); border-color: #a855f7; }
+.desktop-icon[data-module="ai"]       { z-index: var(--layer-ai); border-color: #3b82f6; }
+
+/* --- MODE SUPERPOSITION (Overlay Mode) --- */
+/* Classe à ajouter au parent #desktop-container pour activer l'algo de superposition visuelle */
+.mode-superposition .desktop-icon {
+    position: absolute; /* Sort du flux de la grille pour se superposer */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px; /* Taille agrandie pour le mode focus */
+}
+
+/* Décalages légers pour effet de pile de cartes en mode superposition */
+.mode-superposition .desktop-icon[data-module="server"]   { margin-left: -100px; margin-top: -20px; }
+.mode-superposition .desktop-icon[data-module="midi"]     { margin-left: -60px;  margin-top: -10px; }
+.mode-superposition .desktop-icon[data-module="keyboard"] { margin-left: -20px;  margin-top: 0px; }
+.mode-superposition .desktop-icon[data-module="tensor"]   { margin-left: 20px;   margin-top: 10px; }
+.mode-superposition .desktop-icon[data-module="quantum"]  { margin-left: 60px;   margin-top: 20px; }
+.mode-superposition .desktop-icon[data-module="ai"]       { margin-left: 100px;  margin-top: 30px; }

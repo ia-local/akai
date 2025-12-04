@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur d'Art ASCII</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for pre tag */
+        pre::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        pre::-webkit-scrollbar-track {
+            background: #333;
+            border-radius: 10px;
+        }
+        pre::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 10px;
+        }
+        pre::-webkit-scrollbar-thumb:hover {
+            background: #777;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 to-black text-gray-100 p-4 flex flex-col items-center justify-center">
+
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-3xl border border-gray-700">
+        <h1 class="text-4xl font-bold text-center mb-8 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+            Générateur d'Art ASCII
+        </h1>
+
+        <div class="mb-6">
+            <label for="text-input" class="block text-lg font-medium mb-2 text-gray-300">
+                Texte à encadrer :
+            </label>
+            <textarea
+                id="text-input"
+                class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                rows="4"
+                placeholder="Entrez votre texte ici..."
+            ></textarea>
+        </div>
+
+        <div class="mb-6 flex items-center space-x-4">
+            <label for="shape-select" class="block text-lg font-medium text-gray-300">
+                Ou sélectionnez une forme :
+            </label>
+            <select
+                id="shape-select"
+                class="flex-grow p-3 rounded-lg bg-gray-700 border border-gray-600 text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+            >
+                <option value="none">-- Choisir une forme --</option>
+                <option value="box">Boîte</option>
+                <option value="triangle">Triangle</option>
+                <option value="arrow">Flèche</option>
+            </select>
+        </div>
+
+        <div class="flex justify-center mb-8">
+            <button
+                id="generate-button"
+                class="flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg shadow-lg hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-50 transition-all duration-300 transform hover:scale-105"
+            >
+                Générer l'Art ASCII
+                <span class="ml-2 w-5 h-5" data-lucide="arrow-right"></span>
+            </button>
+        </div>
+
+        <div class="bg-gray-900 p-6 rounded-xl border border-gray-700 shadow-inner overflow-auto max-h-96">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-200 flex items-center justify-between">
+                Résultat de l'Art ASCII
+                <button
+                    id="copy-button"
+                    class="p-2 bg-gray-700 rounded-lg text-gray-300 hover:bg-gray-600 hover:text-white transition-colors duration-200"
+                    title="Copier dans le presse-papiers"
+                >
+                    <span class="w-5 h-5" data-lucide="copy"></span>
+                </button>
+            </h2>
+            <pre
+                id="ascii-art-output"
+                class="font-mono text-sm text-green-400 whitespace-pre overflow-auto p-2 bg-black rounded-lg border border-gray-700"
+            >
+                Sélectionnez une option ou entrez du texte à encadrer.
+            </pre>
+            <div id="message-box" class="mt-4 p-3 rounded-lg text-center text-sm hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const textInput = document.getElementById('text-input');
+        const shapeSelect = document.getElementById('shape-select');
+        const generateButton = document.getElementById('generate-button');
+        const copyButton = document.getElementById('copy-button');
+        const asciiArtOutput = document.getElementById('ascii-art-output');
+        const messageBox = document.getElementById('message-box');
+
+        // Initial state variables
+        let inputText = '';
+        let selectedShape = 'none';
+
+        // Function to display a message in the message box
+        const showMessage = (message, type = 'info') => {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-green-600', 'bg-red-600', 'text-white');
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-600', 'text-white');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-600', 'text-white');
+            } else {
+                messageBox.classList.add('bg-blue-600', 'text-white');
+            }
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000); // Hide after 3 seconds
+        };
+
+        // Function to generate an ASCII box
+        const generateBox = () => {
+            return (
+                `+-------------------+\n` +
+                `|                   |\n` +
+                `|     Boîte ASCII   |\n` +
+                `|                   |\n` +
+                `+-------------------+\n`
+            );
+        };
+
+        // Function to generate an ASCII triangle
+        const generateTriangle = () => {
+            return (
+                `      /\\\n` +
+                `     /  \\\n` +
+                `    /____\\\n`
+            );
+        };
+
+        // Function to generate an ASCII arrow
+        const generateArrow = () => {
+            return (
+                `--------->\n` +
+                `  Flèche\n` +
+                `--------->\n`
+            );
+        };
+
+        // Function to frame the input text with ASCII characters
+        const frameText = (text) => {
+            if (!text) {
+                return "Entrez du texte pour l'encadrer.";
+            }
+            const lines = text.split('\n');
+            let maxLength = 0;
+            lines.forEach(line => {
+                if (line.length > maxLength) {
+                    maxLength = line.length;
+                }
+            });
+
+            const horizontalBorder = '+' + '-'.repeat(maxLength + 2) + '+';
+            let framed = horizontalBorder + '\n';
+            lines.forEach(line => {
+                framed += '| ' + line + ' '.repeat(maxLength - line.length) + ' |\n';
+            });
+            framed += horizontalBorder;
+            return framed;
+        };
+
+        // Function to generate ASCII art based on selected options
+        const generateAsciiArt = () => {
+            let generatedArt = '';
+            if (selectedShape === 'frameText' && inputText) {
+                generatedArt = frameText(inputText);
+            } else {
+                switch (selectedShape) {
+                    case 'box':
+                        generatedArt = generateBox();
+                        break;
+                    case 'triangle':
+                        generatedArt = generateTriangle();
+                        break;
+                    case 'arrow':
+                        generatedArt = generateArrow();
+                        break;
+                    default:
+                        generatedArt = 'Sélectionnez une option ou entrez du texte à encadrer.';
+                        break;
+                }
+            }
+            asciiArtOutput.textContent = generatedArt;
+        };
+
+        // Function to copy the generated ASCII art to the clipboard
+        const copyToClipboard = () => {
+            const textToCopy = asciiArtOutput.textContent;
+            // Using document.execCommand('copy') for better compatibility in iframes
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showMessage('Art ASCII copié dans le presse-papiers !', 'success');
+            } catch (err) {
+                console.error('Impossible de copier le texte: ', err);
+                showMessage('Échec de la copie.', 'error');
+            }
+            document.body.removeChild(textarea);
+        };
+
+        // Event Listeners
+        textInput.addEventListener('input', (e) => {
+            inputText = e.target.value;
+            if (inputText) {
+                selectedShape = 'frameText';
+                shapeSelect.value = 'none'; // Reset shape selection when typing
+            } else {
+                selectedShape = 'none'; // Reset if text is cleared
+            }
+            generateAsciiArt();
+        });
+
+        shapeSelect.addEventListener('change', (e) => {
+            selectedShape = e.target.value;
+            textInput.value = ''; // Clear text input when a shape is selected
+            inputText = ''; // Also clear the internal state
+            generateAsciiArt();
+        });
+
+        generateButton.addEventListener('click', generateAsciiArt);
+        copyButton.addEventListener('click', copyToClipboard);
+
+        // Initialize Lucide icons on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            generateAsciiArt(); // Generate initial ASCII art
+        });
+    </script>
+</body>
+</html>

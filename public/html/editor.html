@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="../css/multiCalc.css">
     <link rel="stylesheet" href="../css/modalSystem.css">
     <link rel="stylesheet" href="../css/modalConfig.css">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -31,12 +31,12 @@
             <div id="mode-indicator" class="px-3 py-1 rounded text-xs font-bold bg-green-900 text-green-400 border border-green-700 transition-colors">
                 MODE: PERFORM
             </div>
-            <button id="btn-settings" class="text-gray-400 hover:text-white mx-2 ml-4" title="Paramètres">
+            <button id="btn-settings" class="text-gray-400 hover:text-white mx-2" title="Paramètres">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
         </div>
 
-        <div class="space-x-4 flex items-center pr-4">
+        <div class="space-x-4 flex items-center">
              <div class="text-xs text-gray-400 flex items-center space-x-2 border-r border-gray-700 pr-4">
                 <button id="zoom-out-btn" class="bg-gray-800 w-6 h-6 rounded hover:bg-gray-700">-</button>
                 <span id="zoom-level-display">1.0x</span>
@@ -55,46 +55,41 @@
 
     <div id="workspace">
         
-        <aside id="asset-library" class="collapsed-aside left-aside">
-            <div class="aside-trigger">
-                <span class="trigger-icon">📂</span>
-                <span class="vertical-text">LIBRARY</span>
+        <aside id="asset-library">
+            <div class="flex justify-between items-center p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                <h2 class="text-white font-semibold text-xs uppercase tracking-wider">Média Pool</h2>
+                <div class="flex gap-1 bg-[#111] rounded p-1">
+                    <button id="view-list-btn" class="p-1 rounded hover:bg-gray-700 text-white active-view" title="Vue Liste">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                    <button id="view-grid-btn" class="p-1 rounded hover:bg-gray-700 text-gray-500" title="Vue Grille">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    </button>
+                </div>
             </div>
             
-            <div class="aside-content">
-                <div class="flex justify-between items-center p-3 border-b border-gray-700 bg-[#1a1a1a]">
-                    <h2 class="text-white font-semibold text-xs uppercase tracking-wider">Média Pool</h2>
-                    <div class="flex gap-1 bg-[#111] rounded p-1">
-                        <button id="view-list-btn" class="p-1 rounded hover:bg-gray-700 text-white active-view" title="Vue Liste">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                        </button>
-                        <button id="view-grid-btn" class="p-1 rounded hover:bg-gray-700 text-gray-500" title="Vue Grille">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="assets-list-container" class="flex-1 overflow-y-auto">
-                    <div class="text-gray-500 text-sm p-3">Chargement...</div>
-                </div>
+            <div id="assets-list-container">
+                <div class="text-gray-500 text-sm p-3">Chargement...</div>
             </div>
         </aside>
 
-        <div id="center-area" class="bg-[#0d0d0d] flex-1 flex flex-col relative z-0">
-            <div id="preview-zone" class="flex-1 bg-black flex justify-center items-center overflow-hidden relative">
-                <div id="preview-media-container" class="w-full h-full relative flex justify-center items-center">
-                    
+        <div id="center-area">
+            <div id="preview-zone">
+                <div id="preview-media-container">
                     <img id="player-image" class="preview-player" src="" />
                     <video id="player-video" class="preview-player" muted playsinline preload="auto"></video>
                     
-                    <canvas id="ruler-layer" class="preview-player active" style="z-index: 19; pointer-events: none;"></canvas>
-                    <canvas id="paint-layer" class="preview-player active" style="z-index: 18; pointer-events: none;"></canvas>
-                    <canvas id="ascii-canvas" class="preview-player" style="z-index: 15; pointer-events: none;"></canvas>
                     <canvas id="webgl-canvas" class="preview-player" 
                             style="z-index: 12; pointer-events: none; mix-blend-mode: screen; opacity: 0.8;">
                     </canvas>
+
+                    <canvas id="ascii-canvas" class="preview-player" style="z-index: 15; pointer-events: none;"></canvas>
                     
-                    <svg id="drawing-layer" xmlns="http://www.w3.org/2000/svg" class="absolute top-0 left-0 w-full h-full z-20 pointer-events-none">
+                    <canvas id="paint-layer" class="preview-player active" style="z-index: 18; pointer-events: none;"></canvas>
+                    
+                    <canvas id="ruler-layer" class="preview-player active" style="z-index: 19; pointer-events: none;"></canvas>
+
+                    <svg id="drawing-layer" xmlns="http://www.w3.org/2000/svg">
                         <g id="drawn-paths"></g>
                         <rect id="drawing-cursor" x="0" y="0" width="10" height="10" 
                               fill="rgba(255, 255, 255, 0.5)" stroke="white" stroke-width="1" vector-effect="non-scaling-stroke" /> 
@@ -112,24 +107,17 @@
             </div>
         </div>
 
-        <aside id="right-panel" class="collapsed-aside right-aside">
-            <div class="aside-trigger">
-                <span class="trigger-icon">🤖</span>
-                <span class="vertical-text">TOOLS</span>
+        <aside id="right-panel">
+            <div class="panel-header">
+                <span>Assistants Intelligents</span>
+                <button id="close-tools-btn" class="hover:text-white">×</button>
             </div>
-
-            <div class="aside-content">
-                <div class="panel-header">
-                    <span>Assistants Intelligents</span>
-                    <button id="close-tools-btn" class="hover:text-white">×</button>
-                </div>
-                <div class="panel-content text-sm text-gray-400">
-                    <div class="p-4 border border-dashed border-gray-700 rounded text-center">
-                        <div class="text-2xl mb-2">🧠</div>
-                        <p>Module IA</p>
-                        <button class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white py-1 rounded">Vision Analysis</button>
-                        <button class="mt-2 w-full bg-gray-700 hover:bg-gray-600 text-white py-1 rounded">Auto-Cut Silence</button>
-                    </div>
+            <div class="panel-content text-sm text-gray-400">
+                <div class="p-4 border border-dashed border-gray-700 rounded text-center">
+                    <div class="text-2xl mb-2">🧠</div>
+                    <p>Module IA en attente</p>
+                    <button class="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white py-1 rounded">Vision Analysis</button>
+                    <button class="mt-2 w-full bg-gray-700 hover:bg-gray-600 text-white py-1 rounded">Auto-Cut Silence</button>
                 </div>
             </div>
         </aside>
@@ -152,18 +140,23 @@
                 <div id="track-video" class="timeline-track mb-2" data-track-type="video">
                     <span class="track-label">VIDEO</span>
                 </div>
-                
-                <div id="track-image" class="timeline-track mb-2" data-track-type="image">
-                    <span class="track-label text-fuchsia-400">IMAGE / DESSIN</span>
-                </div>
-                
-                <div id="track-text" class="timeline-track mb-2" data-track-type="text">
-                    <span class="track-label text-green-400">TEXTE / ASCII</span>
-                </div>
-                
                 <div id="track-audio" class="timeline-track mb-2" data-track-type="audio">
                     <span class="track-label">AUDIO</span>
                 </div>
+                <div id="track-image" class="timeline-track mb-2" data-track-type="image">
+                    <span class="track-label text-fuchsia-400">IMAGE / DESSIN</span>
+                </div>
+                <div id="track-image" class="timeline-track mb-2" data-track-type="image">
+                    <span class="track-label text-fuchsia-400">DRAW</span>
+                </div>
+                
+                <div id="track-text" class="timeline-track mb-2" data-track-type="text">
+                    <span class="track-label text-green-400">TEXTE / PROMPT</span>
+                </div>
+                <div id="track-text" class="timeline-track mb-2" data-track-type="text">
+                    <span class="track-label text-green-400">ASCII - PIXEL</span>
+                </div>
+
                 
                 <div id="track-fx" class="timeline-track" data-track-type="fx">
                     <span class="track-label">FX / CC</span>
@@ -177,10 +170,10 @@
         <a href="media_data.html" class="nav-tab">
             <span class="nav-icon">📁</span> MEDIA
         </a>
-        <a href="cut_timeline.html" class="nav-tab">
-            <span class="nav-icon">✂️</span> CUT
+        <a href="code_timeline.html" class="nav-tab">
+            <span class="nav-icon">✂️</span> CODE
         </a>
-        <a href="editor.html" class="nav-tab active">
+        <a href="../index.html" class="nav-tab active">
             <span class="nav-icon">🎬</span> EDIT
         </a>
         <a href="fusion_visuel.html" class="nav-tab">
@@ -196,6 +189,7 @@
     
     <div id="generic-modal-overlay" class="c-modal-overlay"></div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <script src="http://localhost:3145/socket.io/socket.io.js"></script>
     <script type="module" src="../js/main.js"></script>
 </body>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio AV - Quantum Compute</title>
+    
+    <link rel="stylesheet" href="../css/studio.css">
+    <link rel="stylesheet" href="../css/mpd218.css">
+    <link rel="stylesheet" href="../css/QuantumCompute.css"> <!-- Ton SCSS compilé -->
+    <link rel="stylesheet" href="../css/modalSystem.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 'akai-base': '#1e1e1e', 'quantum-cyan': '#00ffff' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Consolas', 'monospace'] },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="flex items-center">
+            <span class="text-xl font-bold text-white mr-6">Studio AV (v2.2)</span>
+            <div id="cpu-indicator" class="px-3 py-1 rounded text-xs font-bold bg-cyan-900 text-cyan-400 border border-cyan-700 transition-colors animate-pulse">
+                CPU: QUANTUM LINK
+            </div>
+            <span class="ml-4 text-xs text-gray-500 border-l border-gray-600 pl-4 uppercase tracking-widest">Quantum Compute Engine</span>
+        </div>
+
+        <div class="space-x-4 flex items-center pr-4">
+             <!-- Indicateur d'état Asynchrone -->
+             <div id="async-status" class="hidden text-xs text-yellow-400 font-mono">
+                 <span class="inline-block animate-spin">⟳</span> CALCULATING WAVEFUNCTION...
+             </div>
+             
+             <button id="compile-btn" class="bg-cyan-700 border border-cyan-500 px-3 py-1 rounded text-white text-xs hover:bg-cyan-600 transition-colors font-bold shadow-[0_0_10px_rgba(0,255,255,0.3)]">
+                ⚡ RUN CODE
+             </button>
+        </div>
+    </header>
+
+    <div id="workspace">
+        
+        <!-- LEFT ASIDE : PRESETS / LIBRARY -->
+        <aside class="collapsed-aside left-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">⚛️</span>
+                <span class="vertical-text">STATES</span>
+            </div>
+            
+            <div class="aside-content">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <h2 class="text-white font-bold text-sm uppercase">Quantum States</h2>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto p-2">
+                    <ul class="space-y-1" id="preset-list">
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer flex gap-2" onclick="loadPreset('superposition')">
+                            <span class="text-cyan-400">◎</span> Superposition (Alpha)
+                        </li>
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer flex gap-2" onclick="loadPreset('entanglement')">
+                            <span class="text-purple-400">∞</span> Entanglement (Chaos)
+                        </li>
+                        <li class="folder-item text-xs text-gray-300 hover:bg-[#333] p-2 rounded cursor-pointer flex gap-2" onclick="loadPreset('interference')">
+                            <span class="text-yellow-400">≈</span> Interference (Glitch)
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CENTER AREA : VISUALIZER -->
+        <div id="center-area" class="bg-[#0d0d0d] flex-1 flex flex-col relative z-0">
+            
+            <!-- Zone de Visualisation (Canvas) -->
+            <div class="flex-1 border-b border-gray-700 relative bg-black overflow-hidden flex justify-center items-center">
+                <!-- Le Canvas WebGL qui réagit au moteur -->
+                <canvas id="webgl-canvas" class="w-full h-full object-contain"></canvas>
+                
+                <!-- Overlay d'info technique -->
+                <div class="absolute bottom-4 left-4 font-mono text-[10px] text-cyan-500/50 pointer-events-none">
+                    <div id="debug-phase">PHASE: 0.000</div>
+                    <div id="debug-prob">PROB: 0.500</div>
+                    <div id="debug-ent">ENT: 0.000</div>
+                </div>
+            </div>
+            
+            <!-- Console de Sortie (Logs du serveur) -->
+            <div class="h-1/3 bg-[#111] overflow-y-auto p-4 border-t border-gray-700 font-mono text-xs">
+                <div class="text-gray-500 mb-2">--- QUANTUM SERVER LOGS ---</div>
+                <div id="console-output" class="flex flex-col gap-1 text-gray-300">
+                    <!-- Les logs s'afficheront ici -->
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT ASIDE : CODE EDITOR (FORMULAS) -->
+        <aside id="right-panel" class="right-aside" style="width: 350px; transform: translateX(0);">
+            <div class="h-full bg-[#1a1a1a] border-l border-gray-700 flex flex-col">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a] flex justify-between items-center">
+                    <h3 class="text-xs font-bold text-white uppercase">Formula Editor</h3>
+                    <span class="text-[10px] text-gray-500">JS / Q-SCRIPT</span>
+                </div>
+                
+                <div class="flex-1 relative">
+                    <!-- Zone de texte simple pour l'instant (à remplacer par Monaco Editor plus tard si besoin) -->
+                    <textarea id="code-editor" class="w-full h-full bg-[#0d0d0d] text-cyan-300 font-mono text-xs p-4 focus:outline-none resize-none" spellcheck="false">
+// --- QUANTUM FORMULA ---
+// Modifier les variables en temps réel
+
+const prob = Math.sin(time) * 0.5 + 0.5;
+const chaos = knob_Y * 2.0;
+
+return {
+  probability: prob,
+  entanglement: chaos,
+  mood: "CYBERPUNK"
+};
+                    </textarea>
+                </div>
+                
+                <div class="p-2 border-t border-gray-700">
+                    <button id="send-code-btn" class="w-full bg-cyan-900/50 hover:bg-cyan-800 text-cyan-200 text-xs py-2 rounded border border-cyan-700">
+                        EXECUTE ASYNC
+                    </button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer id="studio-footer">
+        <a href="media_data.html" class="nav-tab"><span class="nav-icon">📁</span> MEDIA</a>
+        <a href="code_timeline.html" class="nav-tab"><span class="nav-icon">✂️</span> CODE</a>
+        <a href="../index.html" class="nav-tab"><span class="nav-icon">🎬</span> EDIT</a>
+        <a href="#" class="nav-tab active"><span class="nav-icon">⚛️</span> QUANTUM</a>
+        <a href="fairlight_audio.html" class="nav-tab"><span class="nav-icon">🎵</span> FAIRLIGHT</a>
+        <a href="delivery.html" class="nav-tab"><span class="nav-icon">🚀</span> DELIVER</a>
+    </footer>
+
+    <!-- DEPENDENCIES -->
+    <script src="http://localhost:3145/socket.io/socket.io.js"></script>
+    <script type="module" src="../js/quantum_ui.js"></script>
+</body>
+</html>

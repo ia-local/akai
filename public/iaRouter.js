@@ -12,7 +12,7 @@ const Groq = require('groq-sdk');
 const groq = new Groq();
 
 // Chemin de base où se trouvent les fichiers du Playground
-const LABCODE_DIR = path.join(__dirname, 'public', 'labCode');
+const LABCODE_DIR = path.join(__dirname, 'public','labCode');
 
 // Liste des extensions autorisées (sécurité)
 // Extensions autorisées pour des raisons de sécurité

@@ -26,7 +26,20 @@ class AssetManager {
 
         return types[ext] || 'application/octet-stream';
     }
-
+    getAllAssets() {
+            console.log("[AssetManager] Scan complet des répertoires...");
+            
+            return {
+                images: this.scanFolderRecursive('data/images', 'VISUEL'),
+                video:  this.scanFolderRecursive('data/video', 'VIDEO'),
+                audio:  this.scanFolderRecursive('data/audio', 'AUDIO'),
+                text:   this.scanFolderRecursive('data/text', 'TEXT'),
+                scripts: this.scanFolderRecursive('data/scripts', 'SCRIPT'),
+                
+                // AJOUT DU DOSSIER ASCII
+                ascii:  this.scanFolderRecursive('data/ascii', 'ASCII') 
+            };
+        }
     /**
      * Scanne un dossier récursivement et retourne une liste d'assets à plat
      * @param {string} relativePath - Chemin relatif depuis 'public' (ex: 'data/images')

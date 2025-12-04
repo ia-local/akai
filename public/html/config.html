@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Studio Configuration</title>
+    <link rel="stylesheet" href="../css/studio.css">
+    <link rel="stylesheet" href="../css/modalConfig.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #121212; color: #ddd; padding: 2rem; }
+        .config-section {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .config-title {
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        input[type="text"], input[type="password"], select {
+            background: #000;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 0.5rem;
+            width: 100%;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        input:focus { border-color: #3b82f6; outline: none; }
+        label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 0.3rem; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+
+    <h1 class="text-2xl font-bold text-white mb-8 border-l-4 border-blue-600 pl-4">SYSTÈME & CONFIGURATION</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="config-section">
+            <div class="config-title">
+                <span>🔑 API Keys & Cloud</span>
+                <span class="text-xs text-gray-500 mt-1">Groq / OpenAI / Anthropic</span>
+            </div>
+            
+            <label>GROQ_API_KEY</label>
+            <input type="password" value="gsk_************************" id="groq-key">
+            
+            <label>ELEVEN_LABS_KEY</label>
+            <input type="password" placeholder="Non configuré">
+            
+            <label>Mode IA par défaut</label>
+            <select>
+                <option>Llama 3.1 8b Instant (Groq)</option>
+                <option>Gemini Pro Vision</option>
+                <option>Mistral Large</option>
+            </select>
+        </div>
+
+        <div class="config-section">
+            <div class="config-title">
+                <span>🎛️ MIDI Hardware</span>
+                <span class="text-xs text-green-500 mt-1">● Actif</span>
+            </div>
+
+            <label>Input Device (Pad)</label>
+            <select id="midi-in">
+                <option>Akai MPD218 Port A</option>
+                <option>Akai MPD218 Port B</option>
+            </select>
+
+            <label>Clock Source</label>
+            <select>
+                <option>Internal (Master)</option>
+                <option>External (Slave)</option>
+            </select>
+
+            <div class="mt-4 p-2 bg-black rounded border border-gray-800 text-xs font-mono text-gray-400">
+                Last Event: NOTE_ON [36] Channel 1
+            </div>
+        </div>
+
+        <div class="config-section md:col-span-2 border-cyan-900/30 bg-gray-900/20">
+            <div class="config-title">
+                <span class="text-cyan-400">⚛️ Quantum Engine Parameters</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div>
+                    <label>Max Superposition Layers</label>
+                    <input type="number" value="8" class="bg-black border border-gray-700 text-white p-2 w-full">
+                </div>
+                <div>
+                    <label>Buffer Resolution</label>
+                    <select>
+                        <option>Native (Window)</option>
+                        <option>Half (Performance)</option>
+                        <option>Fixed 1920x1080</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Render Backend</label>
+                    <select>
+                        <option>Canvas 2D (Safe Mode)</option>
+                        <option>WebGL (Experimental)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="fixed bottom-0 left-0 w-full bg-[#1a1a1a] border-t border-gray-700 p-4 flex justify-end gap-4">
+        <button class="text-gray-400 hover:text-white px-4 py-2" onclick="window.close()">Annuler</button>
+        <button class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-bold shadow-lg shadow-blue-900/20">
+            ENREGISTRER & REDÉMARRER
+        </button>
+    </div>
+
+</body>
+</html>

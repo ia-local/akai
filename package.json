@@ -6,7 +6,7 @@
   "scripts": {
     "start-backend": "node server.js",
     "start-frontend": "electron .",
-    "tl": "scss --watch public/scss/timeline.scss public/css/timeline.css",
+    "tl": "scss --watch controllers/timeline.scss public/css/timeline.css",
     "start": "npm run start-backend & npm run start-frontend & run tl",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

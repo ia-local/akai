@@ -1,21 +1,23 @@
 openapi: 3.0.0
 info:
-  title: Studio Multimedia AV API
-  description: API de contrôle pour le Studio d'Enregistrement Multimédia (Audio/Vidéo/MIDI/IA).
-  version: 1.1.0
+  title: Studio Multimedia AV & Quantum API
+  description: API de contrôle hybride pour le Studio (Audio/Vidéo/MIDI/IA/Quantum).
+  version: 2.0.0
   contact:
-    name: Dev Team
+    name: Dev Team / Architecte AGI
 servers:
   - url: http://localhost:3145
-    description: Serveur Local de Développement
+    description: Serveur Local Node.js (Production)
 
 tags:
   - name: Assets
     description: Gestion dynamique des fichiers (Audio, Vidéo, Images, Scripts)
   - name: State
-    description: État global du contrôleur (MIDI, Transport, Paramètres)
+    description: État global du contrôleur (MIDI, Transport, Qubits)
   - name: AI Services
     description: Services d'intelligence artificielle (Vision, NLP)
+  - name: Quantum Ops
+    description: Opérations de calcul quantique simulé et génération procédurale
 
 paths:
   # --- GESTION DES ACTIFS ---
@@ -42,20 +44,64 @@ paths:
   /api/state:
     get:
       summary: Obtenir l'état actuel du système
-      description: Retourne la position des curseurs, l'état du transport et les paramètres EQ.
+      description: Retourne la position des curseurs, l'état du transport et les paramètres quantiques.
       tags: [State]
       responses:
         '200':
-          description: État global actuel.
+          description: État global actuel incluant les variables quantiques.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GlobalState'
 
+  # --- OPÉRATIONS QUANTIQUES (NOUVEAU) ---
+  /api/quantum/mutate:
+    post:
+      summary: Générer une mutation visuelle (Llama-3)
+      description: Envoie l'état des Qubits à l'IA pour réécrire le code SCSS en temps réel (Live Coding).
+      tags: [Quantum Ops]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - entanglement
+                - probability
+                - mood
+              properties:
+                entanglement:
+                  type: number
+                  description: Valeur du Knob Y (Intensité du chaos/interférence).
+                  example: 0.85
+                probability:
+                  type: number
+                  description: Valeur du Knob X (Équilibre Vidéo/ASCII).
+                  example: 0.5
+                mood:
+                  type: string
+                  description: Ambiance dérivée de l'index dimensionnel (ex CHAOS ou HARMONY).
+                  example: "CHAOS"
+      responses:
+        '200':
+          description: Mutation SCSS appliquée avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Style Quantique Mis à jour"
+
   # --- SERVICES IA ---
   /api/ia/vision-analyze:
     post:
-      summary: Analyser une image via IA (Groq/Llama)
+      summary: Analyser une image via IA (Vision)
       description: Envoie l'ID d'un actif image au script Python pour analyse visuelle.
       tags: [AI Services]
       requestBody:
@@ -69,8 +115,8 @@ paths:
               properties:
                 assetId:
                   type: string
-                  description: L'ID de l'actif à analyser (ex: "img_scene").
-                  example: "img_scene"
+                  description: L'ID de l'actif à analyser.
+                  example: "img_scene_01"
       responses:
         '200':
           description: Analyse réussie.
@@ -83,9 +129,7 @@ paths:
                     type: boolean
                   description:
                     type: string
-                    example: "Je vois une scène sombre avec des formes géométriques..."
-        '500':
-          description: Erreur lors de l'exécution du script Python.
+                    example: "Je vois une structure fractale avec des teintes cyan..."
 
 components:
   schemas:
@@ -128,35 +172,51 @@ components:
           enum: [VISUEL, AUDIO, VIDEO, CAMERA, SCRIPT]
         url:
           type: string
-          description: Chemin relatif accessible via le navigateur.
+          description: Chemin relatif.
           example: "/data/video/storyboard.mp4"
         duration:
           type: number
-          description: Durée en secondes (si applicable).
           example: 35.5
 
-    # État Global (Source de vérité)
+    # État Global (Mise à jour Quantique)
     GlobalState:
       type: object
       properties:
         transport:
           type: string
           enum: [PLAYING, STOPPED, PAUSED, RECORDING]
+        
+        # Contrôles Physiques (Legacy & Current)
         cursor_x:
           type: number
-          description: Position X (0-100)
+          description: Position X (Knob 0)
         cursor_y:
           type: number
-          description: Position Y (0-100)
+          description: Position Y (Knob 1)
+        cursor_z:
+          type: number
+          description: Zoom / Coherence (Knob 2)
+        
+        # Audio / Visuel Classique
         av_chroma_angle:
           type: number
-          description: Angle chromatique (0-360)
-        av_saturation:
-          type: number
-          description: Saturation globale (0.0-1.0)
+          description: Couleur (Knob 3)
         eq_bass:
           type: number
-          description: Equalizer Basses (-12 à +12)
         eq_treble:
           type: number
-          description: Equalizer Aiguës (-12 à +12)
+        
+        # Paramètres Quantiques (Nouveaux)
+        quantum_dimension:
+          type: integer
+          description: Index de superposition actif (1-8), piloté par PAD 15.
+          example: 4
+        quantum_probability:
+          type: number
+          description: État de superposition (0.0 = Video, 1.0 = ASCII). Lié à cursor_x.
+        quantum_entanglement:
+          type: number
+          description: Niveau d'interférence/glitch. Lié à cursor_y.
+        quantum_coherence:
+          type: number
+          description: Stabilité de l'image (Blur/Focus). Lié à cursor_z.

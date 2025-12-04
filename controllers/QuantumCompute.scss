@@ -1,0 +1,40 @@
+$entanglement: 0.6010415972782278;
+$probabilité: 0.2650850982359555;
+$ambiance: GENERATED;
+
+$primary-color: #{$ambiance == "GENERATED" ? "#3498db" : "error"};
+
+$glitch-intensity: 20 * ($entanglement - 0.5);
+
+@keyframes quantum-flux {
+  0% {
+    transform: translateX(0) skewX(0);
+  }
+  50% {
+    transform: translateX(50%) skewX(180deg);
+  }
+  100% {
+    transform: translateX(0) skewX(0);
+  }
+}
+
+#preview-media-container.mode-quantum {
+  #webgl-canvas {
+    animation: quantum-flux 10s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+#preview-media-container.mode-quantum {
+  #webgl-canvas {
+    opacity: $probabilité;
+  }
+}
+
+#preview-media-container.mode-quantum {
+  #webgl-canvas {
+    background-color: $primary-color;
+  }
+}
+
+
+Cela définit $primary-color en fonction de l'ambiance, crée une animation complexe @keyframes 'quantum-flux' en fonction de l'entanglement, et applique cette animation à `#preview-media-container.mode-quantum #webgl-canvas` avec une opacité basée sur la probabilité.

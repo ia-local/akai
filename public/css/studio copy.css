@@ -42,15 +42,16 @@ main { height: 90%; }
 }
 
 /* --- 3.2 CENTRE : PREVIEW & CONTENT --- */
-/* --- 3.2 CENTRE : PREVIEW & CONTENT --- */
 #center-area {
+    /* Le centre prend toute la largeur, les asides flottent par-dessus */
     flex: 1; 
     display: flex;
     flex-direction: column;
     background-color: #0d0d0d;
     position: relative;
     min-width: 0;
-    z-index: 1; 
+    z-index: 1; /* Derrière les panneaux flottants */
+    /* Padding gauche/droite pour laisser voir les triggers */
     padding-left: 30px; 
     padding-right: 30px;
     transition: padding 0.3s ease;
@@ -66,100 +67,6 @@ main { height: 90%; }
     position: relative;
 }
 
-#preview-media-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    /* Optimisation pour le compositeur */
-    will-change: transform; 
-}
-
-/* =========================================
-   LAYER SYSTEM (SUPERPOSITION QUANTIQUE)
-   Z-Index Hierarchy:
-   1. Video (Source brute)
-   2. WebGL (Rendu Quantique / FX) -> Sortie Principale
-   3. ASCII (Monitoring pur)
-   4. Paint (Raster)
-   5. Ruler/Tools (Overlay UI)
-   6. Drawing (Vector UI)
-   ========================================= */
-
-.preview-player {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease-in-out;
-}
-
-/* 1. SOURCE BRUTE */
-#player-video, #player-image {
-    z-index: 5;
-    opacity: 1; /* Par défaut visible, caché par JS en mode Quantum */
-}
-
-/* 2. RENDU QUANTIQUE / SHADER (Sortie du QuantumEngine) */
-#webgl-canvas {
-    z-index: 10;
-    /* En mode normal, c'est un effet (screen). En mode Quantum, c'est opaque. */
-    mix-blend-mode: screen; 
-    opacity: 0;
-}
-
-/* 3. MONITORING ASCII (Source pour QuantumEngine) */
-#ascii-canvas {
-    z-index: 15;
-    /* Style visuel "Matrix" par défaut */
-    filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.5));
-    opacity: 0;
-}
-
-/* 4. CALQUES D'INTERACTION (Toujours au-dessus) */
-#paint-layer { z-index: 20; opacity: 1; }
-#ruler-layer { z-index: 25; opacity: 1; }
-
-#drawing-layer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 30 !important; /* Toujours au top */
-    pointer-events: none;
-}
-
-#drawing-cursor {
-    mix-blend-mode: exclusion;
-    transition: x 0.05s, y 0.05s;
-}
-
-/* --- CLASSE D'ÉTAT : MODE QUANTUM (Activé par JS) --- */
-/* Lorsque cette classe est ajoutée au container parent : */
-
-#preview-media-container.mode-quantum #player-video {
-    opacity: 0 !important; /* On cache la source, mais elle joue encore */
-}
-
-#preview-media-container.mode-quantum #ascii-canvas {
-    opacity: 0 !important; /* On cache le moniteur ASCII brut */
-}
-
-#preview-media-container.mode-quantum #webgl-canvas {
-    opacity: 1 !important;
-    mix-blend-mode: normal !important; /* Devient opaque pour afficher la superposition */
-    filter: contrast(1.1) brightness(1.1); /* Petit boost visuel */
-}
-
-/* Placeholder */
-#player-placeholder {
-    z-index: 50;
-    background-color: #000;
-}
-#player-placeholder.hidden { display: none; }
 #preview-media-container {
     width: 100%;
     height: 100%;
@@ -407,15 +314,4 @@ main { height: 90%; }
     background-color: rgba(0, 0, 0, 0.5);
     box-shadow: 0 0 15px rgba(250, 204, 21, 0.4) !important;
     opacity: 1 !important; z-index: 25 !important;
-}
-/* Force le calque de dessin à être au-dessus de tout (Même du menu s'il le faut) */
-#preview-media-container.layer-mode-top #drawing-layer {
-    z-index: 100 !important;
-    filter: drop-shadow(0 0 5px white); /* Petit glow pour confirmer qu'il est actif */
-}
-
-/* Mode "Fusion" : Le dessin passe derrière les effets (pour tester l'algo de superposition) */
-#preview-media-container.layer-mode-blend #drawing-layer {
-    z-index: 5 !important; /* Derrière le WebGL/ASCII mais devant la vidéo */
-    mix-blend-mode: overlay; /* Fusionne avec les couches */
 }
