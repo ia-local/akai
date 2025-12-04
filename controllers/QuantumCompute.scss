@@ -1,40 +1,58 @@
-$entanglement: 0.6010415972782278;
-$probabilité: 0.2650850982359555;
-$ambiance: GENERATED;
+$primary-color: #3498db; // couleur primaire pour l'ambiance CHAOS
+$glitch-intensity: 0.5; // intensité du glitch pour l'ambiance CHAOS
+$entanglement: low; // entanglement (complexité) basse
+$probabilité: 0.5; // probabilité (opacité) de 0.5
 
-$primary-color: #{$ambiance == "GENERATED" ? "#3498db" : "error"};
+@function calculate-glitch($value) {
+  @return $value * $glitch-intensity;
+}
 
-$glitch-intensity: 20 * ($entanglement - 0.5);
+#preview-media-container.mode-quantum {
+  & #webgl-canvas {
+    animation: quantum-flux 10s linear infinite;
+    opacity: $probabilité;
+    background-color: $primary-color;
+    transition: opacity 0.5s;
+
+    &.high-entanglement {
+      animation: quantum-flux 5s ease-out infinite;
+    }
+  }
+}
 
 @keyframes quantum-flux {
   0% {
-    transform: translateX(0) skewX(0);
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(0.9);
+    opacity: 0.7;
   }
   50% {
-    transform: translateX(50%) skewX(180deg);
+    transform: scale(1.2);
+    opacity: 0.3;
+  }
+  70% {
+    transform: scale(0.8);
+    opacity: 0.9;
   }
   100% {
-    transform: translateX(0) skewX(0);
+    transform: scale(1);
+    opacity: 0.5;
   }
 }
 
-#preview-media-container.mode-quantum {
-  #webgl-canvas {
-    animation: quantum-flux 10s infinite cubic-bezier(0.4, 0, 0.2, 1);
+#preview-media-container {
+  &.high-entanglement {
+    #webgl-canvas {
+      animation: quantum-flux 5s ease-out infinite;
+      @extend #preview-media-container.mode-quantum #webgl-canvas;
+    }
   }
 }
 
-#preview-media-container.mode-quantum {
-  #webgl-canvas {
-    opacity: $probabilité;
-  }
-}
-
-#preview-media-container.mode-quantum {
-  #webgl-canvas {
-    background-color: $primary-color;
-  }
-}
-
-
-Cela définit $primary-color en fonction de l'ambiance, crée une animation complexe @keyframes 'quantum-flux' en fonction de l'entanglement, et applique cette animation à `#preview-media-container.mode-quantum #webgl-canvas` avec une opacité basée sur la probabilité.
+Ce code définit les variables $primary-color et $glitch-intensity selon l'ambiance CHAOS. Il crée une animation @keyframes 'quantum-flux' complexe si l'entanglement est haute et l'applique à '#preview-media-container.mode-quantum #webgl-canvas'.

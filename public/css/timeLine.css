@@ -1,31 +1,24 @@
-/* public/css/timeline.css */
+/* --- FOCUS ETAT (CORRECTION V2.2) --- */
 
-/* Tête de lecture (Ligne rouge verticale) */
-#playhead {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: #ff0000;
-    z-index: 50;
-    pointer-events: none; /* Permet de cliquer à travers */
-    transform: translateX(0);
-    will-change: transform; /* Optimisation GPU pour l'animation */
+/* L'état focused est ajouté au conteneur principal #timeline-editor */
+#timeline-editor.timeline-focused {
+    /* On enlève la bordure du haut du drawer global pour la mettre sur le contenu */
+    border-top-color: #444; 
+    /* Force l'ouverture si focus (pour ne pas que ça se ferme si la souris sort) */
+    transform: translateY(0) !important;
 }
 
-/* Tête (Triangle) */
-#playhead::after {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -6px;
-    border-left: 7px solid transparent;
-    border-right: 7px solid transparent;
-    border-top: 10px solid #ff0000;
+/* On applique l'effet de focus sur la zone interne des pistes */
+#timeline-editor.timeline-focused #timeline-content-wrapper {
+    box-shadow: inset 0 0 0 2px #1e3a8a, inset 0 0 20px rgba(59, 130, 246, 0.1);
+    background-color: rgba(10, 10, 15, 1);
+    outline: none;
 }
 
-/* Ajustement pour que le curseur soit dans le conteneur relatif */
-#timeline-content-wrapper {
-    position: relative;
-    min-height: 100%;
+/* Style des boutons de Timeline actifs */
+.tl-btn.active {
+    background-color: #1e3a8a; /* Blue-900 */
+    color: white;
+    font-weight: bold;
+    border-color: #5f5f5d;
 }

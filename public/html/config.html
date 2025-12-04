@@ -2,127 +2,478 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Studio Configuration</title>
-    <link rel="stylesheet" href="../css/studio.css">
-    <link rel="stylesheet" href="../css/modalConfig.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio AV - Configuration & Mappage MIDI (Final Réparé et Stable)</title>
+    <link rel="stylesheet" href="studio.css">
+    <!-- Intégration Tailwind et Socket.IO -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    
     <style>
-        body { background: #121212; color: #ddd; padding: 2rem; }
-        .config-section {
-            background: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
+        /* Configuration Tailwind spécifique */
+        :root {
+            --midi-red: #d6455d;
         }
-        .config-title {
+
+        /* Styles de base pour simuler studio.css et modalConfig.css */
+        body {
+            background-color: #1e1e1e;
             color: #fff;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-bottom: 1px solid #333;
-            padding-bottom: 0.5rem;
-            margin-bottom: 1rem;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #0d0d0d;
+            border-bottom: 1px solid #333;
         }
-        input[type="text"], input[type="password"], select {
-            background: #000;
-            border: 1px solid #444;
+        #workspace {
+            display: flex;
+            flex-grow: 1;
+        }
+        #center-area {
+            flex-grow: 1;
+            padding: 0;
+        }
+        /* ASIDES */
+        .collapsed-aside {
+            width: 50px;
+            background-color: #151515;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .aside-trigger {
+            height: 100px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 10px 0;
+            color: #aaa;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        /* UTILS */
+        .config-card {
+            background-color: #1a1a1a; 
+            border: 1px solid #333;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        .card-header {
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .card-title {
             color: #fff;
-            padding: 0.5rem;
-            width: 100%;
-            border-radius: 4px;
-            font-family: monospace;
+            font-size: 14px;
+            font-weight: 600;
         }
-        input:focus { border-color: #3b82f6; outline: none; }
-        label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 0.3rem; margin-top: 1rem; }
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-size: 11px;
+            color: #ccc;
+            text-transform: uppercase;
+        }
+        input[type="number"], select {
+            width: 100%;
+            background-color: #222;
+            border: 1px solid #444;
+            padding: 5px;
+            border-radius: 4px;
+            color: #eee;
+        }
+
+        /* --- mpd_visual.css (Correction Finale Stabilité) --- */
+
+        #mpd-visualizer-frame {
+            display: flex;
+            gap: 20px;
+            padding-top: 10px;
+        }
+
+        .mpd-left-panel { width: 160px; display: flex; flex-direction: column; gap: 20px; padding-right: 20px; border-right: 1px solid #2a2a2a; }
+        .mpd-right-panel { flex-grow: 1; padding-left: 10px; }
+        .knob-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 5px; }
+        .midi-control.knob { display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .knob-circle { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(145deg, #2c2c2c, #141414); position: relative; box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .knob-indicator { width: 3px; height: 10px; background: #555; position: absolute; left: 50%; top: 3px; transform-origin: 50% 13px; transition: transform 0.1s ease-out; }
+        .control-label { font-size: 9px; color: #666; font-family: monospace; }
+        .midi-control.knob.active-flash .knob-circle { border-color: #ffcc00; box-shadow: 0 0 10px 2px rgba(255, 204, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.6); }
+        .midi-control.knob.active-flash .knob-indicator { background: #ffcc00; }
+        
+        .midi-control-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 5px; }
+        .midi-control.pad { 
+            height: 60px; background: #111; border-radius: 4px; border: 1px solid #444; 
+            color: #999 !important; 
+            font-size: 10px; font-weight: bold; cursor: pointer; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8); 
+            transition: all 0.05s ease-out; box-sizing: border-box; 
+        }
+        
+        /* PAD ACTIVE STATE (FORCÉ AVEC !IMPORTANT) */
+        .midi-control.pad.active-pad-trigger { 
+            background: var(--midi-red) !important; 
+            color: white !important; 
+            border-color: #ff0000 !important;
+            box-shadow: 0 0 18px 4px rgba(214, 69, 93, 0.8), inset 0 0 5px rgba(255, 255, 255, 0.5) !important; 
+            transform: scale(1.03); 
+        }
+
+        /* TIMELINE PREVIEW */
+        #timeline-editor {
+            padding: 20px;
+            background-color: #111;
+            border-top: 2px solid #333;
+        }
+        .timeline-track {
+            height: 30px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <h1 class="text-2xl font-bold text-white mb-8 border-l-4 border-blue-600 pl-4">SYSTÈME & CONFIGURATION</h1>
+    <header>
+        <div class="flex items-center">
+            <span class="text-xl font-bold text-white mr-6">Studio AV (v2.3)</span>
+            <div id="mode-indicator" class="px-3 py-1 rounded text-xs font-bold bg-gray-800 text-gray-300 border border-gray-600">MODE: CONFIGURATION</div>
+        </div>
+        <div class="space-x-4 flex items-center pr-4">
+             <div class="text-xs text-gray-400 flex items-center gap-2">
+                <span id="midi-status-dot" class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span>MIDI SYSTEM</span>
+             </div>
+             <button id="btn-save-config" class="bg-blue-600 px-4 py-1 rounded text-white text-xs hover:bg-blue-500 font-bold border border-blue-400 transition-all active:scale-95 shadow-lg shadow-blue-900/20">SAUVEGARDER</button>
+        </div>
+    </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div id="workspace">
         
-        <div class="config-section">
-            <div class="config-title">
-                <span>🔑 API Keys & Cloud</span>
-                <span class="text-xs text-gray-500 mt-1">Groq / OpenAI / Anthropic</span>
-            </div>
-            
-            <label>GROQ_API_KEY</label>
-            <input type="password" value="gsk_************************" id="groq-key">
-            
-            <label>ELEVEN_LABS_KEY</label>
-            <input type="password" placeholder="Non configuré">
-            
-            <label>Mode IA par défaut</label>
-            <select>
-                <option>Llama 3.1 8b Instant (Groq)</option>
-                <option>Gemini Pro Vision</option>
-                <option>Mistral Large</option>
-            </select>
-        </div>
-
-        <div class="config-section">
-            <div class="config-title">
-                <span>🎛️ MIDI Hardware</span>
-                <span class="text-xs text-green-500 mt-1">● Actif</span>
-            </div>
-
-            <label>Input Device (Pad)</label>
-            <select id="midi-in">
-                <option>Akai MPD218 Port A</option>
-                <option>Akai MPD218 Port B</option>
-            </select>
-
-            <label>Clock Source</label>
-            <select>
-                <option>Internal (Master)</option>
-                <option>External (Slave)</option>
-            </select>
-
-            <div class="mt-4 p-2 bg-black rounded border border-gray-800 text-xs font-mono text-gray-400">
-                Last Event: NOTE_ON [36] Channel 1
-            </div>
-        </div>
-
-        <div class="config-section md:col-span-2 border-cyan-900/30 bg-gray-900/20">
-            <div class="config-title">
-                <span class="text-cyan-400">⚛️ Quantum Engine Parameters</span>
-            </div>
-
-            <div class="grid grid-cols-3 gap-4">
-                <div>
-                    <label>Max Superposition Layers</label>
-                    <input type="number" value="8" class="bg-black border border-gray-700 text-white p-2 w-full">
-                </div>
-                <div>
-                    <label>Buffer Resolution</label>
-                    <select>
-                        <option>Native (Window)</option>
-                        <option>Half (Performance)</option>
-                        <option>Fixed 1920x1080</option>
-                    </select>
-                </div>
-                <div>
-                    <label>Render Backend</label>
-                    <select>
-                        <option>Canvas 2D (Safe Mode)</option>
-                        <option>WebGL (Experimental)</option>
-                    </select>
+        <!-- ASIDE GAUCHE (MENU) -->
+        <aside id="aside-left-menu" class="collapsed-aside left-aside">
+            <div class="aside-trigger"><span class="trigger-icon">⚙️</span><span class="vertical-text">SYSTEM</span></div>
+            <div class="aside-content">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a]"><h2 class="text-white font-bold text-sm uppercase">Configuration Menu</h2></div>
+                <div class="flex-1 p-4 space-y-1 text-xs">
+                    <p class="text-gray-400">Navigation et Presets (issue de **dataManager.js**).</p>
+                    <div class="mt-4"><a href="#timeline-settings" class="text-blue-400 hover:underline">Timeline Defaults</a></div>
+                    <a href="#midi-mapper" class="text-green-400 hover:underline">MIDI Mapping Visual</a>
                 </div>
             </div>
+        </aside>
+
+        <div id="center-area" class="flex flex-col">
+            
+            <div id="visual-canvas-zone" style="height: 250px; background: black; border-bottom: 2px solid #333; position: relative; display: flex; justify-content: center; align-items: center;">
+                <canvas id="config-visual-canvas" class="w-full h-full absolute"></canvas>
+                <div class="absolute top-2 left-2 text-cyan-400 text-xs font-mono">QUANTUM/MIDI MONITOR</div>
+            </div>
+
+            <div id="mpd-config-visualizer-card" class="p-4"> 
+                <div class="config-card border-green-500/50 p-6">
+                    <div class="card-header">
+                        <span class="card-title">🎛️ Mappage MPD218</span>
+                        <span class="text-xs text-green-400">CC & Notes</span>
+                    </div>
+                    
+                    <div id="mpd-visualizer-frame" class="flex gap-4">
+                        
+                        <div class="mpd-left-panel">
+                            <div class="knob-grid">
+                                <div class="midi-control knob" data-cc="0"><div class="knob-circle" id="k-0"><div class="knob-indicator"></div></div><span class="control-label">K1 (X)</span></div>
+                                <div class="midi-control knob" data-cc="1"><div class="knob-circle" id="k-1"><div class="knob-indicator"></div></div><span class="control-label">K2 (Y)</span></div>
+                                <div class="midi-control knob" data-cc="2"><div class="knob-circle" id="k-2"><div class="knob-indicator"></div></div><span class="control-label">K3 (Z)</span></div>
+                                <div class="midi-control knob" data-cc="3"><div class="knob-circle" id="k-3"><div class="knob-indicator"></div></div><span class="control-label">K4 (HUE)</span></div>
+                                <div class="midi-control knob" data-cc="4"><div class="knob-circle" id="k-4"><div class="knob-indicator"></div></div><span class="control-label">K5 (SAT)</span></div>
+                                <div class="midi-control knob" data-cc="5"><div class="knob-circle" id="k-5"><div class="knob-indicator"></div></div><span class="control-label">K6 (VOL)</span></div>
+                            </div>
+
+                            <div class="button-grid mt-4">
+                                <button class="midi-control func-btn bank" data-func="BANK_A">BANK A</button>
+                                <button class="midi-control func-btn" data-func="BANK_B">BANK B</button>
+                                <button class="midi-control func-btn" data-func="BANK_C">BANK C</button>
+                                
+                                <button class="midi-control func-btn" data-func="FULL_LEVEL">FULL LEVEL</button>
+                                <button class="midi-control func-btn" data-func="NR_CONFIG">NR CONFIG</button>
+                                <button class="midi-control func-btn" data-func="NOTE_REPEAT">NOTE RPT</button>
+                            </div>
+                        </div>
+                        
+                        <div class="mpd-right-panel">
+                            <div class="midi-control-grid">
+                                <!-- MAPPING AJUSTÉ aux notes basses pour débloquer le Pad -->
+                                <div class="midi-control pad" data-note="12">P13</div> <div class="midi-control pad" data-note="13">P14</div> <div class="midi-control pad" data-note="14">P15</div> <div class="midi-control pad" data-note="15">P16</div>
+                                <div class="midi-control pad" data-note="8">P09</div> <div class="midi-control pad" data-note="9">P10</div> <div class="midi-control pad" data-note="10">P11</div> <div class="midi-control pad" data-note="11">P12</div>
+                                <div class="midi-control pad" data-note="4">P05</div> <div class="midi-control pad" data-note="5">P06</div> <div class="midi-control pad" data-note="6">P07</div> <div class="midi-control pad" data-note="7">P08</div>
+                                <div class="midi-control pad" data-note="0">P01</div> <div class="midi-control pad" data-note="1">P02</div> <div class="midi-control pad" data-note="2">P03</div> <div class="midi-control pad" data-note="3">P04</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-grid p-4 grid grid-cols-2 gap-4">
+                
+                <div class="config-card" id="timeline-settings">
+                    <div class="card-header">
+                        <span class="card-title">⏱️/⚛️ Timeline & Quantum Defaults</span>
+                    </div>
+
+                    <label>Base Framerate (FPS)</label><select id="conf-fps">...</select>
+                    
+                    <label>Magnetism (Snapping)</label>
+                    <div class="flex items-center gap-2">
+                        <input type="range" id="conf-snap" min="0" max="100" value="50">
+                        <span id="snap-val" class="text-xs font-mono text-blue-400">50%</span>
+                    </div>
+                    
+                    <label>Max Superposition Layers</label><input type="number" id="conf-q-layers" value="8">
+                    <label>Render Backend</label><select id="conf-q-backend">...</select>
+                </div>
+
+                <div class="config-card">
+                    <div class="card-header">
+                        <span class="card-title">🎚️ Calibration & Sensitivity</span>
+                    </div>
+
+                    <label>Knob Sensitivity</label>
+                    <input type="range" id="conf-midi-sens" min="0.1" max="2.0" step="0.1" value="1.0">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label>MIDI Channel</label><input type="number" id="conf-midi-ch" value="1" min="1" max="16"></div>
+                        <div><label>Pad Threshold (Velocity Min)</label><input type="number" id="conf-pad-thresh" value="10" min="0" max="127"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TIMELINE PREVIEW -->
+            <div id="timeline-editor">
+                <div class="timeline-header">
+                    <h3 class="text-xs text-white font-bold mr-4 uppercase">Timeline Preview</h3>
+                    <div class="text-xs font-mono text-gray-500 bg-black px-2 rounded">24 FPS GRID</div>
+                    <div class="text-[10px] text-gray-500">PREVIEW ONLY ▲</div>
+                </div>
+                <div id="timeline-content-wrapper" class="p-2 bg-[#111]">
+                    <div class="timeline-track">Track Video</div>
+                    <div class="timeline-track">Track Audio</div>
+                    <div class="timeline-track">Track Drawing</div>
+                </div>
+            </div>
+            
         </div>
+
+        <!-- ASIDE DROIT (CONTEXTE) -->
+        <aside id="aside-right-info" class="collapsed-aside right-aside">
+            <div class="aside-trigger"><span class="trigger-icon">🧠</span><span class="vertical-text">CONTEXT</span></div>
+            <div class="aside-content">
+                <div class="panel-header p-3 border-b border-gray-700 bg-[#1a1a1a]"><span class="text-white font-bold text-xs uppercase">Contexte IA & Aide</span></div>
+                <div class="p-4 text-xs text-gray-400">
+                    <p>Ce panneau afficherait l'historique des requêtes (issue du module **chatbot.js**).</p>
+                </div>
+            </div>
+        </aside>
 
     </div>
 
-    <div class="fixed bottom-0 left-0 w-full bg-[#1a1a1a] border-t border-gray-700 p-4 flex justify-end gap-4">
-        <button class="text-gray-400 hover:text-white px-4 py-2" onclick="window.close()">Annuler</button>
-        <button class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded font-bold shadow-lg shadow-blue-900/20">
-            ENREGISTRER & REDÉMARRER
-        </button>
-    </div>
+    <footer id="studio-footer">
+        <a href="media_data.html" class="nav-tab"><span class="nav-icon">📁</span> MEDIA</a>
+        <a href="code_timeline.html" class="nav-tab"><span class="nav-icon">✂️</span> CODE</a>
+        <a href="editor.html" class="nav-tab"><span class="nav-icon">🎬</span> EDIT</a>
+        <a href="config.html" class="nav-tab active"><span class="nav-icon">⚙️</span> CONFIG</a>
+        <a href="delivery.html" class="nav-tab"><span class="nav-icon">🚀</span> DELIVER</a>
+    </footer>
+    
+    <script type="module">
+        // La correction est ici : on englobe tout le code qui utilise 'io' dans DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
 
+            // =================================================================
+            // CLASSE MIDIINPUT (CONSOLIDÉE)
+            // =================================================================
+            class MidiInput {
+                constructor(socket, callbacks) {
+                    console.log("[MidiInput] Initialisation: Écoute Socket.IO.");
+                    this.callbacks = callbacks;
+                    
+                    // Écoute des événements CC (Knobs) du serveur
+                    socket.on('midi_cc', (data) => {
+                        if (this.callbacks.onKnob) {
+                            this.callbacks.onKnob(data.cc, data.normalizedValue, data.rawValue);
+                        }
+                    });
+
+                    // Écoute des événements Note (Pads) du serveur
+                    socket.on('midi_note', (data) => {
+                        if (this.callbacks.onPad) {
+                            this.callbacks.onPad(data.note, data.velocity); 
+                        }
+                    });
+                }
+            }
+
+            // Déplace l'appel à io() à l'intérieur de DOMContentLoaded
+            const socket = io('http://localhost:3145'); 
+
+            // =================================================================
+            // 1. ÉLÉMENTS DU DOM & UTILS
+            // =================================================================
+
+            const midiStatusDot = document.getElementById('midi-status-dot');
+            const btnSave = document.getElementById('btn-save-config');
+            const snapInput = document.getElementById('conf-snap');
+            const snapValueSpan = document.getElementById('snap-val');
+
+            function getKnobIndicator(cc) {
+                const knobContainer = document.querySelector(`.knob[data-cc="${cc}"]`);
+                return knobContainer ? knobContainer.querySelector('.knob-indicator') : null;
+            }
+
+            function getPadElement(note) {
+                const selector = `.pad[data-note="${note}"]`;
+                const element = document.querySelector(selector);
+                
+                // LOG DE DÉBOGAGE CRITIQUE
+                if (!element) {
+                    console.warn(`[DEBUG-PAD] Pad non trouvé pour la note MIDI : ${note}.`);
+                }
+                return element;
+            }
+
+            // =================================================================
+            // 2. GESTION DE LA CONNEXION & DU STATUT
+            // =================================================================
+
+            function updateMidiStatus(isConnected) {
+                if (!midiStatusDot) return;
+                if (isConnected) {
+                    midiStatusDot.classList.remove('bg-red-500');
+                    midiStatusDot.classList.add('bg-green-500');
+                } else {
+                    midiStatusDot.classList.remove('bg-green-500');
+                    midiStatusDot.classList.add('bg-red-500');
+                }
+            }
+
+            socket.on('connect', () => {
+                console.log('[Socket.IO] Connecté. ✅');
+                updateMidiStatus(true);
+            });
+
+            socket.on('disconnect', () => {
+                console.warn('[Socket.IO] Déconnecté. ❌');
+                updateMidiStatus(false);
+            });
+
+            // =================================================================
+            // 3. LOGIQUE MIDI (Instanciation et Rendu Visuel)
+            // =================================================================
+
+            const midiInput = new MidiInput(socket, {
+                
+                // --- KNOB (CC) VISUALIZATION ---
+                onKnob: (cc, normVal, rawVal) => {
+                    const indicator = getKnobIndicator(cc);
+                    if (indicator) {
+                        const rotation = -135 + (normVal * 270);
+                        indicator.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+                        
+                        const knobContainer = indicator.closest('.knob');
+                        knobContainer.classList.add('active-flash');
+                        setTimeout(() => {
+                            knobContainer.classList.remove('active-flash');
+                        }, 100); 
+                        
+                        const label = knobContainer.querySelector('.control-label');
+                        if (label) label.textContent = `K${cc + 1} (${(normVal * 100).toFixed(0)}%)`;
+                    }
+                },
+
+                // --- PAD (Note) VISUALIZATION (CORRIGÉ POUR VELOCITY UNDEFINED) ---
+                onPad: (note, velocity) => {
+                    const padElement = getPadElement(note);
+                    if (!padElement) return;
+                    
+                    let isNoteOn = false;
+
+                    if (typeof velocity !== 'undefined') {
+                        // Logique MIDI standard: Note ON si velocity > 0
+                        isNoteOn = velocity > 0;
+                    } else {
+                        // CORRECTION DE SÉCURITÉ: Si la vélocité est manquante, on bascule l'état.
+                        isNoteOn = !padElement.classList.contains('active-pad-trigger');
+                    }
+
+                    if (isNoteOn) { 
+                        padElement.classList.add('active-pad-trigger');
+                    } else { 
+                        padElement.classList.remove('active-pad-trigger');
+                    }
+                }
+            });
+
+
+            // =================================================================
+            // 4. LOGIQUE UI COMPLÉMENTAIRE (Sauvegarde/Champs)
+            // =================================================================
+
+            // Gestion de la sauvegarde
+            if (btnSave) {
+                btnSave.addEventListener('click', () => {
+                    const configData = {
+                        baseFramerate: document.getElementById('conf-fps')?.value, 
+                        magnetismSnap: snapInput?.value, 
+                        maxQLayers: document.getElementById('conf-q-layers')?.value,
+                        renderBackend: document.getElementById('conf-q-backend')?.value, 
+                        midiSens: document.getElementById('conf-midi-sens')?.value,
+                        midiChannel: document.getElementById('conf-midi-ch')?.value,
+                        padThreshold: document.getElementById('conf-pad-thresh')?.value,
+                    };
+                    
+                    fetch('/api/config/save', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(configData)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                             btnSave.textContent = "SAUVEGARDÉ !";
+                             btnSave.className = "bg-green-600 px-4 py-1 rounded text-white text-xs font-bold border border-green-400 transition-all active:scale-95 shadow-lg shadow-green-900/20";
+                             setTimeout(() => {
+                                 btnSave.className = "bg-blue-600 px-4 py-1 rounded text-white text-xs hover:bg-blue-500 font-bold border border-blue-400 transition-all active:scale-95 shadow-lg shadow-blue-900/20";
+                                 btnSave.textContent = "SAUVEGARDER";
+                             }, 1500);
+                        }
+                    });
+                });
+            }
+
+            // Mise à jour de l'affichage du Snap Range
+            if (snapInput && snapValueSpan) {
+                snapValueSpan.textContent = `${snapInput.value}%`;
+                snapInput.addEventListener('input', (e) => {
+                    snapValueSpan.textContent = `${e.target.value}%`;
+                });
+            }
+            
+            console.log('✅ Configuration MIDI Complète et Stabilité assurée.');
+        }); // Fin de DOMContentLoaded
+    </script>
 </body>
 </html>

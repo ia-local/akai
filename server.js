@@ -156,6 +156,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => console.log(`[Socket] Déconnecté`));
+    // Assurez-vous d'avoir l'écoute et la diffusion de l'événement ici :
+    socket.on('midi_page_switch', (data) => {
+        // Log pour confirmer la réception sur le serveur Node
+        console.log(`[SERVER] Relais MIDI Page Switch: ${data.page}`);
+        
+        // Relai vers TOUS les clients connectés (y compris le processus Electron principal)
+        io.emit('midi_page_switch', data); 
+    });
 });
 
 // --- Démarrage Serveur ---

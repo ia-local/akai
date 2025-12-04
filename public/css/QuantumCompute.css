@@ -1,9 +1,9 @@
-/* Error: expected "}".
- *   ,
- * 5 | $primary-color: #{$ambiance == "GENERATED" ? "#3498db" : "error"};
- *   |                                            ^
- *   '
- *   controllers/QuantumCompute.scss 5:44  root stylesheet */
+/* Error: Expected '.
+ *    ,
+ * 58 | Ce code définit les variables $primary-color et $glitch-intensity selon l'ambiance CHAOS. Il crée une animation @keyframes 'quantum-flux' complexe si l'entanglement est haute et l'applique à '#preview-media-container.mode-quantum #webgl-canvas'.
+ *    |                                                                                                                                                                                                                                                      ^
+ *    '
+ *   controllers/QuantumCompute.scss 58:246  root stylesheet */
 
 body::before {
   font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
@@ -13,5 +13,5 @@ body::before {
   padding: 1em;
   margin-bottom: 1em;
   border-bottom: 2px solid black;
-  content: 'Error: expected "}".\a   \2577 \a 5 \2502  $primary-color: #{$ambiance == "GENERATED" ? "#3498db" : "error"};\a   \2502                                             ^\a   \2575 \a   controllers/QuantumCompute.scss 5:44  root stylesheet';
+  content: "Error: Expected '.\a    \2577 \a 58 \2502  Ce code d\e9 finit les variables $primary-color et $glitch-intensity selon l'ambiance CHAOS. Il cr\e9 e une animation @keyframes 'quantum-flux' complexe si l'entanglement est haute et l'applique \e0  '#preview-media-container.mode-quantum #webgl-canvas'.\a    \2502                                                                                                                                                                                                                                                       ^\a    \2575 \a   controllers/QuantumCompute.scss 58:246  root stylesheet";
 }

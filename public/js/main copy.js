@@ -23,7 +23,6 @@ import { AsciiTensorEngine } from './engines/AsciiTensorEngine.js';
 import { AsciiCanvasEngine } from './engines/AsciiCanvasEngine.js';
 import { WebGLEngine } from './engines/WebGLEngine.js';
 import { PaintEngine } from './engines/PaintEngine.js';
-// Ligne ci-dessous retirée: const { initMidiPageControl } = require('./pageTool'); 
 
 // MOTEURS ADDITIONNELS (Audio / Quantum)
 import { AudioEngine } from './modules/AudioEngine.js';
@@ -43,16 +42,6 @@ import { RulerOverlay } from './modules/RulerOverlay.js';
 // =================================================================
 const PIXELS_PER_SECOND = 50;
 const socket = io('http://localhost:3145');
-
-// MAPPING DES PAGES STUDIO MIDI (Correspond aux fichiers public/html/*.html)
-const MIDI_PAGE_MAP = {
-    8: 'code',      // code_timeline.html
-    9: 'edite',     // editor.html (Mise à jour pour correspondre au fichier fourni)
-    10: 'fusion',   // fusion_visuel.html
-    11: 'fairlight',// fairlight_audio.html
-    12: 'media',    // media_data.html
-    13: 'delivery'  // delivery.html
-};
 
 // Globales
 window.modalSystem = new ModalSystem(); 
@@ -315,49 +304,6 @@ const midiInput = new MidiInput(socket, {
         if (note === 6) toolSystem.nextGlyph();
         if (note === 7) toolSystem.setTool('eraser');
 
-        // --- LOGIQUE DE SWITCH PAGE MIDI (8-13) AVEC TRANSITION CSS ET REDIRECTION ---
-        const pageKey = MIDI_PAGE_MAP[note];
-        
-        // MAPPING DES NOMS DE FICHIERS pour la redirection dans le navigateur
-        const FILE_NAME_MAP = {
-            'code': 'code_timeline.html',
-            'edite': 'editor.html', // Corrigé pour utiliser editor.html
-            'fusion': 'fusion_visuel.html',
-            'fairlight': 'fairlight_audio.html',
-            'media': 'media_data.html',
-            'delivery': 'delivery.html'
-        };
-        const targetFile = FILE_NAME_MAP[pageKey];
-
-
-        if (pageKey) {
-            const containerToFade = document.body; 
-            
-            // 1. Déclenche l'animation de fondu (fade-out)
-            if (containerToFade) {
-                // Cette classe doit être définie dans votre CSS (.studio-fade-out)
-                containerToFade.classList.add('studio-fade-out'); 
-                console.log(`✨ UI: Transition de sortie ('studio-fade-out') déclenchée.`);
-            }
-
-            // 2. Redirection du NAVIGATEUR après le délai de transition (300ms)
-            setTimeout(() => {
-                
-                // **** CHEMIN CORRIGÉ ****
-                // Routage vers /html/ pour un serveur Node servant 'public' comme racine
-                const redirectPath = `/html/${targetFile}`; 
-                
-                console.log(`🧭 NAVIGATION: Redirection vers ${redirectPath} après fondu.`);
-                
-                // *** EXÉCUTION DE LA REDIRECTION DANS CHROME ***
-                window.location.href = redirectPath;
-                
-                // OPTIONNEL : Envoyer le signal Socket après la redirection (utile pour l'état du serveur)
-                // socket.emit('midi_page_switch', { page: pageKey });
-
-            }, 300); // Délai de 300ms pour que l'animation CSS se termine
-
-        }
         // --- PAD 14 : IA MUTATION ---
         if (note === 14) {
             triggerQuantumMutation();
@@ -519,33 +465,18 @@ document.querySelectorAll('.timeline-track').forEach(track => {
 // 9. DÉMARRAGE (STARTUP)
 // =================================================================
 
-// =================================================================
-// 9. DÉMARRAGE (STARTUP)
-// =================================================================
-
 (async function init() {
+    // Initialisation Audio Safe
+    document.getElementById('btn-play').addEventListener('click', async () => {
+        if (!audioEngine.isInitialized) await audioEngine.init();
+        transport.play();
+        audioEngine.play();
+    });
     
-    // --- Correction : Rendre l'initialisation Audio Safe et Conditionnelle ---
-    
-    const playButton = document.getElementById('btn-play');
-    const pauseButton = document.getElementById('btn-pause');
-
-    if (playButton) {
-        playButton.addEventListener('click', async () => {
-            if (!audioEngine.isInitialized) await audioEngine.init();
-            transport.play();
-            audioEngine.play();
-        });
-    } else {
-        console.warn("⚠️ Audio/Transport: Bouton '#btn-play' non trouvé. Initialisation audio désactivée.");
-    }
-    
-    if (pauseButton) {
-        pauseButton.addEventListener('click', () => {
-            transport.pause();
-            audioEngine.pause();
-        });
-    }
+    document.getElementById('btn-pause').addEventListener('click', () => {
+        transport.pause();
+        audioEngine.pause();
+    });
     
     new KeyboardController({ togglePlayback: () => {
         if(transport.isPlaying) {

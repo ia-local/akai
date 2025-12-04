@@ -1,0 +1,171 @@
+/* =========================================
+   MPD218 VISUALIZER STYLES (Corrigé et Stable)
+   Style: Dark Studio Aesthetic / Modular
+   ========================================= */
+
+/* --- CONTEXTE GLOBAL --- */
+
+.config-card {
+    background-color: #1a1a1a; 
+    border: 1px solid #333;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.card-header {
+    border-bottom: 1px solid #2a2a2a;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* --- STRUCTURE DU VISUALISEUR MPD --- */
+
+#mpd-visualizer-frame {
+    display: flex;
+    gap: 20px;
+    padding-top: 10px;
+}
+
+.mpd-left-panel {
+    width: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-right: 20px;
+    border-right: 1px solid #2a2a2a;
+}
+
+.mpd-right-panel {
+    flex-grow: 1;
+    padding-left: 10px;
+}
+
+
+/* --- 1. KNOBS (CC) --- */
+
+.knob-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px 5px;
+}
+.midi-control.knob {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    cursor: pointer;
+    transition: all 0.1s;
+}
+.knob-circle {
+    width: 32px; height: 32px; 
+    border-radius: 50%; 
+    border: 1px solid #000;
+    background: linear-gradient(145deg, #2c2c2c, #141414); 
+    position: relative; 
+    margin-bottom: 4px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+.knob-indicator {
+    width: 3px; height: 10px; 
+    background: #555; 
+    position: absolute; 
+    left: 50%; 
+    top: 3px;
+    transform-origin: 50% 13px;
+    transform: rotate(-135deg); 
+    transition: transform 0.1s ease-out; 
+}
+.control-label {
+    font-size: 9px;
+    color: #666; /* Couleur du label par défaut */
+    font-family: monospace;
+    text-align: center;
+}
+
+/* --- KNOB ACTIVE STATE (Feedback JS) --- */
+
+.midi-control.knob.active-flash .knob-circle {
+    border-color: #ffcc00; 
+    box-shadow: 0 0 10px 2px rgba(255, 204, 0, 0.5), inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+.midi-control.knob.active-flash .knob-indicator {
+    background: #ffcc00;
+}
+
+
+/* --- 2. BOUTONS DE FONCTION/BANQUE (Styles inchangés) --- */
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.midi-control.func-btn {
+    background: #252525; 
+    color: #888; 
+    border: 1px solid #444; 
+    padding: 6px 3px;
+    border-radius: 2px;
+    font-size: 8px; 
+    font-weight: 500; 
+    text-align: center; 
+    cursor: pointer;
+    transition: all 0.1s;
+    text-transform: uppercase;
+}
+.midi-control.func-btn:hover { 
+    background: #333; 
+    color: #fff; 
+    border-color: #777;
+}
+.midi-control.bank { 
+    background: #d6455d; 
+    color: white; 
+    border-color: #ff0000; 
+    font-weight: bold;
+} 
+
+
+/* --- 3. PADS (Notes) --- */
+
+.midi-control-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px; 
+    padding: 5px;
+}
+.midi-control.pad {
+    height: 60px; /* Hauteur définie */
+    background: #111; /* Couleur du Pad éteint */
+    border-radius: 4px; 
+    border: 1px solid #444; 
+    color: #999; /* COULEUR DU TEXTE PAR DÉFAUT (important) */
+    font-size: 10px; 
+    font-weight: bold; 
+    cursor: pointer;
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8);
+    transition: all 0.05s ease-out;
+    box-sizing: border-box; /* S'assure que padding/border sont inclus dans la hauteur */
+}
+.midi-control.pad:hover {
+    border-color: #777;
+}
+
+/* --- PAD ACTIVE STATE (Piloté par le JS) --- */
+
+.midi-control.pad.active-pad-trigger {
+    background: #d6455d; /* MIDI-RED vif */
+    color: white; /* Texte en blanc quand actif */
+    border-color: #ff0000;
+    box-shadow: 0 0 18px 4px rgba(214, 69, 93, 0.8), inset 0 0 5px rgba(255, 255, 255, 0.5); 
+    transform: scale(1.03); 
+}

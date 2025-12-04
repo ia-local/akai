@@ -226,10 +226,17 @@
             <span class="nav-icon">🚀</span> DELIVER
         </a>
     </footer>
-    
-    <script src="/socket.io/socket.io.js"></script>
-    <div id="generic-modal-overlay" class="c-modal-overlay"></div>
-
-    <script type="module" src="../js/media_desktop.js"></script>
+    <div style="display:none;">
+        <canvas id="ascii-canvas"></canvas>
+        <canvas id="webgl-canvas"></canvas>
+        <canvas id="paint-layer"></canvas>
+        <canvas id="ruler-layer"></canvas>
+    <div id="preview-media-container"></div>
+    </div>
+<script src="/socket.io/socket.io.js"></script>
+<div id="generic-modal-overlay" class="c-modal-overlay"></div>
+<script type="module" src="../js/media_desktop.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script type="module" src="../js/main.js"></script>
 </body>
 </html>

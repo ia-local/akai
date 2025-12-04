@@ -1,0 +1,79 @@
+/* =========================================
+   MPD218 VISUALIZER STYLES (Config Page)
+   Base: Physical representation of the AKAI MPD218.
+   ========================================= */
+
+/* --- LAYOUT DU MPD DANS LA CARTE --- */
+
+.mpd-left-panel {
+    width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-right: 15px;
+    border-right: 1px solid #222;
+}
+
+.mpd-right-panel {
+    flex-grow: 1;
+}
+
+/* --- KNOBS (3x2 Grid) --- */
+
+.knob-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 5px;
+}
+.midi-control.knob {
+    display: flex; flex-direction: column; align-items: center; cursor: pointer;
+}
+.knob-circle {
+    width: 28px; height: 28px; border-radius: 50%; border: 2px solid #333; 
+    background: radial-gradient(#222, #000); /* Effet 3D léger */
+    position: relative; margin-bottom: 2px;
+}
+.knob-indicator {
+    width: 2px; height: 8px; background: #666; position: absolute; left: 50%; top: 2px;
+    transform-origin: 50% 12px; /* Point de rotation */
+    transform: rotate(-135deg); /* Position de départ (minimum) */
+    transition: transform 0.1s;
+}
+
+/* --- BOUTONS SÉLECTEURS (2x3 Grid) --- */
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+.midi-control.func-btn {
+    background: #252525; color: #888; border: 1px solid #333; padding: 4px; border-radius: 3px;
+    font-size: 8px; font-weight: bold; text-align: center; cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
+.midi-control.func-btn:hover { background: #333; color: #fff; }
+.midi-control.bank { background: #d6455d; color: white; border-color: #ff0000; } /* Bank A active */
+
+
+/* --- PADS (4x4 Grid) --- */
+
+.midi-control-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+.midi-control.pad {
+    height: 40px; background: #2b2b2b; border-radius: 4px; border: 1px solid #333; 
+    color: #444; font-size: 10px; font-weight: bold; cursor: pointer;
+    transition: all 0.05s;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+}
+.midi-control.pad span { font-size: 8px; color: #666; margin-top: 2px; }
+
+/* ÉTATS ACTIFS (Pilotés par JS / Socket.io) */
+.midi-control.pad.active {
+    background: #ff0000; /* LED ON */
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}

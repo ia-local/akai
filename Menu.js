@@ -1,29 +1,29 @@
 // Menu.js (à la racine du projet)
 const { app, shell, Menu, MenuItem, BrowserWindow } = require('electron');
+const path = require('path'); // Nécessaire pour les chemins
 
-// Détecte si nous sommes en mode développement (pour afficher les outils de dev dans le menu)
+// Détecte si nous sommes en mode développement
 const isDev = process.env.NODE_ENV !== 'production';
 
-function createWindow(filePath, options = {}) {
-  const window = new BrowserWindow({
-    width: 987,
-    height: 610,
-    ...options,
-  });
-
-  // Load the file *after* the window is created
-  window.loadFile(path.join(__dirname, filePath)); // Load the file
-
-  window.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
-    console.error(`Failed to load ${filePath}: ${errorDescription} (Error Code: ${errorCode})`);
-    // ... (Your error handling code)
-  });
-
-  return window;
+// Fonction utilitaire pour créer des fenêtres
+function createSecondaryWindow(filePath, title = "Studio AV") {
+    const win = new BrowserWindow({
+        width: 1200,
+        height: 800,
+        backgroundColor: '#121212',
+        title: title,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false // À adapter selon tes besoins de sécurité
+        }
+    });
+    // On remonte d'un niveau si on est dans public/html, sinon chemin direct
+    // Ici on utilise path.join pour être sûr
+    win.loadFile(path.join(__dirname, filePath));
+    return win;
 }
 
 const template = [
-    // ... (votre code de menu existant) ...
     {
         label: 'Fichier',
         submenu: [
@@ -51,208 +51,89 @@ const template = [
         ]
     },
     {
-        label: 'Sutdio',
+        label: 'Studio', // Correction typo (Sutdio -> Studio)
         submenu: [
             {
-            label: 'DATA',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/media_data.html');
-            }
+                label: '📁 DATA (Media Pool)',
+                accelerator: 'CmdOrCtrl+1',
+                click: () => createSecondaryWindow('public/html/media_data.html', 'Studio AV - Data Manager')
             },
             { type: 'separator' },
             {
-            label: 'CODE',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/code_timeline.html');
-            }
+                label: '✂️ EDIT (Timeline)', // Redirection logique vers cut_timeline
+                accelerator: 'CmdOrCtrl+2',
+                click: () => createSecondaryWindow('public/html/cut_timeline.html', 'Studio AV - Timeline Editor')
             },
             { type: 'separator' },
             {
-            label: 'EDIT',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/fusion_visuel.html');
-            }
+                label: '🎨 FUSION (Compositing)',
+                accelerator: 'CmdOrCtrl+3',
+                click: () => createSecondaryWindow('public/html/fusion_visuel.html', 'Studio AV - Fusion Engine')
             },
             { type: 'separator' },
             {
-            label: 'FUSION',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/fusion_visuel.html');
-            }
-            },
-            { type: 'separator' },
-            {
-            label: 'FAIRLIGHT',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/fairlight_audio.html');
-            }
+                label: '🎵 FAIRLIGHT (Audio)',
+                accelerator: 'CmdOrCtrl+4',
+                click: () => createSecondaryWindow('public/html/fairlight_audio.html', 'Studio AV - Audio Mixer')
             },
             { type: 'separator' },            
             {
-            label: 'DELIVERY',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/delivery.html');
-            }
+                label: '🚀 DELIVERY (Export)',
+                accelerator: 'CmdOrCtrl+5',
+                click: () => createSecondaryWindow('public/html/delivery.html', 'Studio AV - Delivery')
+            },
+            { type: 'separator' },
+            {
+                label: '📜 CODE (Editor)',
+                click: () => createSecondaryWindow('public/html/code_timeline.html', 'Studio AV - Code Editor')
             }
         ]
     },
     {
         label: 'Quantum',
         submenu: [
-{
+            {
                 label: 'QUANTUM COMPUTE',
-                accelerator: 'CmdOrCtrl+Shift+Q', // Petit raccourci clavier bonus
+                accelerator: 'CmdOrCtrl+Shift+Q',
                 click: () => {
-                    // CRÉATION DE LA FENÊTRE AVEC LE RATIO D'OR (FIBONACCI)
-                    // Largeur 987 / Hauteur 610 ≈ 1.618 (Phi)
                     const win = new BrowserWindow({ 
                         width: 987, 
                         height: 610, 
-                        minWidth: 610, // On garde les proportions minimales
+                        minWidth: 610,
                         minHeight: 377,
-                        webPreferences: { 
-                            nodeIntegration: true, 
-                            contextIsolation: false 
-                        },
-                        backgroundColor: '#0d0d0d', // Fond noir pour éviter le flash blanc
+                        webPreferences: { nodeIntegration: true, contextIsolation: false },
+                        backgroundColor: '#0d0d0d',
                         title: "Quantum Compute Engine [Phi Ratio]"
                     });
-                    
-                    win.loadFile('public/html/quantum_compute.html'); 
+                    win.loadFile(path.join(__dirname, 'public/html/quantum_compute.html')); 
                 }
             },
-            {
-            label: 'INDEX',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/index.html');
-            }
-            },
-            {
-            label: 'Prev',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/slider_ia_prev.html');
-            }
-            },
-            {
-            label: 'Next',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/slider_ia_next.html');
-            }
-            },
+            { label: 'INDEX', click: () => createSecondaryWindow('public/index.html') },
             { type: 'separator' },
-            {
-            label: 'Config',
-            click: () => {
-              // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-              const aboutWindow = new BrowserWindow({ /* ... */ });
-              aboutWindow.loadFile('public/html/config.html');
-            }
-            },
+            { label: 'Config', click: () => createSecondaryWindow('public/html/config.html') },
         ]
     },
     {
-      label: 'Models',
+      label: 'Models (IA)',
       submenu: [
-        {
-          label: 'Groq',
-          role:'system',
-          models:'',
-          click: () => {
-            // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-            const aboutWindow = new BrowserWindow({ /* ... */ });
-            aboutWindow.loadFile('models/about.html');
-          }
-        },
-        {
-          label: 'llama',
-          models:'llama-3.1-8b-instant',
-          click: () => {
-            // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-            const aboutWindow = new BrowserWindow({ /* ... */ });
-            aboutWindow.loadFile('models/about.html');
-          }
-        },
-        {
-          label: 'Gemini',
-          models:'gemini-3-pro-preview',
-          click: () => {
-            // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-            const aboutWindow = new BrowserWindow({ /* ... */ });
-            aboutWindow.loadFile('models/about.html');
-          }
-        },
-
-        {
-          label: 'Qwant',
-          models:'qwen/qwen3-32b',
-          click: () => {
-            // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-            const aboutWindow = new BrowserWindow({ /* ... */ });
-            aboutWindow.loadFile('models/about.html');
-          }
-        },
+        { label: 'Groq API', click: () => createSecondaryWindow('models/about.html') },
+        { label: 'Llama 3.1', click: () => console.log('Model Llama Selected') },
+        { label: 'Gemini Pro', click: () => console.log('Model Gemini Selected') },
         { type: 'separator' },
-        {
-          label: '🧑‍🎤 Avatars',
-          models:'anonymous-7b-ar',
-          click: () => {
-            // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-            const aboutWindow = new BrowserWindow({ /* ... */ });
-            aboutWindow.loadFile('models/about.html');
-          }
-        },
-                {
-          label: '🎨 Images',
-          models:'gemini-3-pro-image-preview',
-          click: () => {
-            // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-            const aboutWindow = new BrowserWindow({ /* ... */ });
-            aboutWindow.loadFile('models/about.html');
-          }
-        },
-        {
-          label: '💿 video',
-          models:'  VEO_FAST = veo-3.1-fast-generate-preview',
-          models:'VEO = veo-3.1-generate-preview',
-          click: () => {
-            // Affichez une boîte de dialogue ou une fenêtre avec les informations "À propos"
-            const aboutWindow = new BrowserWindow({ /* ... */ });
-            aboutWindow.loadFile('models/about.html');
-          }
-        },
+        { label: 'Video Gen (Veo)', click: () => console.log('Veo Selected') }
       ]
     },  
     {
         label: 'Vue',
         submenu: [
             { role: 'reload', label: 'Recharger' },
-            { role: 'forceReload', label: 'Forcer le rechargement' },
-            // Gardons l'option DevTools dans le menu 'Vue' pour un accès manuel
             { role: 'toggleDevTools', label: 'Outils de développement' },
             { type: 'separator' },
-            { role: 'resetZoom', label: 'Réinitialiser le zoom' },
-            { role: 'zoomIn', label: 'Zoom avant' },
-            { role: 'zoomOut', label: 'Zoom arrière' },
+            { role: 'resetZoom' },
+            { role: 'zoomIn' },
+            { role: 'zoomOut' },
             { type: 'separator' },
-            { role: 'togglefullscreen', label: 'Plein écran' }
+            { role: 'togglefullscreen' }
         ]
     },
     {
@@ -262,59 +143,49 @@ const template = [
             { role: 'close', label: 'Fermer' }
         ]
     },
-
     {
         label: 'Aide',
         submenu: [
             {
-                label: 'En savoir plus sur Electron',
-                click: async () => {
-                    await shell.openExternal('https://electronjs.org');
+                label: '📚 Documentation Technique',
+                accelerator: 'F1',
+                click: () => {
+                    // Ouvre la documentation locale que nous avons créée dans /docs
+                    const docWin = new BrowserWindow({
+                        width: 1024, 
+                        height: 768,
+                        title: "Studio AV - Documentation",
+                        autoHideMenuBar: true
+                    });
+                    docWin.loadFile(path.join(__dirname, 'docs/index.html'));
                 }
             },
+            { type: 'separator' },
             {
                 label: 'GitHub du projet',
-                click: async () => {
-                    await shell.openExternal('https://github.com/[VotreOrganisation]/[VotreRepo]');
-                }
+                click: async () => { await shell.openExternal('https://github.com/ia-local/akai/'); }
             }
         ]
     }
 ];
 
-// Menu spécifique à macOS
+// Menu spécifique à macOS (inchangé, juste pour rappel)
 if (process.platform === 'darwin') {
     template.unshift({
         label: app.name,
         submenu: [
-            { role: 'about', label: `À propos de ${app.name}` },
+            { role: 'about' },
             { type: 'separator' },
-            { role: 'services', submenu: [] },
+            { role: 'services' },
             { type: 'separator' },
-            { role: 'hide', label: `Masquer ${app.name}` },
-            { role: 'hideOthers', label: 'Masquer les autres' },
-            { role: 'unhide', label: 'Afficher tout' },
+            { role: 'hide' },
+            { role: 'hideOthers' },
+            { role: 'unhide' },
             { type: 'separator' },
-            { role: 'quit', label: 'Quitter' }
+            { role: 'quit' }
         ]
     });
-
-    // Supprimer le sous-menu "Développement" du template macOS si non souhaité
-    // Ou le rendre conditionnel si vous voulez un menu "Développement" séparé pour macOS en dev
-    /*
-    if (isDev) {
-        template.push({
-            label: 'Développement',
-            submenu: [
-                { role: 'toggledevtools', label: 'Outils de développement' },
-                { role: 'reload', label: 'Recharger' },
-                { role: 'forcereload', label: 'Forcer le rechargement' }
-            ]
-        });
-    }
-    */
 }
 
 const appMenu = Menu.buildFromTemplate(template);
-
 module.exports = appMenu;

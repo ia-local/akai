@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio AV - MIDI Controller (MPD218)</title>
+    
+    <link rel="stylesheet" href="../css/studio.css">
+    <link rel="stylesheet" href="../css/mpc.css">
+    <link rel="stylesheet" href="../css/modalSystem.css">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 
+                        'akai-base': '#1e1e1e',
+                        'akai-red': '#ff0000',
+                        'midi-green': '#32c865',
+                        'midi-blue': '#4a7bed'
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Consolas', 'monospace'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+    <header>
+        <div class="flex items-center">
+            <span class="text-xl font-bold text-white mr-6">Studio AV (v2.2)</span>
+            <div id="status-indicator" class="px-3 py-1 rounded text-xs font-bold bg-green-900 text-green-400 border border-green-700 animate-pulse">
+                MIDI: ONLINE
+            </div>
+            <span class="ml-4 text-xs text-gray-500 border-l border-gray-600 pl-4 uppercase tracking-widest">AKAI MPD218 Controller</span>
+        </div>
+
+        <div class="space-x-4 flex items-center pr-4">
+             <div class="text-xs text-gray-400 font-mono" id="last-event-display">
+                WAITING FOR SIGNAL...
+             </div>
+             <button id="reset-midi-btn" class="bg-red-900/50 border border-red-700 px-3 py-1 rounded text-red-200 text-xs hover:bg-red-800 transition-colors">
+                RESET DEVICE
+             </button>
+        </div>
+    </header>
+
+    <div id="workspace">
+        
+        <aside class="collapsed-aside left-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">🎛️</span>
+                <span class="vertical-text">BANKS</span>
+            </div>
+            
+            <div class="aside-content">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <h2 class="text-white font-bold text-sm uppercase">Bank Config</h2>
+                </div>
+                
+                <div class="p-4 overflow-y-auto space-y-4">
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400 font-bold">Active Bank</label>
+                        <div class="flex gap-2">
+                            <button class="flex-1 bg-red-600 text-white text-xs py-2 rounded font-bold shadow-lg shadow-red-900/50">A</button>
+                            <button class="flex-1 bg-gray-800 text-gray-400 text-xs py-2 rounded hover:bg-gray-700">B</button>
+                            <button class="flex-1 bg-gray-800 text-gray-400 text-xs py-2 rounded hover:bg-gray-700">C</button>
+                        </div>
+                    </div>
+
+                    <hr class="border-gray-800">
+
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400 font-bold">Knob Sensitivity</label>
+                        <input type="range" class="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="text-xs text-gray-400 font-bold">Aftertouch</label>
+                        <select class="w-full bg-black border border-gray-700 text-gray-300 text-xs p-1 rounded">
+                            <option>Channel Pressure</option>
+                            <option>Polyphonic</option>
+                            <option>Off</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div id="center-area" class="bg-[#0d0d0d] flex-1 flex items-center justify-center relative z-0 p-8">
+            
+            <div id="mpd-frame">
+                
+                <div class="control-panel">
+                    <div class="text-gray-500 text-[10px] font-bold mb-4 uppercase tracking-widest">Control Assign</div>
+                    
+                    <div class="knob-grid-6">
+                        <div class="knob-wrapper" data-cc="0">
+                            <div class="knob-visual"><div class="knob-pointer"></div></div>
+                            <span class="knob-label">K1 (X)</span>
+                            <span class="knob-value">0</span>
+                        </div>
+                        <div class="knob-wrapper" data-cc="1">
+                            <div class="knob-visual"><div class="knob-pointer"></div></div>
+                            <span class="knob-label">K2 (Y)</span>
+                            <span class="knob-value">0</span>
+                        </div>
+                        <div class="knob-wrapper" data-cc="2">
+                            <div class="knob-visual"><div class="knob-pointer"></div></div>
+                            <span class="knob-label">K3 (Z)</span>
+                            <span class="knob-value">0</span>
+                        </div>
+                        <div class="knob-wrapper" data-cc="3">
+                            <div class="knob-visual"><div class="knob-pointer"></div></div>
+                            <span class="knob-label">K4 (Hue)</span>
+                            <span class="knob-value">0</span>
+                        </div>
+                        <div class="knob-wrapper" data-cc="4">
+                            <div class="knob-visual"><div class="knob-pointer"></div></div>
+                            <span class="knob-label">K5 (Time)</span>
+                            <span class="knob-value">0</span>
+                        </div>
+                        <div class="knob-wrapper" data-cc="5">
+                            <div class="knob-visual"><div class="knob-pointer"></div></div>
+                            <span class="knob-label">K6 (Scale)</span>
+                            <span class="knob-value">0</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-6 grid grid-cols-2 gap-2">
+                        <button class="func-btn active">FULL LEVEL</button>
+                        <button class="func-btn">NOTE RPT</button>
+                    </div>
+                </div>
+
+                <div class="pad-panel">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-gray-500 text-[10px] font-bold uppercase tracking-widest">Pad Assign</div>
+                        <div class="text-midi-green text-[10px] font-bold">USB A</div>
+                    </div>
+
+                    <div id="pad-grid-visual" class="pad-grid">
+                        </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <aside class="collapsed-aside right-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">ℹ️</span>
+                <span class="vertical-text">MAPPING</span>
+            </div>
+
+            <div class="aside-content">
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <h2 class="text-white font-bold text-sm uppercase">Current Mapping</h2>
+                </div>
+                <div class="p-4 flex-1 overflow-y-auto">
+                    <p class="text-xs text-gray-400 mb-4">Cliquez sur un Pad pour voir son assignation.</p>
+                    
+                    <div id="mapping-details" class="hidden">
+                        <div class="bg-black p-3 rounded border border-gray-700 mb-4">
+                            <div class="text-3xl font-bold text-white mb-1" id="detail-note">C#2</div>
+                            <div class="text-xs text-midi-blue font-bold uppercase" id="detail-func">Transport: Play</div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <label class="text-xs text-gray-500">Reassign Function</label>
+                            <select class="w-full bg-[#111] border border-gray-700 text-gray-300 text-xs p-1 rounded">
+                                <option>Transport: Play/Pause</option>
+                                <option>Transport: Stop</option>
+                                <option>Tool: Brush</option>
+                                <option>Quantum: Next Dimension</option>
+                            </select>
+                            <button class="w-full bg-blue-900/30 text-blue-400 text-xs py-1 rounded border border-blue-800 hover:bg-blue-900/50">UPDATE</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer id="studio-footer">
+        <a href="media_data.html" class="nav-tab"><span class="nav-icon">📁</span> MEDIA</a>
+        <a href="code_timeline.html" class="nav-tab"><span class="nav-icon">✂️</span> CODE</a>
+        <a href="../index.html" class="nav-tab"><span class="nav-icon">🎬</span> EDIT</a>
+        <a href="fusion_visuel.html" class="nav-tab"><span class="nav-icon">🎨</span> FUSION</a>
+        <a href="fairlight_audio.html" class="nav-tab"><span class="nav-icon">🎵</span> FAIRLIGHT</a>
+        <a href="mpc.html" class="nav-tab active"><span class="nav-icon">🎛️</span> MIDI</a>
+    </footer>
+    
+    <div id="generic-modal-overlay" class="c-modal-overlay"></div>
+    <script src="../js/main.js"></script>
+    <script type="module" src="../js/modalMpc.js"></script>
+</body>
+</html>

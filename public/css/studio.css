@@ -1,6 +1,6 @@
 /* =========================================
-   STUDIO MASTER STYLES (V1.5)
-   Layout: DaVinci Style + Auto-Collapse Panels
+   STUDIO MASTER STYLES (V1.6 - IMMERSIVE MODE)
+   Layout: Full Overlay / Auto-Collapse Drawers
    ========================================= */
 
 /* --- 1. GLOBAL RESET & LAYOUT --- */
@@ -15,7 +15,7 @@ body {
     height: 100vh;
 }
 
-/* --- 2. HEADER --- */
+/* --- 2. HEADER & FOOTER (FIXED) --- */
 header {
     height: 50px;
     background-color: #1e1e1e;
@@ -25,37 +25,54 @@ header {
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
-    z-index: 100;
-}
-main { height: 90%; }
-.workspace { height: 100%; }
-#toggle-tools-btn.active { background-color: #3b82f6; border-color: #2563eb; }
-
-/* --- 3. WORKSPACE (Zone Centrale) --- */
-#workspace {
-    display: flex;
-    flex: 1; 
-    overflow: hidden;
-    height: calc(100vh - 50px - 40px); /* Header - Footer */
+    z-index: 200; /* Au-dessus de tout */
     position: relative;
-    background-color: #0d0d0d;
 }
 
-/* --- 3.2 CENTRE : PREVIEW & CONTENT --- */
-/* --- 3.2 CENTRE : PREVIEW & CONTENT --- */
+#studio-footer {
+    height: 40px; 
+    background-color: #151515; 
+    border-top: 1px solid #333;
+    display: flex; 
+    justify-content: center; 
+    gap: 4px; 
+    flex-shrink: 0; 
+    z-index: 200; /* Au-dessus de la timeline rétractée */
+    position: relative;
+}
+
+.nav-tab {
+    background: none; border: none; color: #666; font-size: 0.8rem; font-weight: bold;
+    padding: 0 15px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    border-bottom: 3px solid transparent; transition: all 0.2s;
+}
+.nav-tab:hover { color: #aaa; background: #1e1e1e; }
+.nav-tab.active { color: #ddd; border-bottom-color: #d6455d; background: #252525; }
+
+/* --- 3. WORKSPACE (Zone Centrale Pleine Page) --- */
+#workspace {
+    flex: 1;
+    position: relative; /* Référentiel pour les absolute */
+    overflow: hidden;
+    background-color: #0d0d0d;
+    display: flex;
+}
+
+/* CENTER AREA : Prend toute la place maintenant */
 #center-area {
-    flex: 1; 
+    width: 100%;
+    height: 100%;
+    position: absolute; /* Fond complet */
+    top: 0; left: 0;
+    z-index: 1; /* Le plus bas */
     display: flex;
     flex-direction: column;
-    background-color: #0d0d0d;
-    position: relative;
-    min-width: 0;
-    z-index: 1; 
-    padding-left: 30px; 
-    padding-right: 30px;
-    transition: padding 0.3s ease;
+    padding-bottom: 40px; /* Espace pour le header de timeline visible */
+    padding-left: 40px;
+    padding-right: 40px;
 }
 
+/* --- 4. PREVIEW ZONE --- */
 #preview-zone {
     flex: 1;
     background-color: #000;
@@ -73,349 +90,200 @@ main { height: 90%; }
     justify-content: center;
     align-items: center;
     position: relative;
-    /* Optimisation pour le compositeur */
-    will-change: transform; 
 }
 
-/* =========================================
-   LAYER SYSTEM (SUPERPOSITION QUANTIQUE)
-   Z-Index Hierarchy:
-   1. Video (Source brute)
-   2. WebGL (Rendu Quantique / FX) -> Sortie Principale
-   3. ASCII (Monitoring pur)
-   4. Paint (Raster)
-   5. Ruler/Tools (Overlay UI)
-   6. Drawing (Vector UI)
-   ========================================= */
-
+/* Couches de rendu (Z-Index local) */
 .preview-player {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: contain; opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+}
+.preview-player.active { opacity: 1; }
+
+#player-video { z-index: 5; opacity: 1; }
+#webgl-canvas { z-index: 10; mix-blend-mode: screen; opacity: 0; }
+#ascii-canvas { min-width: 100%;z-index: 15; opacity: 0; }
+#paint-layer  { z-index: 20; opacity: 1; }
+#drawing-layer { z-index: 30; pointer-events: none; }
+
+/* Mode Quantum (Activé par JS) */
+#preview-media-container.mode-quantum #player-video { opacity: 0 !important; }
+#preview-media-container.mode-quantum #webgl-canvas { opacity: 1 !important; mix-blend-mode: normal !important; }
+
+/* --- 5. PANNEAUX LATÉRAUX (ASIDE DRAWERS) --- */
+/* Structure commune */
+.collapsed-aside {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease-in-out;
+    top: 0; bottom: 0;
+    width: 300px; /* Largeur totale déployée */
+    z-index: 100; /* Au-dessus du Center Area */
+    display: flex;
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Note: Pas de pointer-events: none ici sinon on ne peut pas hover le trigger */
 }
 
-/* 1. SOURCE BRUTE */
-#player-video, #player-image {
-    z-index: 5;
-    opacity: 1; /* Par défaut visible, caché par JS en mode Quantum */
+.aside-content {
+    flex: 1;
+    background-color: rgba(26, 26, 26, 0.95); /* Légère transparence */
+    backdrop-filter: blur(5px);
+    border: 1px solid #333;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
 }
 
-/* 2. RENDU QUANTIQUE / SHADER (Sortie du QuantumEngine) */
-#webgl-canvas {
-    z-index: 10;
-    /* En mode normal, c'est un effet (screen). En mode Quantum, c'est opaque. */
-    mix-blend-mode: screen; 
-    opacity: 0;
-}
-
-/* 3. MONITORING ASCII (Source pour QuantumEngine) */
-#ascii-canvas {
-    z-index: 15;
-    /* Style visuel "Matrix" par défaut */
-    filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.5));
-    opacity: 0;
-}
-
-/* 4. CALQUES D'INTERACTION (Toujours au-dessus) */
-#paint-layer { z-index: 20; opacity: 1; }
-#ruler-layer { z-index: 25; opacity: 1; }
-
-#drawing-layer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 30 !important; /* Toujours au top */
-    pointer-events: none;
-}
-
-#drawing-cursor {
-    mix-blend-mode: exclusion;
-    transition: x 0.05s, y 0.05s;
-}
-
-/* --- CLASSE D'ÉTAT : MODE QUANTUM (Activé par JS) --- */
-/* Lorsque cette classe est ajoutée au container parent : */
-
-#preview-media-container.mode-quantum #player-video {
-    opacity: 0 !important; /* On cache la source, mais elle joue encore */
-}
-
-#preview-media-container.mode-quantum #ascii-canvas {
-    opacity: 0 !important; /* On cache le moniteur ASCII brut */
-}
-
-#preview-media-container.mode-quantum #webgl-canvas {
-    opacity: 1 !important;
-    mix-blend-mode: normal !important; /* Devient opaque pour afficher la superposition */
-    filter: contrast(1.1) brightness(1.1); /* Petit boost visuel */
-}
-
-/* Placeholder */
-#player-placeholder {
-    z-index: 50;
-    background-color: #000;
-}
-#player-placeholder.hidden { display: none; }
-#preview-media-container {
-    width: 100%;
+.aside-trigger {
+    width: 30px;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
+    background-color: #111;
+    border: 1px solid #333;
+    display: flex; flex-direction: column; align-items: center; padding-top: 15px;
+    cursor: pointer; color: #666; z-index: 101;
+    transition: background 0.2s, color 0.2s;
 }
+.aside-trigger:hover { background-color: #252525; color: #fff; }
+.trigger-icon { font-size: 1.2rem; margin-bottom: 10px; }
+.vertical-text { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 0.7rem; font-weight: bold; letter-spacing: 2px; }
 
-/* Superposition des couches */
-.preview-player {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: contain;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.1s;
+/* -- LEFT ASIDE (GAUCHE) -- */
+.left-aside {
+    left: 0;
+    flex-direction: row-reverse; /* Trigger à droite du contenu */
+    /* On cache le contenu (270px) en laissant le trigger (30px) visible */
+    transform: translateX(-270px);
 }
-.preview-player.active { opacity: 1; z-index: 10; }
+.left-aside:hover { transform: translateX(0); }
+.left-aside .aside-trigger { border-left: none; }
 
-/* Calque Dessin */
-#drawing-layer {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 20 !important;
-    pointer-events: none;
+/* -- RIGHT ASIDE (DROITE) -- */
+.right-aside {
+    right: 0;
+    flex-direction: row; /* Trigger à gauche du contenu */
+    /* On cache le contenu (270px) en laissant le trigger (30px) visible */
+    transform: translateX(270px);
 }
+.right-aside:hover { transform: translateX(0); }
+.right-aside .aside-trigger { border-right: none; }
 
-#drawing-cursor {
-    mix-blend-mode: exclusion;
-    transition: x 0.05s, y 0.05s, width 0.05s, height 0.05s;
-}
 
-.preview-controls {
-    height: 40px;
-    background-color: #2a2a2a;
-    border-top: 1px solid #333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
-
-/* --- 4. TIMELINE --- */
+/* --- 6. TIMELINE (BOTTOM DRAWER) --- */
 #timeline-editor {
-    height: 280px; 
-    background-color: #1e1e1e;
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 300px; /* Hauteur déployée */
+    background-color: rgba(30, 30, 30, 0.98);
     border-top: 2px solid #333;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    z-index: 50;
-    position: relative;
+    display: flex; flex-direction: column;
+    z-index: 90; /* Au-dessus du Center Area, en dessous des Asides */
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    
+    /* Par défaut : Caché, sauf une bande de 30px (le header) */
+    transform: translateY(calc(100% - 30px)); 
+}
+
+/* Au survol, on déploie */
+#timeline-editor:hover {
+    transform: translateY(0);
+    box-shadow: 0 -10px 50px rgba(0,0,0,0.8);
 }
 
 .timeline-header {
     height: 30px;
     background-color: #252525;
     border-bottom: 1px solid #333;
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
+    cursor: n-resize; /* Indique que c'est une zone active */
 }
+.timeline-header:hover { background-color: #333; }
 
 #timeline-content-wrapper { flex: 1; position: relative; overflow: auto; }
-#timecode-area {
-    height: 25px; background-color: #2a2a2a; border-bottom: 1px solid #444;
-    position: sticky; top: 0; z-index: 40; width: fit-content;
-}
-#playhead {
-    position: absolute; top: 0; bottom: 0; width: 1px; background: red; z-index: 60; pointer-events: none;
-    border-left: 1px solid rgba(255,0,0,0.5);
-}
-#playhead::after {
-    content: ''; position: absolute; top: 0; left: -5px;
-    border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid red;
-}
-#timeline-tracks-container {
-    display: flex; flex-direction: column; gap: 8px; padding: 10px 0 30px 0; min-width: 100%; width: fit-content;
-}
-.timeline-track { height: 45px; background-color: #252525; border-radius: 3px; position: relative; border: 1px solid #333; }
-.track-label { position: absolute; left: 5px; top: -14px; font-size: 0.6rem; color: #666; pointer-events: none; }
-.timeline-clip {
-    height: 38px; top: 3px; border-radius: 3px; padding: 0 5px; position: absolute;
-    font-size: 0.75rem; color: white; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
-    cursor: pointer; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
-    display: flex; align-items: center; z-index: 5;
-}
-.timeline-clip:hover { filter: brightness(1.2); z-index: 10; }
 
-/* --- 5. FOOTER NAV --- */
-#studio-footer {
-    height: 40px; background-color: #151515; border-top: 1px solid #333;
-    display: flex; justify-content: center; gap: 4px; flex-shrink: 0; z-index: 100;
-}
-.nav-tab {
-    background: none; border: none; color: #666; font-size: 0.8rem; font-weight: bold;
-    padding: 0 15px; cursor: pointer; display: flex; align-items: center; gap: 6px;
-    border-bottom: 3px solid transparent; transition: all 0.2s;
-}
-.nav-tab:hover { color: #aaa; background: #1e1e1e; }
-.nav-tab.active { color: #ddd; border-bottom-color: #d6455d; background: #252525; }
+/* Elements Timeline */
+#timecode-area { height: 25px; background: #2a2a2a; border-bottom: 1px solid #444; position: sticky; top: 0; z-index: 40; }
+#playhead { position: absolute; top: 0; bottom: 0; width: 1px; background: red; z-index: 60; pointer-events: none; border-left: 1px solid rgba(255,0,0,0.5); }
+.timeline-track { height: 45px; background: #252525; border: 1px solid #333; position: relative; margin-bottom: 4px; border-radius: 3px; }
+.track-label { position: absolute; left: 5px; top: 2px; font-size: 0.6rem; color: #666; pointer-events: none; font-weight: bold; }
 
-/* --- 6. ASIDE AUTO-COLLAPSE (Panneaux Latéraux) --- */
-
-.collapsed-aside {
+/* --- CONTROLS OVERLAY (PLAY/PAUSE) --- */
+/* Pour éviter que les contrôles soient cachés par la timeline, on les remonte un peu */
+.preview-controls {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 300px; /* Largeur dépliée */
-    height: 100%;
-    z-index: 50;
-    display: flex;
-    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    pointer-events: none; /* Laisse passer les clics quand fermé */
+    bottom: 40px; /* Au-dessus du header timeline rétracté */
+    left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    border-radius: 20px;
+    padding: 5px 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    z-index: 80;
+    transition: opacity 0.2s;
+}
+/* On cache les contrôles quand la timeline est ouverte pour ne pas gêner */
+#timeline-editor:hover ~ #center-area .preview-controls {
+    opacity: 0;
+    pointer-events: none;
+}
+/* --- TIMELINE DRAWER & FOCUS --- */
+
+#timeline-editor {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 300px; /* Hauteur déployée */
+    background-color: rgba(30, 30, 30, 0.98);
+    
+    /* Bordure par défaut (discrète) */
+    border-top: 2px solid #333;
+    
+    display: flex; flex-direction: column;
+    z-index: 90; 
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.2s, box-shadow 0.2s;
+    
+    /* Caché par défaut (sauf header 30px) */
+    transform: translateY(calc(100% - 30px)); 
 }
 
-/* La zone de contenu (Library / Metadata) */
-.aside-content {
-    flex: 1;
-    background-color: #1a1a1a;
-    border: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    opacity: 0.95;
-    pointer-events: auto; /* Réactive les clics sur le contenu */
+/* Au survol : On ouvre le tiroir */
+#timeline-editor:hover {
+    transform: translateY(0);
+    box-shadow: 0 -10px 50px rgba(0,0,0,0.8);
 }
 
-/* La bande de déclenchement (Trigger Strip) */
-.aside-trigger {
-    width: 30px;
-    height: 100%;
-    background-color: #111;
-    border-right: 1px solid #333;
-    border-left: 1px solid #333;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 10px;
-    cursor: pointer;
-    pointer-events: auto; /* Toujours cliquable/survolable */
-    color: #666;
-    transition: background 0.2s, color 0.2s;
-    z-index: 60;
+/* ÉTAT ACTIF (FOCUS) - Géré par JS */
+/* Utilisation de !important pour être sûr que ça s'applique */
+#timeline-editor.timeline-focused {
+    border-top: 2px solid #1e3a8a !important; /* BLEU SYSTEME */
+    box-shadow: 0 -5px 25px rgba(59, 130, 246, 0.3) !important; /* GLOW BLEU */
 }
 
-.aside-trigger:hover {
+/* Contenu */
+.timeline-header {
+    height: 30px;
     background-color: #252525;
-    color: #fff;
-}
-
-.trigger-icon {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-}
-
-.vertical-text {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    font-size: 0.7rem;
-    font-weight: bold;
-    letter-spacing: 2px;
-    white-space: nowrap;
-}
-
-/* --- GAUCHE (Left Aside) --- */
-.left-aside {
-    left: 0;
-    /* On cache le contenu (270px) en ne laissant que le trigger (30px) visible */
-    transform: translateX(-270px); 
-    flex-direction: row-reverse; /* Trigger à droite du contenu */
-}
-
-.left-aside .aside-trigger {
-    border-left: none; /* Collé au bord gauche */
-}
-
-/* Au survol de TOUT l'aside (trigger ou contenu), on déplie */
-.left-aside:hover {
-    transform: translateX(0);
-}
-
-/* --- DROITE (Right Aside) --- */
-.right-aside {
-    right: 0;
-    /* On cache le contenu en ne laissant que le trigger visible */
-    transform: translateX(270px);
-    flex-direction: row; /* Trigger à gauche du contenu */
-}
-
-.right-aside .aside-trigger {
-    border-right: none; /* Collé au bord droit */
-}
-
-.right-aside:hover {
-    transform: translateX(0);
-}
-
-/* Contenu interne des panneaux (Specifiques) */
-.folder-tree {
-    list-style: none;
-    padding-left: 5px;
-}
-.folder-item {
-    padding: 4px 8px;
+    border-bottom: 1px solid #333;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 10px;
     cursor: pointer;
-    font-size: 0.8rem;
-    color: #aaa;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.folder-item:hover { background-color: #333; color: #fff; }
-.folder-item.active { background-color: #2563eb; color: white; }
-.folder-arrow { font-size: 0.6rem; width: 10px; }
-
-.metadata-grid {
-    display: grid;
-    grid-template-columns: 80px 1fr;
-    gap: 8px 12px;
-    font-size: 0.75rem;
-}
-.meta-label { color: #666; text-align: right; }
-.meta-value { color: #ccc; overflow: hidden; text-overflow: ellipsis; }
-
-/* Canvas ASCII Monitoring (Styles existants) */
-#ascii-canvas {
-    border: 1px solid rgba(74, 222, 128, 0.2);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 15; pointer-events: none;
-    transition: opacity 0.2s, border-color 0.2s;
-}
-#ascii-canvas.active {
-    border: 2px solid #facc15 !important; 
-    background-color: rgba(0, 0, 0, 0.5);
-    box-shadow: 0 0 15px rgba(250, 204, 21, 0.4) !important;
-    opacity: 1 !important; z-index: 25 !important;
-}
-/* Force le calque de dessin à être au-dessus de tout (Même du menu s'il le faut) */
-#preview-media-container.layer-mode-top #drawing-layer {
-    z-index: 100 !important;
-    filter: drop-shadow(0 0 5px white); /* Petit glow pour confirmer qu'il est actif */
 }
 
-/* Mode "Fusion" : Le dessin passe derrière les effets (pour tester l'algo de superposition) */
-#preview-media-container.layer-mode-blend #drawing-layer {
-    z-index: 5 !important; /* Derrière le WebGL/ASCII mais devant la vidéo */
-    mix-blend-mode: overlay; /* Fusionne avec les couches */
+#timeline-content-wrapper { 
+    flex: 1; 
+    position: relative; 
+    overflow: auto; 
+    outline: none; /* Enlève le contour bleu par défaut du navigateur */
+}
+
+/*
+    AJOUTEZ CE BLOC À VOTRE FICHIER CSS PRINCIPAL
+*/
+
+/* 1. Définir l'animation de base (sur le corps ou le conteneur principal) */
+#preview-media-container {
+    /* Propriété critique: assure une animation de 0.3s sur l'opacité */
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1; /* S'assurer qu'il est visible au départ */
+}
+
+/* 2. La classe déclenchée par le JavaScript */
+.studio-fade-out {
+    /* Rend l'élément invisible */
+    opacity: 0 !important; 
+    /* pointer-events: none; (Optionnel: pour bloquer les clics pendant la transition) */
 }
