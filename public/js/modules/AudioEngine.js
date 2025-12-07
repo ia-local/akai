@@ -1,170 +1,207 @@
-/**
- * AUDIO ENGINE (Tone.js Wrapper) - CORRIGÉ
- * Gère le mixage spatial, les effets et la lecture des samples.
- */
+// public/js/modules/AudioEngine.js
 
-// Si Tone est chargé en script global (non-module), il est attaché à window.
-// Dans un module ES6, nous devons nous assurer qu'il est accessible.
+/**
+ * AUDIO ENGINE (Tone.js Wrapper) - VERSION MATHÉMATIQUE & QUANTIQUE FINALE
+ * Gère le mixage spatial, les samplers, le séquenceur et les contrôles avancés.
+ */
 
 export class AudioEngine {
     constructor() {
         this.isInitialized = false;
         
-        // --- VÉRIFICATION CRITIQUE POUR LA RÉSILIENCE DU MODULE ---
         if (typeof Tone === 'undefined') {
-            console.error("❌ TONE.JS NON DÉFINI. Assurez-vous que le CDN est chargé AVANT AudioEngine.js.");
+            console.error("❌ TONE.JS NON DÉFINI.");
             return; 
         }
         
-        // --- 1. MASTER CHAIN (La chaîne de sortie) ---
-        // Limiter pour éviter la saturation numérique
+        // --- 1. MASTER CHAIN ---
         this.limiter = new Tone.Limiter(-1).toDestination();
-        
-        // Master Volume
         this.masterGain = new Tone.Gain(1.0).connect(this.limiter);
-
-        // --- 2. FX BUS (Effets Globaux) ---
         
-        this.reverb = new Tone.Reverb({
-            decay: 2.5,
-            preDelay: 0.1,
-            wet: 0 
-        }); 
-
-        // EQ 3 Bandes (Contrôlé par MIDI CC 6 & 7)
-        this.eq = new Tone.EQ3(0, 0, 0);
-
-        // Filter (Contrôlé par l'axe Y)
+        // --- 2. FX BUS ---
+        this.reverb = new Tone.Reverb({ decay: 2.5, preDelay: 0.1, wet: 0 }); 
+        this.eq = new Tone.EQ3(0, 0, 0); // Low, Mid, High (CC 3 pour Mid)
         this.filter = new Tone.Filter(20000, "lowpass", -12);
-
-        // Panner 3D (Contrôlé par l'axe X)
-        this.panner = new Tone.Panner(0); // -1 (Gauche) à 1 (Droite)
-
+        this.panner = new Tone.Panner(0); 
+        this.chorus = new Tone.Chorus({ frequency: 1.5, delayTime: 3.5, depth: 0.7, type: "sine", spread: 180, wet: 0 });
+        
+        // --- 3. QUANTIFICATION & SYNCHRO ---
+        this.quantizer = 0; 
+        this.clockRate = 120; 
+        this.isSequencerRunning = false;
+        this.scaleIndex = 0; // CC 4: Index de transposition
+        
         // --- CHAINAGE DU SIGNAL ---
-        // Panner -> Filter -> EQ -> Reverb -> Master
         this.panner.connect(this.filter);
         this.filter.connect(this.eq);
-        this.eq.connect(this.reverb);
+        this.eq.connect(this.chorus); 
+        this.chorus.connect(this.reverb); 
         this.reverb.connect(this.masterGain);
 
-        // --- 3. SOURCES ---
-        this.players = new Map(); // Pour les sons de la Timeline
-        this.bankPlayers = {};    // Pour les Pads (MPD218)
-        
-        // Synthé par défaut pour les tests PAD
+        // --- 4. SOURCES : Sampler, Synthé, Séquenceur ---
+        this.players = new Map(); 
         this.synth = null; 
+        this.sampler = null;
+        this.sequencer = null;
+        this.tensorCaptureBuffer = {};
     }
 
-    /**
-     * Initialise le contexte Audio (Doit être appelé après une interaction utilisateur)
-     */
     async init() {
         if (this.isInitialized) return;
-        
-        if (typeof Tone === 'undefined') {
-            console.error("❌ Cannot start Tone.js: Library not available.");
-            return;
-        }
+        if (typeof Tone === 'undefined') return;
 
         await Tone.start();
         console.log("🔊 AUDIO ENGINE: Tone.js Context Started");
         
-        // On attend que la reverb soit prête
         await this.reverb.ready; 
+        
+        Tone.Transport.bpm.value = this.clockRate;
+        Tone.Transport.swing = 0.5;
 
         this.isInitialized = true;
         this._loadDefaultBank();
     }
 
-    /**
-     * Charge des sons basiques pour les pads (Placeholder)
-     */
     _loadDefaultBank() {
-        // Création du synthé connecté au Panner
+        // --- SYNTHÉ DE SECOURS (Si le Sampler échoue) ---
         this.synth = new Tone.PolySynth(Tone.Synth).connect(this.panner);
+        this.synth.set({ envelope: { attack: 0.005, decay: 0.2, sustain: 0.1, release: 0.5 } });
+        
+        // --- SAMPLER (Pads A/C) ---
+        // ATTENTION: Les chemins doivent pointer vers des fichiers EXISTANTS sur votre serveur
+        const defaultSamples = { 
+            "C4": "public/audio/kick.wav", // Exemple
+            "D4": "public/audio/snare.wav",
+            "E4": "public/audio/hat.wav",
+        };
+        
+        this.sampler = new Tone.Sampler({
+            urls: defaultSamples,
+            onload: () => console.log("✅ SAMPLER: Pads chargés (C4, D4, E4)."),
+        }).connect(this.panner);
+
+        // --- SÉQUENCEUR (Exemple simple) ---
+        this.sequencer = new Tone.Sequence((time, note) => {
+            if (this.isSequencerRunning && this.sampler.loaded) {
+                this.sampler.triggerAttack(note, time);
+            }
+        }, ["C4", "rest", "D4", "E4"]).start(0);
+
+        Tone.Transport.stop(); 
     }
 
     // =================================================================
-    // GESTION SPATIALE & MIDI
+    // CONTROLES KNOB (CC 0-7)
     // =================================================================
 
     updateSpatialState(x, y, z) {
         if (!this.isInitialized) return;
-
-        // 1. AXE X : Panoramique
         const panVal = Math.max(-1, Math.min(1, (x / 50) - 1));
         this.panner.pan.rampTo(panVal, 0.1);
-
-        // 2. AXE Y : Filtre
         const freqVal = Math.max(100, (y / 100) * 15000);
         this.filter.frequency.rampTo(freqVal, 0.1);
-
-        // 3. AXE Z : Reverb Wetness
         const wetVal = Math.max(0, Math.min(0.8, (z - 0.5) / 4));
         this.reverb.wet.rampTo(wetVal, 0.2);
     }
-
     updateEQ(bass, treble) {
         if (!this.isInitialized) return;
-        // Vérification si la valeur est null (cas où on ne touche qu'un seul knob)
         if (bass !== null && bass !== undefined) this.eq.low.value = bass;
         if (treble !== null && treble !== undefined) this.eq.high.value = treble;
     }
-
-    triggerPad(note, velocity = 1) {
-        if (!this.isInitialized || !this.synth) return;
-
-        const toneNote = Tone.Frequency(note, "midi").toNote();
-        this.synth.triggerAttackRelease(toneNote, "8n", undefined, velocity);
-        console.log(`🎵 AUDIO: Trigger ${toneNote} (Vel: ${velocity.toFixed(2)})`);
+    
+    // NOUVEAU : CC 4 (Key Mode Index - Math)
+    updateKeyModeIndex(rawIndex) {
+        if (!this.isInitialized) return;
+        this.scaleIndex = Math.floor(rawIndex);
+        console.log(`🎵 KEY MODE (CC4): Index de Tonalité mis à jour à ${this.scaleIndex}`);
     }
 
+    // NOUVEAU : CC 3 (Filter Band - Math)
+    updateFilterBand(rawFreq) {
+        if (!this.isInitialized) return;
+        this.eq.mid.value = rawFreq; 
+        console.log(`🎚️ BAND EQ (CC3): Fréquence centrale Mid EQ à ${rawFreq} Hz.`);
+    }
+
+    // NOUVEAU : CC 6 (FX Index)
+    updateFXIndex(rawIndex) {
+        if (!this.isInitialized) return;
+        const freq = 0.5 + (rawIndex * 0.2); 
+        const wet = rawIndex / 10;           
+        this.chorus.frequency.value = freq;
+        this.chorus.wet.value = wet;
+    }
+
+    // NOUVEAU : CC 7 (Transport Speed)
+    updateTransportSpeed(rawSpeed) {
+        if (!this.isInitialized) return;
+        const newBPM = Math.max(60, Math.min(180, rawSpeed + 60));
+        Tone.Transport.bpm.rampTo(newBPM, 0.2);
+    }
+    
     // =================================================================
-    // TRANSPORT & TIMELINE
+    // LOGIQUE QUANTIQUE / TRANSPORT (Banque B)
     // =================================================================
 
-    setTime(time) {
-        if (!this.isInitialized) return;
-        Tone.Transport.seconds = time;
+    toggleQuantizer() {
+        this.quantizer = (this.quantizer === 0) ? "4n" : 0; 
+        console.log(`⚛️ QUANTUM: Quantification ${this.quantizer ? 'ACTIVÉE' : 'DÉSACTIVÉE'}`);
     }
 
-    play() {
-        if (!this.isInitialized) return;
-        if (Tone.context.state !== 'running') Tone.context.resume();
-        Tone.Transport.start();
+    toggleSequencer() {
+        this.isSequencerRunning = !this.isSequencerRunning;
+        if (this.isSequencerRunning) {
+            this.sequencer.start(0);
+        } else {
+            this.sequencer.stop();
+        }
+        console.log(`🎶 SEQUENCER: ${this.isSequencerRunning ? 'Démarré' : 'Arrêté'}.`);
     }
 
-    pause() {
-        if (!this.isInitialized) return;
-        Tone.Transport.pause();
+    startTensorCapture() {
+        this.tensorCaptureBuffer = {
+            pan: this.panner.pan.value, freq: this.filter.frequency.value,
+            reverbWet: this.reverb.wet.value, fxWet: this.chorus.wet.value,
+        };
+        console.log("💾 TENSOR: État des contrôles capturé.", this.tensorCaptureBuffer);
     }
-
+    
+    // --- TRANSPORT ---
+    playPause() {
+        if (!this.isInitialized) return;
+        if (Tone.Transport.state === 'started') {
+            Tone.Transport.pause();
+        } else {
+            if (Tone.context.state !== 'running') Tone.context.resume();
+            Tone.Transport.start();
+        }
+    }
+    getTransportState() { return Tone.Transport.state.toUpperCase(); }
     stop() {
         if (!this.isInitialized) return;
         Tone.Transport.stop();
+        Tone.Transport.seconds = 0;
     }
 
-    async loadTimelineClip(clip) {
-        let url = clip.assetData.url || clip.assetData.path;
-        if (!url) return;
+    // --- TRIGGER PAD (Banques A, C) ---
+    triggerPad(note, velocity = 1) {
+        if (!this.isInitialized || (!this.synth && !this.sampler)) return;
         
-        if (!url.startsWith('http')) {
-            url = 'http://localhost:3145' + url.replace(/^\/public/, '');
+        // Calcul de la note transposée
+        let noteToPlay = Tone.Frequency(note, "midi").toNote();
+        if (this.scaleIndex !== 0 && note < 32) { 
+            noteToPlay = Tone.Frequency(note + this.scaleIndex, "midi").toNote();
         }
 
-        console.log(`📥 AUDIO: Loading clip ${clip.name} from ${url}`);
+        // Action de jeu
+        if (note >= 0 && note <= 15 || note >= 32) {
+            const time = this.quantizer ? Tone.Transport.nextSubdivision(this.quantizer) : undefined;
 
-        const player = new Tone.Player({
-            url: url,
-            onload: () => console.log(`✅ AUDIO: Clip ${clip.name} loaded`),
-            onerror: (e) => console.error(`❌ AUDIO: Error loading ${clip.name}`, e)
-        }).connect(this.panner);
-
-        // Synchro avec Tone.Transport
-        // sync().start(offset, startTime_in_clip) -> start(quand_dans_timeline, quel_offset_du_fichier)
-        // Ici on veut que le fichier démarre à clip.startTime
-        player.sync().start(clip.startTime).stop(clip.startTime + clip.duration);
-
-        this.players.set(clip.id, player);
+            if (this.sampler?.loaded) {
+                this.sampler.triggerAttack(noteToPlay, time, velocity);
+            } else {
+                this.synth.triggerAttackRelease(noteToPlay, "8n", time, velocity);
+            }
+        }
     }
 }

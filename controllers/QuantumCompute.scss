@@ -1,55 +1,97 @@
-// Définition des variables
-$primary-color: #3498db; // Pour l'ambiance HARMONY
-$glitch-intensity: 0.2; // Pour l'ambiance HARMONY
-
-// Définition de la fonction pour calculer l'opacité
-$opacity: 0.5;
-
-// Définition de la fonction pour calculer la complexité
+/* Définition des variables */
+$primary-color: #3498db; // bleu foncé
+$glitch-intensity: 0.5; // 50%
 $entanglement: low; // Basse
-$entanglement-class: '';
-$entanglement-variable: $entanglement == 'low' ? $primary-color : $glitch-intensity;
-$entanglement-switch: $entanglement == 'high' ? '1' : '0';
+$probabilité: 0.5; // 50%
+$ambiance: harmony; // HARMONY
 
-// Définition de la fonction pour calculer le mode
-$mode: harmony;
+/* Définition des couleurs en fonction de l'ambiance */
+$primary-color-harmony: #8bc34a;
+$primary-color-chaos: #ff9800;
 
-// Définition de la fonction pour calculer l'animation
+/* Définition des animations */
 @keyframes quantum-flux {
   0% {
     transform: scale(1);
+    opacity: 1;
+  }
+  10% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+  20% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: scale(0.9);
+    opacity: 0.8;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
   }
   50% {
-    transform: scale(1.2);
+    transform: scale(1.05);
+    opacity: 0.95;
+  }
+  60% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+  80% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  90% {
+    transform: scale(1.1);
+    opacity: 0.9;
   }
   100% {
     transform: scale(1);
+    opacity: 1;
   }
 }
 
-// Style global
-body {
-  background-color: $primary-color;
-}
-
-// Style pour le mode quantique
+/* Définition des styles */
 #preview-media-container.mode-quantum {
-  .webgl-canvas {
-    opacity: $opacity;
-    animation: quantum-flux $entanglement-switch s infinite;
+  .animation-name("quantum-flux");
+  .animation-duration(4s);
+  .animation-iteration-count(infinite);
+  .animation-timing-function(linear);
+  
+  & #webgl-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    animation-name: quantum-flux;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
   }
 }
 
-// Switch pour la complexité
-@mixin entanglement-switch($class) {
-  #preview-media-container & {
-    @if $entanglement == 'high' {
-      .#{ $class } {
-        @include quantum-flux;
-      }
+/* Définition des styles en fonction de l'entanglement */
+$entanglement == high and $entanglement == high {
+  #preview-media-container.mode-quantum {
+    & #webgl-canvas {
+      @include animation("quantum-flux", 4s, infinite, linear);
     }
   }
 }
 
-// Utilisation de la fonction entanglement-switch
-@entanglement-switch('mode-quantum');
+/* Définition des styles en fonction de la probabilité */
+$probabilité == 0.5 {
+  #preview-media-container.mode-quantum {
+    opacity: $probabilité;
+  }
+}
+
+Notez que j'ai utilisé des variables pour définir les couleurs et les animations, et que j'ai appliqué les animations en fonction de l'état actuel de l'entanglement et de la probabilité. J'ai également utilisé les pseudo-classes pour appliquer les styles en fonction de la valeur des variables.

@@ -1,13 +1,13 @@
 // public/js/modules/ToolSystem.js
 
 export class ToolSystem {
-    constructor(drawingEngine, asciiPixelEngine, glyphsData) {
+    constructor(drawingEngine, paintEngine, glyphsData) {
         this.svgEngine = drawingEngine;      // Moteur Vectoriel (Pad 5)
-        this.pixelEngine = asciiPixelEngine; // Moteur Bitmap/Tensor (Pad 6)
+        this.paintEngine = paintEngine;      // Moteur Bitmap/Tensor (Pad 6)
         
         // Données des Glyphes
         this.glyphs = glyphsData;
-        this.glyphKeys = Object.keys(this.glyphs.chars); // ['A', 'B', 'BLOCK'...]
+        this.glyphKeys = Object.keys(this.glyphs.chars); 
         this.currentGlyphIndex = 0;
 
         // État
@@ -27,7 +27,7 @@ export class ToolSystem {
         // Curseur visuel CSS
         if (toolName === 'brush-svg') document.body.style.cursor = 'crosshair';
         else if (toolName === 'stamp-ascii') document.body.style.cursor = 'text';
-        else if (toolName === 'eraser') document.body.style.cursor = 'not-allowed'; // Style gomme
+        else if (toolName === 'eraser') document.body.style.cursor = 'not-allowed'; 
         else document.body.style.cursor = 'default';
     }
 
@@ -36,8 +36,6 @@ export class ToolSystem {
         this.currentGlyphIndex = (this.currentGlyphIndex + 1) % this.glyphKeys.length;
         this.activeChar = this.glyphKeys[this.currentGlyphIndex];
         console.log(`🔤 Next Glyph: ${this.activeChar}`);
-        
-        // Feedback visuel optionnel : On pourrait afficher la lettre quelque part
     }
 
     // --- GESTION DES ENTRÉES (Souris) ---
@@ -62,10 +60,7 @@ export class ToolSystem {
 
     _onMove(e) {
         if (!this.isDrawing) return;
-        
         const coords = this._getLocalCoords(e);
-        
-        // Pour éviter de trop dessiner en mode Stamp (Performance), on pourrait limiter ici
         this._applyTool(coords);
     }
 
@@ -81,10 +76,9 @@ export class ToolSystem {
     _applyTool(coords) {
         // 1. PINCEAU VECTORIEL (Pad 5)
         if (this.activeTool === 'brush-svg') {
-            if (!this.svgEngine.state.isDrawing) this.svgEngine.startStroke(); // Sécurité
+            if (!this.svgEngine.state.isDrawing) this.svgEngine.startStroke(); 
             this.svgEngine.updateState('x', coords.normX); // SVG utilise 0-100%
             this.svgEngine.updateState('y', coords.normY);
-            // updateState appelle updateCursor qui appelle _addPointToPath
         } 
         
         // 2. TAMPON ASCII / TENSOR (Pad 6)
@@ -96,12 +90,12 @@ export class ToolSystem {
             const snapX = Math.floor(coords.x / size) * size;
             const snapY = Math.floor(coords.y / size) * size;
 
-            this.pixelEngine.drawMatrix(matrix, snapX, snapY, size);
+            this.paintEngine.drawMatrix(matrix, snapX, snapY, size);
         }
 
         // 3. GOMME (Pad 8)
         else if (this.activeTool === 'eraser') {
-            this.pixelEngine.erase(coords.x, coords.y, 20);
+            this.paintEngine.erase(coords.x, coords.y, 20);
         }
     }
 

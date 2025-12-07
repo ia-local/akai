@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio AV - Editor (Immersive)</title>
+    
+    <link rel="stylesheet" href="css/studio.css">
+    <link rel="stylesheet" href="css/timeLine.css">
+    <link rel="stylesheet" href="css/modalSystem.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 'akai-base': '#1e1e1e' },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Consolas', 'monospace'] },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Indicateur de Focus Timeline */
+        #timeline-editor.timeline-focused {
+            border-top: 2px solid #3b82f6; /* Bordure Bleue Active */
+            box-shadow: 0 -5px 20px rgba(59, 130, 246, 0.2);
+        }
+        /* Couleurs des pistes */
+        .track-ascii { border-left: 3px solid #d946ef; background: rgba(217, 70, 239, 0.05); }
+        .track-video { border-left: 3px solid #3b82f6; }
+        .track-audio { border-left: 3px solid #22c55e; }
+        .track-image { border-left: 3px solid #eab308; }
+        .track-text  { border-left: 3px solid #fff; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="flex items-center">
+            <span class="text-xl font-bold text-white mr-6">Studio AV (v1.6)</span>
+            <div id="mode-indicator" class="px-3 py-1 rounded text-xs font-bold bg-green-900 text-green-400 border border-green-700 transition-colors">
+                MODE: PERFORM
+            </div>
+        </div>
+
+        <div class="space-x-4 flex items-center pr-4">
+             <div class="text-xs text-gray-400 flex items-center space-x-2 border-r border-gray-700 pr-4">
+                <button id="zoom-out-btn" class="bg-gray-800 w-6 h-6 rounded hover:bg-gray-700">-</button>
+                <span id="zoom-level-display">100%</span>
+                <button id="zoom-in-btn" class="bg-gray-800 w-6 h-6 rounded hover:bg-gray-700">+</button>
+             </div>
+             <button id="toggle-gl-btn" class="flex items-center gap-2 bg-gray-800 border border-gray-600 px-3 py-1 rounded text-gray-400 text-xs hover:text-white transition-colors">
+                <span>✨</span> GL FX
+             </button>
+             <button id="render-btn" class="bg-red-600 px-3 py-1 rounded text-white text-xs hover:bg-red-700 font-bold">EXPORT</button>
+        </div>
+    </header>
+
+    <div id="workspace">
+        
+        <aside id="asset-library" class="collapsed-aside left-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">📁</span>
+                <span class="vertical-text">MEDIA</span>
+            </div>
+            
+            <div class="aside-content">
+                <div class="flex justify-between items-center p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <h2 class="text-white font-semibold text-xs uppercase tracking-wider">Média Pool</h2>
+                    <div class="flex gap-1">
+                        <button id="view-grid-btn" class="text-gray-400 hover:text-white">▦</button>
+                    </div>
+                </div>
+                <div id="assets-list-container" class="p-2 text-gray-500 text-xs overflow-y-auto">
+                    <div class="p-2 hover:bg-white/10 rounded cursor-pointer flex items-center gap-2">
+                        <span class="text-blue-400">🎬</span> video_clip_01.mp4
+                    </div>
+                    <div class="p-2 hover:bg-white/10 rounded cursor-pointer flex items-center gap-2">
+                        <span class="text-green-400">🎵</span> audio_track_main.wav
+                    </div>
+                    <div class="p-2 hover:bg-white/10 rounded cursor-pointer flex items-center gap-2">
+                        <span class="text-yellow-400">🖼️</span> image_ref.png
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <div id="center-area">
+            <div id="preview-zone">
+                <div id="preview-media-container">
+                    <img id="player-image" class="preview-player" src="" />
+                    <video id="player-video" class="preview-player" muted playsinline preload="auto"></video>
+                    
+                    <canvas id="webgl-canvas" class="preview-player"></canvas>
+                    <canvas id="ascii-canvas" class="preview-player"></canvas>
+                    <canvas id="paint-layer" class="preview-player active"></canvas>
+                    <canvas id="ruler-layer" class="preview-player active"></canvas>
+
+                    <svg id="drawing-layer" xmlns="http://www.w3.org/2000/svg">
+                        <g id="drawn-paths"></g>
+                        <rect id="drawing-cursor" x="0" y="0" width="10" height="10" fill="none" stroke="white" /> 
+                    </svg>
+                    
+                    <div id="player-placeholder" class="preview-player active flex justify-center items-center text-gray-500 bg-black h-full w-full">
+                        <div class="text-center animate-pulse">
+                            <span class="text-4xl block mb-2">⚛️</span>
+                            <span class="text-xs tracking-[4px]">QUANTUM ENGINE READY</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-controls flex gap-4">
+                <button id="btn-play" class="text-white hover:text-green-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+                <button id="btn-pause" class="text-white hover:text-yellow-400"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
+            </div>
+        </div>
+
+        <aside id="right-panel" class="collapsed-aside right-aside">
+            <div class="aside-trigger">
+                <span class="trigger-icon">🧠</span>
+                <span class="vertical-text">AI TOOLS</span>
+            </div>
+            <div class="aside-content">
+                <div class="panel-header p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <span class="text-white font-bold text-xs uppercase">Assistants Intelligents</span>
+                </div>
+                <div class="panel-content text-sm text-gray-400 p-4">
+                    <button class="w-full bg-blue-900/50 text-blue-200 py-2 mb-2 rounded border border-blue-800 text-xs hover:bg-blue-900">Analyze Scene (Vision)</button>
+                    <button class="w-full bg-purple-900/50 text-purple-200 py-2 rounded border border-purple-800 text-xs hover:bg-purple-900">Generate ASCII (Llama)</button>
+                </div>
+            </div>
+        </aside>
+
+        <div id="timeline-editor">
+<div class="timeline-header">
+                <div class="flex items-center">
+                    <h3 class="text-xs text-white font-bold mr-4 uppercase w-24">TIMELINE</h3>
+                    
+                    <div id="timecode-display" class="text-xs font-mono text-red-500 font-bold bg-black px-2 rounded border border-red-900 mr-4">00:00:00:00</div>
+
+                    <div class="flex bg-black/50 rounded border border-gray-700 overflow-hidden" id="tl-switcher">
+                        <button class="tl-btn px-3 py-1 text-[10px] text-white active border-r border-gray-700" data-tl="MASTER">MASTER</button>
+                        <button class="tl-btn px-3 py-1 text-[10px] text-gray-400 border-r border-gray-700 hover:text-white" data-tl="RUSHES">RUSHES</button>
+                        <button class="tl-btn px-3 py-1 text-[10px] text-gray-400 hover:text-white" data-tl="FX">FX COMP</button>
+                    </div>
+                </div>
+                <div class="text-[10px] text-gray-500">HOVER TO EXPAND ▲</div>
+            </div>
+
+            <div id="timeline-content-wrapper" class="p-2 flex-1 overflow-y-auto bg-[#111]" tabindex="0">
+                <div id="timecode-area" class="w-full h-6 bg-[#222] mb-2 border-b border-gray-600 relative">
+                    </div>
+                <div id="playhead"></div>
+                
+                <div id="timeline-tracks-container" class="space-y-1 pb-10">
+                    <div id="track-video" class="timeline-track track-video h-12 bg-[#1a1a1a] relative border border-[#333] rounded" data-track-type="video">
+                        <span class="track-label text-blue-500 bg-black/50 px-1 rounded absolute top-1 left-1 z-10">V1 (VIDEO)</span>
+                    </div>
+                    
+                    <div id="track-image" class="timeline-track track-image h-12 bg-[#1a1a1a] relative border border-[#333] rounded" data-track-type="image">
+                        <span class="track-label text-yellow-500 bg-black/50 px-1 rounded absolute top-1 left-1 z-10">IMG (VISUEL)</span>
+                    </div>
+
+                    <div id="track-text" class="timeline-track track-text h-8 bg-[#1a1a1a] relative border border-[#333] rounded" data-track-type="text">
+                        <span class="track-label text-white bg-black/50 px-1 rounded absolute top-1 left-1 z-10">TXT (TITRE)</span>
+                    </div>
+
+                    <div id="track-ascii" class="timeline-track track-ascii h-8 bg-[#1a1a1a] relative border border-[#333] rounded" data-track-type="ascii">
+                        <span class="track-label text-fuchsia-500 bg-black/50 px-1 rounded absolute top-1 left-1 z-10">ASCII (MATRIX)</span>
+                    </div>
+
+                    <div id="track-audio" class="timeline-track track-audio h-12 bg-[#1a1a1a] relative border border-[#333] rounded" data-track-type="audio">
+                        <span class="track-label text-green-500 bg-black/50 px-1 rounded absolute top-1 left-1 z-10">A1 (AUDIO)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer id="studio-footer">
+        <a href="html/media_data.html" class="nav-tab"><span class="nav-icon">📁</span> MEDIA</a>
+        <a href="html/code_timeline.html" class="nav-tab"><span class="nav-icon">✂️</span> CODE</a>
+        <a href="html/editor.html" class="nav-tab active"><span class="nav-icon">🎬</span> EDIT</a>
+        <a href="html/fusion_visuel.html" class="nav-tab"><span class="nav-icon">🎨</span> FUSION</a>
+        <a href="html/fairlight_audio.html" class="nav-tab"><span class="nav-icon">🎵</span> FAIRLIGHT</a>
+        <a href="html/delivery.html" class="nav-tab"><span class="nav-icon">🚀</span> DELIVER</a>
+    </footer>
+    
+    <div id="generic-modal-overlay" class="c-modal-overlay"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="http://localhost:3145/socket.io/socket.io.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const timelineEditor = document.getElementById('timeline-editor');
+            const wrapper = document.getElementById('timeline-content-wrapper');
+            const centerArea = document.getElementById('center-area');
+
+            // Activation du Focus (Bordure Bleue)
+            wrapper.addEventListener('click', (e) => {
+                timelineEditor.classList.add('timeline-focused');
+                console.log('✅ Timeline Focused');
+            });
+
+            // Désactivation du Focus (Clic extérieur)
+            centerArea.addEventListener('click', (e) => {
+                // On vérifie que le clic n'est pas dans la timeline
+                if (!timelineEditor.contains(e.target)) {
+                    timelineEditor.classList.remove('timeline-focused');
+                    console.log('❌ Timeline Unfocused');
+                }
+            });
+        });
+    </script>
+
+    <script type="module" src="./js/main.js"></script>
+</body>
+</html>

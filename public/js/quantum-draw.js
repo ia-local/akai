@@ -3,8 +3,8 @@
  * Rôle: Exporte la fonction de rendu des bits de base |0> et |1>.
  */
 
-
-import { asciiBit,baseCharWidth, baseCharHeight, quantumWavelengths } from './ascii-art.js'; 
+import { asciiBit, baseCharWidth, baseCharHeight } from './ascii-art.js'; 
+import { baseCharWidth, baseCharHeight, quantumWavelengths } from './ascii-art.js'; 
 import { generateQubitBlock3D } from './qubit_tensor_processor.js'; 
 
 const TENSOR_RENDER = { FILL_LIGHT: '░', FILL_SOLID: '█' }; // Densités nécessaires
@@ -78,6 +78,11 @@ export function renderTwoBaseBits(ctx) {
     
     // Le code de `quantum_ui.js` gère le `quantum-active`
 }
+/**
+ * Fichier: quantum.js
+ * Rôle: Rendu des états de base fixes |0> et |1> en 3D (Mode Index 1).
+ */
+
 
 // Dessin multi-ligne (adapté pour les blocs 3D)
 // Dessin multi-ligne (adapté pour les blocs 3D)
@@ -104,6 +109,41 @@ function drawBlock(ctx, blockArt, startX, startY, color) {
     return maxLineLength * charW; 
 }
 
+/**
+ * 🛑 RENDU DES DEUX BITS DE BASE EN 3D (Index 1)
+ */
+export function renderTwoBaseBits(ctx) {
+    const container = document.getElementById('preview-media-container');
+    if (container) {
+        ctx.canvas.width = container.clientWidth;
+        ctx.canvas.height = container.clientHeight;
+    }
+    
+    const blockArt0 = generateQubitBlock3D(TENSOR_RENDER.FILL_LIGHT, 1.0); // Représentation |0> (faible densité)
+    const blockArt1 = generateQubitBlock3D(TENSOR_RENDER.FILL_SOLID, 1.0); // Représentation |1> (forte densité)
+    
+    // Dimensions du bloc 3D
+    const maxLineLength = blockArt0.reduce((max, line) => Math.max(max, line.length), 0);
+    const widthTotalBlock = maxLineLength * baseCharWidth;
+    const heightTotal = blockArt0.length * baseCharHeight;
+
+    const totalContentWidth = (widthTotalBlock * 2) + LETTER_SPACING;
+
+    let currentX = (ctx.canvas.width / 2) - (totalContentWidth / 2);
+    const startY = (ctx.canvas.height / 2) - (heightTotal / 2);
+
+    // 1. Dessiner l'état |0> (Rouge/Faible)
+    const color0 = `rgb(${quantumWavelengths['0'].color.r}, ${quantumWavelengths['0'].color.g}, ${quantumWavelengths['0'].color.b})`;
+    const widthDrawn0 = drawBlock(ctx, blockArt0, currentX, startY, color0);
+    
+    currentX += widthDrawn0 + LETTER_SPACING;
+
+    // 2. Dessiner l'état |1> (Cyan/Forte)
+    const color1 = `rgb(${quantumWavelengths['1'].color.r}, ${quantumWavelengths['1'].color.g}, ${quantumWavelengths['1'].color.b})`;
+    drawBlock(ctx, blockArt1, currentX, startY, color1);
+    
+    console.log("✅ Visualisation des états |0> et |1> en 3D TENSOR terminée.");
+}
 // Nettoyage de l'ancien appel direct au démarrage
 
 

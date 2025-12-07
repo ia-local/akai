@@ -1,9 +1,9 @@
-/* Error: expected ";".
+/* Error: expected "{".
  *    ,
- * 11 | $entanglement-variable: $entanglement == 'low' ? $primary-color : $glitch-intensity;
- *    |                                                ^
+ * 62 |   .animation-name("quantum-flux");
+ *    |                                  ^
  *    '
- *   controllers/QuantumCompute.scss 11:48  root stylesheet */
+ *   controllers/QuantumCompute.scss 62:34  root stylesheet */
 
 body::before {
   font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
@@ -13,5 +13,5 @@ body::before {
   padding: 1em;
   margin-bottom: 1em;
   border-bottom: 2px solid black;
-  content: "Error: expected \";\".\a    \2577 \a 11 \2502  $entanglement-variable: $entanglement == 'low' ? $primary-color : $glitch-intensity;\a    \2502                                                 ^\a    \2575 \a   controllers/QuantumCompute.scss 11:48  root stylesheet";
+  content: 'Error: expected "{".\a    \2577 \a 62 \2502    .animation-name("quantum-flux");\a    \2502                                   ^\a    \2575 \a   controllers/QuantumCompute.scss 62:34  root stylesheet';
 }

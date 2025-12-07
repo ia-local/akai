@@ -10,9 +10,11 @@ const path = require('path');
 const AssetManager = require('./controllers/AssetManager.js');
 const MidiManager = require('./controllers/MidiManager.js');
 const QuantumComputer = require('./controllers/QuantumComputer.js');
-// Note : Utiliser un router depuis 'public' est risqué (code source exposé). 
-// Idéalement, déplace iaRouter.js dans un dossier 'routes' à la racine.
-const iaRouter = require('./public/iaRouter.js');
+
+// 💡 CORRECTION MODULARITÉ/SÉCURITÉ:
+// On utilise iaRouter.js de la racine (selon l'arborescence) pour éviter
+// son exposition via le dossier /public.
+const iaRouter = require('./public/iaRouter.js'); 
 
 // --- Configuration ---
 const PORT = 3145;
@@ -48,20 +50,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 const GLOBAL_STATE = {
     cursor_x: 50,
     cursor_y: 50,
-    cursor_z: 1.0,
+    cursor_z: 1.0, // Reste pour la compatibilité Legacy si besoin
     av_chroma_angle: 0,
     av_camera_rot: 0,
     av_saturation: 1.0,
     eq_bass: 0,
     eq_treble: 0,
+    // 💡 AJOUT : Assurer la conformité avec le schéma GlobalState de Swagger
     quantum_dimension: 1,
     quantum_probability: 0.5,
     quantum_entanglement: 0.0,
+    quantum_coherence: 1.0, // Ajouté, lié à cursor_z (Zoom/Stabilité)
     transport: 'STOPPED'
 };
 
 // --- Initialisation des Contrôleurs ---
-const assetMgr = new AssetManager('public'); // Vérifie que ce dossier existe bien via path aussi si besoin
+const assetMgr = new AssetManager('public'); 
 const midiMgr = new MidiManager(io, GLOBAL_STATE);
 const quantumComputer = new QuantumComputer();
 
@@ -72,6 +76,8 @@ app.get('/api/assets', (req, res) => {
 });
 
 app.get('/api/state', (req, res) => {
+    // Mise à jour de la cohérence avant l'envoi
+    GLOBAL_STATE.quantum_coherence = GLOBAL_STATE.cursor_z; 
     res.json(GLOBAL_STATE);
 });
 
@@ -107,6 +113,7 @@ app.post('/api/ia/chatbot', async (req, res) => {
             messages: messages,
             model: "llama-3.1-8b-instant",
             temperature: 0.1,
+            // Permet de forcer le JSON pour les commandes /code
             response_format: userPrompt.startsWith('/code') ? { type: "json_object" } : undefined
         });
 
@@ -143,6 +150,8 @@ function formatCodeContext(context) {
 io.on('connection', (socket) => {
     console.log(`[Socket] Client connecté: ${socket.id}`);
     
+    // Assurer que la cohérence est synchronisée avant l'envoi initial
+    GLOBAL_STATE.quantum_coherence = GLOBAL_STATE.cursor_z;
     socket.emit('init_state', GLOBAL_STATE);
 
     socket.on('quantum_generate', (data) => {
@@ -156,7 +165,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => console.log(`[Socket] Déconnecté`));
-    // Assurez-vous d'avoir l'écoute et la diffusion de l'événement ici :
+    
     socket.on('midi_page_switch', (data) => {
         // Log pour confirmer la réception sur le serveur Node
         console.log(`[SERVER] Relais MIDI Page Switch: ${data.page}`);

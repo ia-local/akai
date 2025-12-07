@@ -1,0 +1,35 @@
+/* Fichier: QuantumCompute.css (ou injecté dans le <style> de la page) */
+
+/* 1. Animation d'apparition/initialisation */
+@keyframes quantum-fade-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* 2. Animation de Vibration (pour l'Intrication) */
+@keyframes quantum-vibrate {
+    0% { transform: translate(1px, 1px) scale(var(--qubit-scale, 1.0)); }
+    25% { transform: translate(-1px, 0px) scale(var(--qubit-scale, 1.0)); }
+    50% { transform: translate(0px, -1px) scale(var(--qubit-scale, 1.0)); }
+    75% { transform: translate(1px, 0px) scale(var(--qubit-scale, 1.0)); }
+    100% { transform: translate(-1px, -1px) scale(var(--qubit-scale, 1.0)); }
+}
+
+/* 3. Classe pour les conteneurs Quantum (Canvas) */
+.quantum-canvas-layer {
+    /* Cache l'élément par défaut pour éviter le FOUC, mais le rend disponible */
+    opacity: 0; 
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* 4. Classe activée par JS pour lancer l'apparition */
+.quantum-active {
+    opacity: 1;
+    animation: quantum-fade-in 0.8s ease-out forwards; /* Dure 0.8s et reste à la fin */
+}
+
+/* 5. Classe pour lancer la vibration/intrication */
+.quantum-vibrating {
+    /* La variable CSS --qubit-scale est mise à jour par JS (entanglement) */
+    animation: quantum-vibrate 0.1s linear infinite;
+}

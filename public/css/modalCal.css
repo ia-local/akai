@@ -1,0 +1,287 @@
+/**
+ * Fichier: modalSystem.css - RÉVISÉ pour Stabilité et Scroll Canvas
+ * Rôle: Styles du composant Modal (Boîte de dialogue) pour le Centre de Gestion RUP.
+ */
+
+/* --- Variables (Utilisées ici pour référence) --- */
+:root {
+    --color-bg-dark: #161b22;
+    --color-bg-header: #0d1117;
+    --color-border: #30363d;
+    --color-accent-blue: #58a6ff;
+    --color-accent-yellow: #ffc107;
+    --color-success: #28a745;
+    --color-danger: #dc3545;
+    --color-warning: #ffaa00;
+}
+
+/* --- Composant Modal (c-modal-system) --- */
+.c-modal-system {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    z-index: 50;
+}
+
+/* --- Classe de visibilité --- */
+.c-modal-system.is-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* --- Contenu Principal du Dashboard (Plein Écran ou Large) --- */
+.modal-content-full {
+    background-color: var(--color-bg-dark);
+    padding: 0; 
+    border-radius: 8px;
+    box-shadow: 0 0 25px rgba(0, 123, 255, 0.3);
+    width: 80%;
+    max-width: 1195px;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+}
+
+/* --- HEADER de la Modal --- */
+.c-modal-system__header {
+    background-color: var(--color-bg-header);
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.c-modal-system__header h3 {
+    color: var(--color-accent-blue);
+    margin: 0;
+}
+.c-modal-system__close-btn {
+    background: none;
+    border: none;
+    color: #c9d1d9;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* --- MAIN LAYOUT : Aside et Main Container (Flex) --- */
+.c-modal-system__main-layout {
+    display: flex;
+    flex: 1; /* Permet à cette section de prendre la hauteur restante */
+    min-height: 0; /* CORRECTION CRITIQUE: Fixe la hauteur pour le défilement des enfants */
+}
+
+/* --- ASIDE GAUCHE : Gestion CRUD --- */
+.c-modal-system__aside {
+    flex: 0 0 300px; /* Largeur fixe */
+    background-color: var(--color-bg-header);
+    padding: 20px;
+    border-right: 1px solid var(--color-border);
+    overflow-y: auto; /* Permet le défilement si l'Aside devient trop long */
+}
+.c-modal-system__aside h4 {
+    color: var(--color-accent-yellow);
+    margin-bottom: 15px;
+    border-bottom: 1px dashed var(--color-border);
+    padding-bottom: 5px;
+}
+.c-modal-system__aside-nav button {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* --- MAIN CONTAINER (Zone centrale) --- */
+.c-modal-system__main-container {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* Reste en overflow hidden car les sections internes gèrent le scroll */
+    overflow-y: auto; 
+}
+
+/* Ligne 1 : Canvas (Rendu Final) */
+.c-modal-system__canvas {
+    /* CORRECTION ICI : Hauteur fixe et scroll sur ce bloc */
+    flex: 0 0 auto; 
+    max-height: 250px; 
+    overflow-y: auto; 
+    border: 1px dashed var(--color-border); 
+    border-radius: 4px;
+    padding: 0;
+}
+
+.c-modal-system__canvas h4 {
+    padding: 10px;
+    margin: 0;
+    background-color: #1e262c;
+    border-bottom: 1px dashed var(--color-border);
+}
+
+/* Cible le div interne pour le rendu */
+.c-modal-system__canvas #canvas-render {
+    min-height: 150px;
+    background-color: #21262d;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 10px;
+    /* Le défilement est géré par le parent (.c-modal-system__canvas) */
+}
+
+/* 🛑 CORRECTION CRITIQUE : Gérer le texte préformaté injecté par l'IA */
+.c-modal-system__canvas pre {
+    white-space: pre-wrap; 
+    word-break: break-word; 
+    width: 100%;
+    margin: 0;
+    /* Assure que la prévisualisation est scrollable */
+    overflow-y: auto; 
+}
+
+/* Ligne 2 : Timeline/Tableau de Progression */
+.c-modal-system__timeline {
+    flex: 0 0 auto;
+}
+.c-modal-system__timeline .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+.c-modal-system__timeline .data-table th, 
+.c-modal-system__timeline .data-table td {
+    border: 1px solid var(--color-border);
+    padding: 8px;
+    text-align: left;
+}
+
+/* Ligne 3 : Prompt Input & Exécution IA */
+.c-modal-system__prompt-interface {
+    flex: 0 0 auto;
+}
+.c-modal-system__prompt-interface textarea {
+    width: 100%;
+    padding: 10px;
+    background-color: #21262d;
+    border: 1px solid var(--color-border);
+    color: #c9d1d9;
+    border-radius: 4px;
+    resize: none;
+    margin-bottom: 10px;
+}
+
+/* --- FOOTER : Boutons d'Action CRUD --- */
+.c-modal-system__footer {
+    background-color: var(--color-bg-header);
+    padding: 15px 20px;
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* --- Réutilisation des styles d'inputs de modalSystem.js pour l'Aside --- */
+.c-modal-system__aside textarea, 
+.c-modal-system__aside input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    background-color: #21262d;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    color: #c9d1d9;
+    resize: vertical;
+}
+.c-modal-system__aside label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    color: #8b949e;
+}
+
+/* --- Styles pour les boutons réutilisés (CTA) --- */
+.cta-button {
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.cta-button.primary {
+    background-color: var(--color-success); 
+    color: white;
+}
+.cta-button.secondary {
+    background-color: #6c757d; 
+    color: white;
+}
+
+/* --- Composant Alerte Système (c-system-alert-container) --- */
+.c-system-alert-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 60; 
+    display: none; 
+    padding: 10px 0;
+    text-align: center;
+}
+
+.c-system-alert {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    border-radius: 4px;
+    text-align: left;
+    position: relative;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    font-family: 'Consolas', monospace; 
+}
+
+/* Styles pour les types d'alerte */
+.alert--danger {
+    background-color: #330000;
+    border: 1px solid var(--color-danger); 
+    color: white;
+}
+.alert--warning {
+    background-color: #332200;
+    border: 1px solid var(--color-warning); 
+    color: #fff;
+}
+
+.c-system-alert h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.alert-action-text {
+    font-style: italic;
+    font-size: 0.9em;
+    color: var(--color-success); 
+    margin-top: 5px;
+}
+
+.c-alert-close-btn {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+}

@@ -71,102 +71,40 @@
     display: flex;
     gap: 20px;
 }
-.controller {
-    display: flex;
-    flex-direction:row;
-    justify-content: space-evenly;
-}
-/* --- SECTION GAUCHE (KNOBS) --- */
-.mpd-left-col {
-    width: 35%;
+
+
+
+.tensor-port {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-}
-#midi-control-panel {
-        width: 610px;
-        flex-shrink: 0; 
-}
-/* Grille 3x2 pour les KNOBS (Règle d'agencement) */
-.knobs-section {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px 5px;
-    padding-top: 10px;
-}
-
-.knob-visual {
-    width: 40px; 
-    height: 40px; 
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #3a3a3a, #000);
-    box-shadow: 
-        0 5px 10px rgba(0,0,0,0.8),
-        0 0 0 1px #000;
-    position: relative;
-    cursor: ns-resize;
-    transition: transform 0.1s;
-}
-
-.knob-indicator {
-    position: absolute;
-    top: 3px; 
-    left: 50%;
-    width: 3px;
-    height: 40%;
-    background-color: #eee;
-    border-radius: 2px;
-    transform-origin: bottom center;
-    /* IMPORTANT: La transition du JS se base sur cette ligne */
-    transition: transform 0.1s linear; 
-    pointer-events: none;
-    box-shadow: 0 0 2px rgba(0,0,0,0.5);
-}
-
-/* --- SECTION DROITE (PADS) --- */
-.mpd-right-col {
-    width: 65%;
-    display: flex;
     align-items: center;
-}
-
-.pad-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px; 
-    background: #111;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #333;
-}
-
-/* PAD (Carré Gomme) */
-.pad-visual {
-    aspect-ratio: 1/1; 
-    background-color: #181818;
-    border: 2px solid #333;
-    border-radius: 6px;
     position: relative;
-    box-shadow: inset 0 0 15px rgba(0,0,0,1);
-    transition: all 0.05s ease-out; /* Transition rapide pour l'animation */
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 5px;
+    padding: 5px;
+    border: 1px solid #333;
+    border-radius: 4px;
     cursor: pointer;
 }
-
-/* ÉTAT ACTIF (Frappe) */
-.pad-visual.active {
-    background-color: #550000; /* Fond rouge plus visible */
-    border-color: #ff0000;      
-    box-shadow: 
-        0 0 15px rgba(255, 0, 0, 0.4), /* Lueur externe */
-        inset 0 0 10px rgba(255, 0, 0, 0.5); /* Lumière interne */
-    transform: scale(0.95); /* Enfoncement physique accentué */
+.tensor-port::after {
+    content: '';
+    position: absolute;
+    bottom: -5px; 
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--port-color, #666);
+    box-shadow: 0 0 5px var(--port-color, #666);
 }
+#source-m1::after { --port-color: #f87171; } /* Red */
+#source-cc0::after, #source-cc1::after { --port-color: #3b82f6; } /* Blue */
+#quantum-extract::after { --port-color: #a855f7; } /* Purple */
 
-.pad-visual.active .pad-label {
-    color: #ffaaaa;
+/* S'assurer que le canvas prend toute la place dans son conteneur flex */
+#timeline-waveform-area {
+    /* ... vos styles existants */
+    min-height: 120px; /* Assurer une taille minimale */
+}
+#waveform-canvas {
+    width: 100%;
+    height: 100%;
+    /* Retirer l'opacité et le SVG placeholder si ce n'est pas déjà fait */
 }

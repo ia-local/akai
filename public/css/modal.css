@@ -1,0 +1,40 @@
+/* --- AJOUT AU FICHIER style_index.css --- */
+
+/* Conteneur des boutons de la modale (HEADER de la modale) */
+.c-modal__control-bar {
+    display: flex;
+    gap: 8px; /* Espacement entre les boutons */
+    position: absolute; /* Positionner dans le coin de la modale */
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+}
+
+/* Style de base des boutons (cercles) */
+.c-modal__btn-system {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+    flex-shrink: 0;
+}
+
+/* Bouton Rouge (Fermer/Quitter) */
+.c-modal__btn-system--close {
+    background-color: #ff5f56; /* Rouge */
+}
+/* Bouton Jaune (Minimiser/Cacher) */
+.c-modal__btn-system--minimize {
+    background-color: #ffbd2e; /* Jaune */
+}
+/* Bouton Vert (Agrandir/Maximiser/Focus) */
+.c-modal__btn-system--zoom {
+    background-color: #27c93f; /* Vert */
+}
+
+/* Effet de survol discret (optionnel) */
+.c-modal__btn-system:hover {
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}

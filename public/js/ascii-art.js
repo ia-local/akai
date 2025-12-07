@@ -1,15 +1,32 @@
-// ascii-art.js
+// public/js/ascii-art-data.js
 
-// Définition des dimensions des caractères ASCII en pixels
-export const baseCharWidth = 10; // Largeur de base d'un caractère ASCII (ex: ' ') en pixels
-export const baseCharHeight = 10; // Hauteur de base d'un caractère ASCII en pixels
+export const baseCharWidth = 10;
+export const baseCharHeight = 10;
 
-// Calcul des dimensions maximales d'une lettre ASCII (en caractères) pour un espacement cohérent
-export let maxLetterHeightInLines = 0;
-export let maxLetterWidthInChars = 0;
 
-// Définitions de l'ASCII Art pour chaque lettre et chiffre
-// Les définitions sont ajustées pour une meilleure cohérence visuelle.
+// Utiliser les définitions fournies par l'utilisateur (0 et 1)
+export const asciiBit = 
+{
+    // |0> - État de base 0
+    '0': [
+        ' █████╗',
+        '██╔══██╗',
+        '██║  ██║',
+        '██║  ██║',
+        ' █████╔╝',
+        '  ╚═══╝ '
+    ],
+    // |1> - État de base 1
+    '1': [
+        '██═╗',
+        '██╔╝',
+        '██╔╝',
+        '██╔╝',
+        '██╔╝',
+        '╚═╝ '
+    ]
+};
+// Export des caractères Tensor (A-Z, 0-9)
 export const asciiArt = 
 {
     'A': [ // Ajusté pour un style bloc plus cohérent
@@ -303,33 +320,52 @@ export const asciiArt =
     ],
     // Caractère pour l'espace (important pour le mode phrase)
     ' ': [
-        "      ",
-        "      ",
-        "      ",
-        "      ",
-        "      ",
-        "      "
-    ]
+        "       ",
+        "       ",
+        "       ",
+        "       ",
+        "       ",
+        "       "
+    ],
+    '0': asciiBit['0'], // Remplacement pour garantir que 0 et 1 sont les mêmes dans les deux maps
+    '1': asciiBit['1'],
 };
 
-// Calcul des dimensions maximales d'une lettre ASCII (en caractères) pour un espacement cohérent
-// Ces calculs doivent être faits APRÈS la définition de asciiArt
-for (const letterKey in asciiArt) {
-    const letterDefinition = asciiArt[letterKey];
-    if (letterDefinition.length > maxLetterHeightInLines) {
-        maxLetterHeightInLines = letterDefinition.length;
+
+// --- ASSOCIATIONS DE LONGUEURS D'ONDE / FRÉQUENCES ---
+// Ces valeurs sont utilisées par quantum_logique.js pour la visualisation WebGL/Couleur.
+// Les fréquences sont arbitraires pour l'audio/visuel, mais basées sur une analogie.
+
+export const quantumWavelengths = {
+    // État |0> (Bas - plus stable, énergie basse) -> Couleur Rouge/Infra-rouge
+    '0': {
+        color: { r: 255, g: 0, b: 0, hex: '#FF0000' }, // Rouge
+        frequencyHz: 432.00, // Fréquence audio basse (simulée)
+        wavelengthNm: 700 // Longueur d'onde élevée (rouge, proche IR)
+    },
+    // État |1> (Haut - moins stable, énergie haute) -> Couleur Cyan/Bleu/UV
+    '1': {
+        color: { r: 0, g: 255, b: 255, hex: '#00FFFF' }, // Cyan (Quantum Cyan)
+        frequencyHz: 864.00, // Fréquence audio haute (simulée, octave au-dessus)
+        wavelengthNm: 470 // Longueur d'onde basse (cyan, proche UV)
     }
-    letterDefinition.forEach(line => {
-        if (line.length > maxLetterWidthInChars) {
-            maxLetterWidthInChars = line.length;
-        }
+};
+
+
+// Calculs automatiques des dimensions max
+export let maxLetterHeightInLines = 0;
+export let maxLetterWidthInChars = 0;
+
+for (const key in asciiArt) {
+    const def = asciiArt[key];
+    if (def.length > maxLetterHeightInLines) maxLetterHeightInLines = def.length;
+    def.forEach(line => {
+        if (line.length > maxLetterWidthInChars) maxLetterWidthInChars = line.length;
     });
 }
 
-// Dimensions effectives en pixels pour le calcul du layout (à la taille de base)
+// NOTE: effectiveBaseLetterWidth et effectiveBaseLetterHeight ne sont pas définis ici
+// mais seraient calculés dans un fichier JS externe ou une étape de construction
 export const effectiveBaseLetterHeight = maxLetterHeightInLines * baseCharHeight;
 export const effectiveBaseLetterWidth = maxLetterWidthInChars * baseCharWidth;
-
-// Espacement entre les lettres (à la taille de base)
-export const paddingBetweenLetters = 15; // Espacement en pixels entre les lettres
-
+export const paddingBetweenLetters = baseCharWidth;

@@ -111,6 +111,8 @@ header {
 #preview-media-container.mode-quantum #webgl-canvas { opacity: 1 !important; mix-blend-mode: normal !important; }
 
 /* --- 5. PANNEAUX LATÉRAUX (ASIDE DRAWERS) --- */
+
+
 /* Structure commune */
 .collapsed-aside {
     position: absolute;

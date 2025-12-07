@@ -247,7 +247,7 @@ let isWebGLEnabled = false;
 const midiInput = new MidiInput(socket, {
     onKnob: (cc, normVal, rawVal) => {
         // console.log(`🎛️ [KNOB] CC:${cc} | Val:${rawVal}`);
-
+    if (window.logKnobEvent) window.logKnobEvent(cc, normVal);
         if (isSelectorMode) {
             // MODE EDIT (Ta config originale)
             const activeClips = window.timelineMgr.getClipsAtTime(transport.currentTime);
@@ -319,9 +319,12 @@ const midiInput = new MidiInput(socket, {
         if(cc === 5) previewContainer.style.transform = `scale(${1 + normVal * 4})`;
     },
 
-    onPad: (note) => {
+    onPad: (note,velocity) => {
         console.log(`🎹 [PAD] Note:${note}`);
-
+        // 🛑 INJECTION MIDI/PAD
+    if (window.logPadEvent) window.logPadEvent(note, velocity);
+        // 🛑 INJECTION POUR LE LOGGING UI
+        if (window.logPadEvent) window.logPadEvent(note, velocity);
         // --- LIGNE 1 : TRANSPORT ---
         if ([36, 48, 0].includes(note)) transport.toggle();
         if ([37, 49, 1].includes(note)) transport.stop();

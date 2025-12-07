@@ -1,0 +1,404 @@
+{
+  "metadata": {
+    "titre_defi": "Modèle RUP - Défi 28 Jours (Lancement Qi-Store)",
+    "role_rup": "Economic Strategist & Challenge Controller",
+    "debut_cycle": "2025-12-01",
+    "fin_cycle": "2025-12-28",
+    "objectif_rup_final": "750 - 7500 Unités Multi-devise",
+    "note": "Recalibré sur D'1 (2025-12-01). Priorité Absolue : Automatisation du packaging Node.js pour le Qi-Store."
+  },
+  "jours_du_cycle": [
+    {
+      "jour": "J1",
+      "date": "2025-12-01",
+      "phase": "I. Lancement & Automatisation",
+      "progression_pourcent": 3.57,
+      "tache_principale": "CRITIQUE : Création du script d'Automatisation Packaging Node.js (Shell/JS) pour les 60+ produits. Préparation Qi-Module 001.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "Script d'Automation (.sh ou .js)",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J2",
+      "date": "2025-12-02",
+      "phase": "I. Lancement & Automatisation",
+      "progression_pourcent": 7.14,
+      "tache_principale": "CRITIQUE : Test et Validation du script d'Automatisation sur 5 modules. Configuration Smart Contract/Boutique pour Qi-Module 001 (P=1, Q=150).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "5 modules (zip)",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J3",
+      "date": "2025-12-03",
+      "phase": "I. Lancement & Automatisation",
+      "progression_pourcent": 10.71,
+      "tache_principale": "Automatisation Vidéo V1 pour la promotion des modules.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "Snippet Vidéo Promo J1"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J4",
+      "date": "2025-12-04",
+      "phase": "I. Lancement & Automatisation",
+      "progression_pourcent": 14.28,
+      "tache_principale": "Audit & Préparation CVNU (intégration des liens vers les modules dans le portfolio).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J5",
+      "date": "2025-12-05",
+      "phase": "I. Lancement & Automatisation",
+      "progression_pourcent": 17.85,
+      "tache_principale": "Création Landing Page (de la collection Qi-Store).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "/template_landing",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J6",
+      "date": "2025-12-06",
+      "phase": "I. Lancement & Automatisation",
+      "progression_pourcent": 21.42,
+      "tache_principale": "Script d'Assemblage Vidéo (pour variations sociales).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J7",
+      "date": "2025-12-07",
+      "phase": "I. Lancement & Automatisation",
+      "progression_pourcent": 25.00,
+      "tache_principale": "Revue Finale des 7 premiers modules & Miniature (Hook pour la semaine 1).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J8",
+      "date": "2025-12-08",
+      "phase": "II. Exécution & Monétisation",
+      "progression_pourcent": 28.57,
+      "tache_principale": "Lancement Officiel V1 du Qi-Store. Première publication (FB/LI/TG).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J9",
+      "date": "2025-12-09",
+      "phase": "II. Exécution & Monétisation",
+      "progression_pourcent": 32.14,
+      "tache_principale": "Analyse Métriques (ventes J8) & Façade IA (Début de l'intégration des données de vente).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J10",
+      "date": "2025-12-10",
+      "phase": "II. Exécution & Monétisation",
+      "progression_pourcent": 35.71,
+      "tache_principale": "Composant d'Interaction IA (pour gérer les requêtes des acheteurs des modules).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "/componant_ia",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J11",
+      "date": "2025-12-11",
+      "phase": "II. Exécution & Monétisation",
+      "progression_pourcent": 39.28,
+      "tache_principale": "Portefeuille (Wallet) & Infographie (suivi des fonds levés).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J12",
+      "date": "2025-12-12",
+      "phase": "II. Exécution & Monétisation",
+      "progression_pourcent": 42.85,
+      "tache_principale": "Automatisation Publication Sociale (pour le rythme de la boutique éphémère).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J13",
+      "date": "2025-12-13",
+      "phase": "II. Exécution & Monétisation",
+      "progression_pourcent": 46.42,
+      "tache_principale": "Dashboard KPI & Actif V2 (Code) : Création du tableau de bord de suivi.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "/template_dashboard",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J14",
+      "date": "2025-12-14",
+      "phase": "II. Exécution & Monétisation",
+      "progression_pourcent": 50.00,
+      "tache_principale": "Revue de Sprint & Réalignement (Bilan des 14 premiers jours de vente).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J15",
+      "date": "2025-12-15",
+      "phase": "III. Optimisation & Scalabilité",
+      "progression_pourcent": 53.57,
+      "tache_principale": "Refactoring Code V1 & V2 (Amélioration des modules les plus vendus).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J16",
+      "date": "2025-12-16",
+      "phase": "III. Optimisation & Scalabilité",
+      "progression_pourcent": 57.14,
+      "tache_principale": "Optimisation du Prompt Groq pour l'IA Locale.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J17",
+      "date": "2025-12-17",
+      "phase": "III. Optimisation & Scalabilité",
+      "progression_pourcent": 60.71,
+      "tache_principale": "Gabarit SPA pour les Leçons (Base pour le futur CV Numérique).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "/template_spa",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J18",
+      "date": "2025-12-18",
+      "phase": "III. Optimisation & Scalabilité",
+      "progression_pourcent": 64.28,
+      "tache_principale": "Simulation de Tests Unitaires (/component_test) pour les composants Qi-Store.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J19",
+      "date": "2025-12-19",
+      "phase": "III. Optimisation & Scalabilité",
+      "progression_pourcent": 67.85,
+      "tache_principale": "Mise à Jour du Portfolio CVNU (Intégration des KPIs du défi).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J20",
+      "date": "2025-12-20",
+      "phase": "III. Optimisation & Scalabilité",
+      "progression_pourcent": 71.42,
+      "tache_principale": "Composant Graphique (/component_graph) pour la Visualisation RUP (Revenu Passif Progressif).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J21",
+      "date": "2025-12-21",
+      "phase": "III. Optimisation & Scalabilité",
+      "progression_pourcent": 75.00,
+      "tache_principale": "Documentation & Notes de Mise à Jour (pour la transition vers l'IA Locale).",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J22",
+      "date": "2025-12-22",
+      "phase": "IV. Finalisation & Clôture",
+      "progression_pourcent": 78.57,
+      "tache_principale": "Expressions Régulières (/template_regex) : Compilation des Regex des 60+ modules.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J23",
+      "date": "2025-12-23",
+      "phase": "IV. Finalisation & Clôture",
+      "progression_pourcent": 82.14,
+      "tache_principale": "Affinement du Style (/meta_style) : Création d'un style visuel pour les présentations de fin de défi.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J24",
+      "date": "2025-12-24",
+      "phase": "IV. Finalisation & Clôture",
+      "progression_pourcent": 85.71,
+      "tache_principale": "Guide Pratique (HowTo Vidéo) : Tutoriel d'utilisation du premier module IA intégré.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J25",
+      "date": "2025-12-25",
+      "phase": "IV. Finalisation & Clôture",
+      "progression_pourcent": 89.28,
+      "tache_principale": "Configuration du Store (Produit Payant V2) : Préparation du produit post-défi à prix plus élevé.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J26",
+      "date": "2025-12-26",
+      "phase": "IV. Finalisation & Clôture",
+      "progression_pourcent": 92.85,
+      "tache_principale": "Intégration d'une Voix IA (ElevenLabs) : Narration des résultats du défi.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J27",
+      "date": "2025-12-27",
+      "phase": "IV. Finalisation & Clôture",
+      "progression_pourcent": 96.42,
+      "tache_principale": "Synthèse Finale & WOW Factor : Préparation de la présentation des résultats et du RUP atteint.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    },
+    {
+      "jour": "J28",
+      "date": "2025-12-28",
+      "phase": "IV. Finalisation & Clôture",
+      "progression_pourcent": 100.00,
+      "tache_principale": "Clôture du Cycle & Archivage. Publication de la Synthèse Finale.",
+      "routine_audio": "TODO",
+      "production_digitale": {
+        "code": "TODO",
+        "script_ia": "TODO",
+        "video": "TODO"
+      },
+      "cta_engagement": "TODO"
+    }
+  ]
+}
