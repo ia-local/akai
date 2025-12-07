@@ -39,14 +39,26 @@ export class TimeFormatter {
     }
 
     // Format Legacy (HH:MM:SS.ms) requis par main.js
+/**
+     * Format Legacy (HH:MM:SS.ms) requis par main.js
+     * Correction de la dépendance à Date.toISOString pour une meilleure précision/portabilité.
+     */
     static toLegacyFormat(seconds) {
         const safeSeconds = Math.max(0, seconds || 0);
-        const date = new Date(0);
-        date.setMilliseconds(safeSeconds * 1000);
         
-        const timeStr = date.toISOString().substr(11, 8);
-        const ms = (safeSeconds % 1).toFixed(2).substring(2);
-        return `${timeStr}.${ms}`;
+        // Calcul des heures, minutes, secondes et millisecondes
+        const totalMs = Math.round(safeSeconds * 1000);
+        const ms = totalMs % 1000;
+        const s = Math.floor(totalMs / 1000);
+        
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+
+        const pad = (n) => n.toString().padStart(2, '0');
+        const padMs = (n) => n.toString().padStart(3, '0').substring(0, 2); // Prend les deux premiers chiffres du ms
+        
+        return `${pad(h)}:${pad(m)}:${pad(sec)}:${padMs(ms)}`; // HH:MM:SS:FF(ms)
     }
 }
 

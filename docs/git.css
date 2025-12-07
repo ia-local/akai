@@ -39,6 +39,7 @@ header {
 .logo span { color: var(--accent); }
 
 nav a {
+
     color: var(--text-muted);
     text-decoration: none;
     margin-left: 20px;

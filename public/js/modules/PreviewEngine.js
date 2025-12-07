@@ -109,9 +109,22 @@ export class PreviewEngine {
         this.currentAssetId = null;
     }
 
+// --- CORRECTION CRITIQUE DE RÉSILIENCE DU DOM ---
     _activatePlayer(el) {
-        [this.els.image, this.els.video, this.els.placeholder].forEach(e => e.classList.remove('active'));
-        if(el) el.classList.add('active');
+        // Liste de tous les éléments que PreviewEngine gère
+        const players = [this.els.image, this.els.video, this.els.placeholder];
+
+        // Seul le code qui vérifie l'existence de 'e' avant d'accéder à 'e.classList' est sûr
+        players.forEach(e => {
+            if (e) {
+                e.classList.remove('active');
+            }
+        });
+        
+        // Active l'élément cible s'il existe
+        if(el) {
+            el.classList.add('active');
+        }
     }
 
     _isVideo(clip) {

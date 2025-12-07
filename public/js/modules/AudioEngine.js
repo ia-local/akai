@@ -3,9 +3,18 @@
  * Gère le mixage spatial, les effets et la lecture des samples.
  */
 
+// Si Tone est chargé en script global (non-module), il est attaché à window.
+// Dans un module ES6, nous devons nous assurer qu'il est accessible.
+
 export class AudioEngine {
     constructor() {
         this.isInitialized = false;
+        
+        // --- VÉRIFICATION CRITIQUE POUR LA RÉSILIENCE DU MODULE ---
+        if (typeof Tone === 'undefined') {
+            console.error("❌ TONE.JS NON DÉFINI. Assurez-vous que le CDN est chargé AVANT AudioEngine.js.");
+            return; 
+        }
         
         // --- 1. MASTER CHAIN (La chaîne de sortie) ---
         // Limiter pour éviter la saturation numérique
@@ -16,7 +25,6 @@ export class AudioEngine {
 
         // --- 2. FX BUS (Effets Globaux) ---
         
-        // CORRECTION ICI : On enlève .generate()
         this.reverb = new Tone.Reverb({
             decay: 2.5,
             preDelay: 0.1,
@@ -53,10 +61,15 @@ export class AudioEngine {
     async init() {
         if (this.isInitialized) return;
         
+        if (typeof Tone === 'undefined') {
+            console.error("❌ Cannot start Tone.js: Library not available.");
+            return;
+        }
+
         await Tone.start();
         console.log("🔊 AUDIO ENGINE: Tone.js Context Started");
         
-        // On attend que la reverb soit prête (optionnel mais recommandé pour éviter les glitchs au démarrage)
+        // On attend que la reverb soit prête
         await this.reverb.ready; 
 
         this.isInitialized = true;

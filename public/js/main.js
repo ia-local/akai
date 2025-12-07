@@ -252,7 +252,32 @@ const midiInput = new MidiInput(socket, {
             // MODE EDIT (Ta config originale)
             const activeClips = window.timelineMgr.getClipsAtTime(transport.currentTime);
             const targetClip = activeClips.find(c => c.trackId === 'track-video' || c.trackId === 'track-image');
+            // Si la page actuelle a défini une fonction locale de contrôle de potentiomètre, 
+        // nous la déléguons (Tensor Core, Fairlight, etc.)
+        if (window.localMidiKnobControl && cc >= 0 && cc <= 3) {
+            window.localMidiKnobControl(cc, normVal, rawVal);
+            return; // Arrête le traitement pour les CC 0-3
+        }
+
+        // --- Logique originale (ou utilisée si pas de contrôle local) ---
+        if (isSelectorMode) {
+            // MODE EDIT (Ta config originale)
+            const activeClips = window.timelineMgr.getClipsAtTime(transport.currentTime);
+            const targetClip = activeClips.find(c => c.trackId === 'track-video' || c.trackId === 'track-image');
             
+            if (targetClip) {
+                const el = preview._isVideo(targetClip) ? preview.els.video : preview.els.image;
+                if(cc === 0) el.style.opacity = normVal;
+                if(cc === 1) el.style.transform = `scale(${1 + normVal * 2})`;
+            }
+        } else {
+            // MODE PERFORM / Dessin Vectoriel (Utilise CC 0-3 uniquement si non délégué)
+            // Note: Nous laissons cette section pour la compatibilité avec d'anciennes pages
+            if (cc === 0) drawEngine.updateState('x', normVal * 100); 
+            if (cc === 1) drawEngine.updateState('y', 100 - (normVal * 100));
+            if (cc === 2) drawEngine.updateState('z', 2 + normVal * 50);
+            if (cc === 3) drawEngine.updateState('chroma', normVal * 360);
+        }
             if (targetClip) {
                 const el = preview._isVideo(targetClip) ? preview.els.video : preview.els.image;
                 if(cc === 0) el.style.opacity = normVal;
@@ -282,6 +307,7 @@ const midiInput = new MidiInput(socket, {
             if(cc === 1) drawEngine.updateState('y', 100 - (normVal * 100));
             if(cc === 2) drawEngine.updateState('z', 2 + normVal * 50);
             if(cc === 3) drawEngine.updateState('chroma', normVal * 360);
+            
         }
 
         // COMMANDES GLOBALES

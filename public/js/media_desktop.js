@@ -15,23 +15,67 @@ const dataManager = new DataManager(); // Instance unique
 
 let currentView = 'desktop';
 
+// --- LOGIQUE MIDI STATUS ---
+function updateMidiStatus(isConnected) {
+    const statusDot = document.getElementById('status-midi');
+    if (statusDot) {
+        statusDot.classList.remove('status-online', 'status-offline');
+        statusDot.classList.add(isConnected ? 'status-online' : 'status-offline');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Initialisation Socket.io et Écoute Statut MIDI
     if(socket) {
-        socket.on('connect', () => console.log("✅ Desktop: Connected to Socket Server"));
+        // Le statut du contrôleur MIDI est généralement lié au statut du serveur Socket
+        socket.on('connect', () => {
+            console.log("✅ Desktop: Connected to Socket Server");
+            updateMidiStatus(true);
+        });
+        socket.on('disconnect', () => {
+            console.warn("❌ Desktop: Disconnected from Socket Server");
+            updateMidiStatus(false);
+        });
+        // Initialiser l'état au chargement (si déjà connecté)
+        updateMidiStatus(socket.connected); 
+        
     } else {
         console.warn("⚠️ Socket.io non détecté.");
     }
 
-    // 1. Chargement des données (Await est crucial ici)
+    // 2. Chargement des données (Await est crucial ici)
     await dataManager.init();
 
-    // 2. Initialisation Interface
+    // 3. Initialisation Interface
     renderDesktop(); // Vue par défaut
     initBrowserAside();
     
     // Rendre le dataManager accessible globalement pour les onclick HTML (previewAsset)
     window.currentDataManager = dataManager;
 });
+
+// --- NOUVELLE FONCTION CENTRALE DE ROUTAGE ---
+function routeModule(type, link) {
+    if (link) {
+        // Logique de Redirection vers le fichier HTML externe
+        // Le chemin est relatif à la racine statique du serveur (déjà configurée)
+        const redirectPath = `/html/${link}`; 
+        console.log(`🧭 ROUTING: Redirection vers ${redirectPath}`);
+        
+        // Pour simuler la transition MIDI globale, on pourrait ajouter une transition ici
+        // (La fonction main.js gère la transition en général, mais on le fait ici pour la cohérence)
+        document.body.classList.add('studio-fade-out'); 
+        
+        setTimeout(() => {
+            window.location.href = redirectPath;
+        }, 100); // Délai court pour la transition locale
+        
+    } else {
+        // Ouverture de la Modale (Server, MIDI, AI)
+        openModuleModal(type);
+    }
+}
+
 
 // --- GESTION DES ICÔNES BUREAU (Vue Desktop) ---
 function renderDesktop() {
@@ -42,42 +86,21 @@ function renderDesktop() {
 
     // Reset Grid Style
     container.className = "desktop-grid"; 
-    container.innerHTML = `
-        <div class="desktop-icon" data-module="server">
-            <div class="icon-img relative">🖥️<div class="status-dot status-online"></div></div>
-            <span class="icon-label">Data Server</span>
-        </div>
-        <div class="desktop-icon" data-module="midi">
-            <div class="icon-img relative">🎛️<div class="status-dot status-online" id="status-midi"></div></div>
-            <span class="icon-label">MPD 218</span>
-        </div>
-        <div class="desktop-icon" data-module="keyboard">
-            <div class="icon-img">⌨️</div>
-            <span class="icon-label">Key Mapper</span>
-        </div>
-        <div class="desktop-icon" data-module="tensor">
-            <div class="icon-img">🧊</div>
-            <span class="icon-label">Tensor Core</span>
-        </div>
-        <div class="desktop-icon" data-module="quantum">
-            <div class="icon-img">⚛️</div>
-            <span class="icon-label">Quantum CPU</span>
-        </div>
-        <div class="desktop-icon" data-module="ai">
-            <div class="icon-img">🧠</div>
-            <span class="icon-label">Neural Agent</span>
-        </div>
-    `;
+    
+    // Utiliser la structure HTML existante (maintenant sémantique ul/li)
 
     initDesktopIconsListeners();
 }
 
 function initDesktopIconsListeners() {
-    const icons = document.querySelectorAll('.desktop-icon');
+    // La sélection doit cibler les éléments LI qui ont le rôle de bouton
+    const icons = document.querySelectorAll('#desktop-container > li');
     icons.forEach(icon => {
         icon.addEventListener('click', () => {
             const moduleType = icon.dataset.module;
-            openModuleModal(moduleType);
+            const moduleLink = icon.dataset.link; // Récupère l'attribut data-link
+            
+            routeModule(moduleType, moduleLink);
         });
     });
 }
@@ -121,6 +144,7 @@ function loadCategoryView(category) {
 // --- RENDU DE LA GRILLE MEDIA ---
 function renderMediaGrid(assets, category) {
     const container = document.getElementById('desktop-container');
+    // Le container redevient une grille simple de div pour le contenu media, ce qui est correct.
     container.className = "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4"; 
 
     let html = `
@@ -248,14 +272,23 @@ function openModuleModal(type) {
             
         case 'midi':
             title = "AKAI MPD218 CONFIG";
+            
+            // Logique pour déterminer l'état de la connexion MIDI pour la modale
+            const midiStatus = socket && socket.connected ? "Connecté" : "Déconnecté";
+            const statusColor = socket && socket.connected ? "text-green-500" : "text-red-500";
+            
             content = `
                 <div class="p-6 flex flex-col items-center">
+                    <div class="mb-4 text-center">
+                        <div class="text-sm font-bold text-gray-400">Statut: <span class="${statusColor}">${midiStatus}</span></div>
+                        <div class="text-[10px] text-gray-600">via Socket.IO (localhost:3145)</div>
+                    </div>
                     <div class="grid grid-cols-4 gap-2 mb-6 p-4 bg-[#111] rounded border border-gray-700 shadow-lg">
                         ${Array(16).fill(0).map((_, i) => 
                             `<div class="w-12 h-12 bg-[#2a2a2a] rounded flex items-center justify-center text-[10px] text-gray-600 font-bold border border-[#333]">P${i+1}</div>`
                         ).join('')}
                     </div>
-                    <div class="text-xs text-gray-500">MIDI Controller Connected</div>
+                    <div class="text-xs text-gray-500">Les Pads MIDI 8-13 contrôlent la navigation principale.</div>
                 </div>`;
             break;
 
@@ -280,7 +313,7 @@ function openModuleModal(type) {
              
         default:
              title = "MODULE INFO";
-             content = `<div class="p-4 text-gray-500">Module ${type} not fully implemented yet.</div>`;
+             content = `<div class="p-4 text-gray-500">Module ${type} non encore implémenté.</div>`;
     }
 
     if(title) modalSystem.show(title, content, footer);

@@ -6,7 +6,7 @@
     <title>Studio AV - Fairlight Audio</title>
     
     <link rel="stylesheet" href="../css/studio.css">
-    <link rel="stylesheet" href="../css/mpd218.css">
+    <link rel="stylesheet" href="../css/midi.css"> 
     <link rel="stylesheet" href="../css/fairlight_audio.css"> 
     <link rel="stylesheet" href="../css/modalSystem.css">
     
@@ -30,6 +30,7 @@
             <div id="mode-indicator" class="px-3 py-1 rounded text-xs font-bold bg-green-900 text-green-400 border border-green-700 transition-colors">
                 MODE: PERFORM
             </div>
+            <div id="timecode-display" class="text-xs font-mono text-red-500 font-bold bg-black px-2 rounded border border-red-900 ml-4" style="display: none;">00:00:00:00</div>
             <span class="ml-4 text-xs text-gray-500 border-l border-gray-600 pl-4 uppercase tracking-widest">Fairlight Audio</span>
         </div>
 
@@ -94,11 +95,18 @@
                 </div>
             </div>
             
-            <div class="h-1/2 bg-[#1a1a1a] overflow-x-auto p-4 flex justify-center">
-                <div class="audio-mixer flex gap-2 h-full">
+            <div class="h-1/2 bg-[#1a1a1a] overflow-x-auto p-4 flex">
+                
+                <div class="audio-mixer flex gap-2 h-full justify-start">
                     
                     <div class="mixer-strip w-16 bg-[#222] border border-gray-700 rounded flex flex-col items-center p-2 relative">
                         <span class="text-xs text-blue-400 font-bold mb-2">A1</span>
+                        
+                        <div class="control-knob mb-2 mt-1">
+                            <label class="text-[9px] text-gray-500 block">PAN (CC0)</label>
+                            <input type="range" id="fairlight-panner" min="-100" max="100" value="0" class="w-10 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        
                         <div class="flex-1 w-2 bg-black rounded-full relative mb-2">
                             <div class="fader-knob w-6 h-4 bg-gray-400 rounded absolute left-1/2 transform -translate-x-1/2 shadow-lg cursor-pointer hover:bg-white" style="top: 20%;"></div>
                         </div>
@@ -123,6 +131,16 @@
 
                     <div class="mixer-strip w-20 bg-red-900/10 border border-red-900 rounded flex flex-col items-center p-2 ml-4 relative">
                         <span class="text-xs text-red-500 font-bold mb-2">M1</span>
+                        
+                        <div class="control-knob my-1">
+                            <label class="text-[9px] text-gray-500 block">LOW (CC1)</label>
+                            <input type="range" id="fairlight-low-eq" min="-12" max="12" value="0" class="w-10 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div class="control-knob my-1">
+                            <label class="text-[9px] text-gray-500 block">HIGH (CC2)</label>
+                            <input type="range" id="fairlight-high-eq" min="-12" max="12" value="0" class="w-10 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        
                         <div class="flex-1 w-2 bg-black rounded-full relative mb-2 border border-red-900/30">
                             <div class="fader-knob w-8 h-4 bg-red-600 rounded absolute left-1/2 transform -translate-x-1/2 shadow-lg cursor-pointer hover:bg-red-500" style="top: 30%;"></div>
                         </div>
@@ -130,41 +148,155 @@
                     </div>
 
                 </div>
+                
+                <div id="midi-control-panel" class="ml-8 p-4 bg-[#111] rounded border border-gray-700 flex flex-col justify-between shrink-0">
+    <div id="mpd-frame">
+        <!-- Colonne de Gauche : Knobs et Boutons de Fonction -->
+        <div class="control-panel flex flex-col justify-between">
+            <h1 class="text-xl font-bold text-gray-300 mb-4">AKAI MPD218</h1>
+            
+            <!-- Ligne des 6 Knobs (CC 0 à CC 5) -->
+            <div class="knob-grid-6">
+                <!-- RANGÉE 5 & 6 (CC 0 & CC 1) -->
+                <!-- CC 0 (Knob 5 - X) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="0">
+                        <div id="knob-line-0" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 0 (X)</span>
+                    <span id="val-0" class="text-xs text-midi-green font-mono">0</span>
+                </div>
+                <!-- CC 1 (Knob 6 - Y) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="1">
+                        <div id="knob-line-1" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 1 (Y)</span>
+                    <span id="val-1" class="text-xs text-midi-green font-mono">100</span>
+                </div>
+                
+                <!-- RANGÉE 3 & 4 (CC 2 & CC 3) -->
+                <!-- CC 2 (Knob 3 - Z) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="2">
+                        <div id="knob-line-2" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 2 (Z)</span>
+                    <span id="val-2" class="text-xs text-midi-green font-mono">1.00</span>
+                </div>
+                <!-- CC 3 (Knob 4 - Chroma) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="3">
+                        <div id="knob-line-3" class="knob-indicator-line" style="transform: rotate(0deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 3 (Hue)</span>
+                    <span id="val-3" class="text-xs text-midi-green font-mono">0°</span>
+                </div>
+                
+                <!-- RANGÉE 1 & 2 (CC 4 & CC 5) -->
+                <!-- CC 4 (Knob 1 - Sat) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="4">
+                        <div id="knob-line-4" class="knob-indicator-line" style="transform: rotate(135deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 4 (Sat)</span>
+                    <span id="val-4" class="text-xs text-midi-green font-mono">1.00</span>
+                </div>
+                <!-- CC 5 (Knob 2 - Cam Rot) -->
+                <div class="flex flex-col items-center">
+                    <div class="knob-visual relative" data-cc-id="5">
+                        <div id="knob-line-5" class="knob-indicator-line" style="transform: rotate(0deg);"></div>
+                    </div>
+                    <span class="text-xs text-gray-400 mt-1">CC 5 (Cam)</span>
+                    <span id="val-5" class="text-xs text-midi-green font-mono">0°</span>
+                </div>
+            </div>
+
+
+            <!-- Zone MIDI/BANKS/Fonctions -->
+            <div class="mt-6 flex flex-col space-y-2">
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <!-- Indicateurs A/B/C (A et B visibles sur l'image) -->
+                    <div class="flex items-center space-x-1">
+                        <div id="bank-a-led" class="w-2 h-2 rounded-full bg-midi-green/30"></div>
+                        <span class="text-xs text-gray-400">A</span>
+                    </div>
+                    <div class="flex items-center space-x-1 justify-end">
+                        <span class="text-xs text-gray-400">B</span>
+                        <div id="bank-b-led" class="w-2 h-2 rounded-full bg-midi-green/30"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <!-- Boutons de fonction -->
+                    <button class="func-button h-10 accent">FULL LEVEL</button>
+                    <button class="func-button h-10">NOTE REPEAT</button>
+                    <button id="open-pad-modal" class="func-button h-10 bg-midi-blue hover:bg-blue-700">MAPPING</button>
+                    
+                    <button class="func-button h-10">CTRL BANK</button>
+                    <button class="func-button h-10">PROG SELECT</button>
+                    <button class="func-button h-10">PAD BANK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne de Droite : Grille des Pads -->
+        <div class="pad-grid-area flex flex-col justify-between">
+            <div class="text-xs text-gray-500 mb-2 flex justify-between">
+                <span>AKAI MPD218</span>
+                <span id="socket-status" class="text-midi-green">CONNECTÉ</span>
+            </div>
+            
+            <!-- Grille 4x4 des Pads (où le Pad 1 est en bas à gauche) -->
+            <div id="active-pad-grid-visuel" class="grid grid-cols-4 gap-4 flex-grow">
+                <!-- Les pads A1-A16 seront injectés ici par JS -->
+            </div>
+
+            <div class="text-xs text-gray-500 mt-4 flex justify-between">
+                <span>PAD MODE: <strong id="style-display">NONE</strong></span>
+                <span>TRANSPORT: <strong id="transport-display">STOPPED</strong></span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Composant Modal de Mappage des Pads (Identique au Dashboard) -->
+    <div id="pad-mapping-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-midi-blue">Mappage des Pads (Banques A, B, C)</h2>
+            
+            <div id="pad-pagination" class="flex justify-center space-x-4 mb-6">
+                <button data-bank="A" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque A</button>
+                <button data-bank="B" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque B</button>
+                <button data-bank="C" class="bank-button bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-midi-blue transition duration-150">Banque C</button>
+            </div>
+
+            <div id="active-pad-grid" class="pad-grid">
+                <!-- Les 16 pads seront injectés ici par JS -->
+            </div>
+
+            <button id="close-pad-modal" class="mt-6 bg-akai-accent hover:bg-midi-red/80 text-white font-bold py-2 px-4 rounded-lg float-right">
+                Fermer
+            </button>
+        </div>
+    </div>
+
+                </div>
             </div>
         </div>
 
         <aside id="right-panel" class="collapsed-aside right-aside">
             <div class="aside-trigger">
-                <span class="trigger-icon">🎛️</span>
-                <span class="vertical-text">MIDI / IO</span>
+                <span class="trigger-icon">🎚️</span>
+                <span class="vertical-text">AI / LOGS</span>
             </div>
 
             <div class="aside-content">
-                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a] flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-white uppercase">MIDI Controller</h3>
-                    <span id="socket-status" class="text-[10px] text-red-500 font-bold border border-red-500 px-1 rounded">OFFLINE</span>
+                <div class="p-3 border-b border-gray-700 bg-[#1a1a1a]">
+                    <h3 class="text-xs font-bold text-white uppercase">AI ASSISTANT (Placeholder)</h3>
                 </div>
-                
-                <div class="p-4 flex-1 overflow-y-auto">
-                    <div id="mpd-wrapper" class="w-full aspect-square border border-gray-700 rounded bg-[#111] p-4 relative mb-4">
-                        <div class="grid grid-cols-4 gap-2 h-full">
-                            <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div>
-                            <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div>
-                            <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div>
-                            <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div> <div class="bg-gray-800 rounded"></div>
-                        </div>
-                        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 text-xs font-bold pointer-events-none">
-                            MPD 218
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-xs text-gray-400 block">Input Device</label>
-                        <select class="w-full bg-black border border-gray-600 text-white text-xs p-1 rounded">
-                            <option>Akai MPD218 Port A</option>
-                            <option>None</option>
-                        </select>
-                    </div>
+                <div class="p-4 text-xs text-gray-400">
+                    Les assistants IA peuvent auto-EQ ou auto-compresseur votre mix.
                 </div>
             </div>
         </aside>
@@ -174,8 +306,8 @@
         <a href="media_data.html" class="nav-tab">
             <span class="nav-icon">📁</span> MEDIA
         </a>
-        <a href="cut_timeline.html" class="nav-tab">
-            <span class="nav-icon">✂️</span> CUT
+        <a href="code_timeline.html" class="nav-tab">
+            <span class="nav-icon">💻</span> CODE
         </a>
         <a href="editor.html" class="nav-tab">
             <span class="nav-icon">🎬</span> EDIT
@@ -190,17 +322,29 @@
             <span class="nav-icon">🚀</span> DELIVER
         </a>
     </footer>
-    <div style="display:none;">
-        <canvas id="ascii-canvas"></canvas>
-        <canvas id="webgl-canvas"></canvas>
-        <canvas id="paint-layer"></canvas>
-        <canvas id="ruler-layer"></canvas>
+    
+    <div id="generic-modal-overlay" class="c-modal-overlay"></div>
+
+q<div style="display:none;">
+    <img id="player-image" src="" /> 
+    <video id="player-video" muted playsinline preload="auto"></video>
+    <div id="player-placeholder"></div> 
+    
+    <canvas id="ascii-canvas"></canvas>
+    <canvas id="webgl-canvas"></canvas>
+    <canvas id="paint-layer"></canvas>
+    <canvas id="ruler-layer"></canvas>
     <div id="preview-media-container"></div>
-    </div>
-    <script src="../js/main.js"></script>
+    
+    <div id="playhead"></div>
+    <div id="timeline-tracks-container"></div>
+    <button id="btn-play"></button>
+    <button id="btn-pause"></button>
+</div>
     <script src="http://localhost:3145/socket.io/socket.io.js"></script>
-    <script type="module" src="../js/fairlight_audio.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script type="module" src="../js/fairlight_audio.js"></script>
+        <script src="../js/mpc.js"></script>
     <script type="module" src="../js/main.js"></script>
 </body>
 </html>

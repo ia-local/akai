@@ -1,4 +1,4 @@
-// public/js/AsciiGlyphs.js (Module unifié)
+// public/js/data/AsciiGlyphs.js (Module unifié)
 
 // =================================================================
 // 1. DÉFINITIONS GRAPHIQUES (CONSTANTES TENSOR)

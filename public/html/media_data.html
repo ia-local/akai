@@ -139,53 +139,51 @@
                  style="background-image: radial-gradient(#333 1px, transparent 1px); background-size: 20px 20px;">
             </div>
 
-            <div class="desktop-grid" id="desktop-container">
-                
-                <div class="desktop-icon" data-module="server">
-                    <div class="icon-img relative">
-                        🖥️
-                        <div class="status-dot status-online"></div>
-                    </div>
-                    <span class="icon-label">Data Server</span>
-                </div>
+<ul class="desktop-grid" id="desktop-container" role="list">
+    <li class="desktop-icon" data-module="server" role="button" tabindex="0">
+        <div class="icon-img relative">
+            🖥️
+            <div class="status-dot status-online"></div>
+        </div>
+        <span class="icon-label">Data Server</span>
+    </li>
 
-                <div class="desktop-icon" data-module="midi">
-                    <div class="icon-img relative">
-                        🎛️
-                        <div class="status-dot status-online" id="status-midi"></div>
-                    </div>
-                    <span class="icon-label">MPD 218</span>
-                </div>
+    <li class="desktop-icon" data-module="midi" role="button" tabindex="0">
+        <div class="icon-img relative">
+            🎛️
+            <div class="status-dot status-offline" id="status-midi"></div>
+        </div>
+        <span class="icon-label">MPD 218</span>
+    </li>
 
-                <div class="desktop-icon" data-module="keyboard">
-                    <div class="icon-img">
-                        ⌨️
-                    </div>
-                    <span class="icon-label">Key Mapper</span>
-                </div>
+    <li class="desktop-icon" data-module="keyboard" role="button" tabindex="0">
+        <div class="icon-img">
+            ⌨️
+        </div>
+        <span class="icon-label">Key Mapper</span>
+    </li>
 
-                <div class="desktop-icon" data-module="tensor">
-                    <div class="icon-img">
-                        🧊
-                    </div>
-                    <span class="icon-label">Tensor Core</span>
-                </div>
+    <li class="desktop-icon" data-module="tensor" data-link="tensor.html" role="button" tabindex="0">
+        <div class="icon-img">
+            🧊
+        </div>
+        <span class="icon-label">Tensor Core</span>
+    </li>
 
-                <div class="desktop-icon" data-module="quantum">
-                    <div class="icon-img">
-                        ⚛️
-                    </div>
-                    <span class="icon-label">Quantum CPU</span>
-                </div>
+    <li class="desktop-icon" data-module="quantum" data-link="quantum.html" role="button" tabindex="0">
+        <div class="icon-img">
+            ⚛️
+        </div>
+        <span class="icon-label">Quantum CPU</span>
+    </li>
 
-                <div class="desktop-icon" data-module="ai">
-                    <div class="icon-img">
-                        🧠
-                    </div>
-                    <span class="icon-label">Neural Agent</span>
-                </div>
-
-            </div>
+    <li class="desktop-icon" data-module="ai" role="button" tabindex="0">
+        <div class="icon-img">
+            🧠
+        </div>
+        <span class="icon-label">Neural Agent</span>
+    </li>
+</ul>
 
         </div>
 
@@ -226,17 +224,19 @@
             <span class="nav-icon">🚀</span> DELIVER
         </a>
     </footer>
+    
     <div style="display:none;">
         <canvas id="ascii-canvas"></canvas>
         <canvas id="webgl-canvas"></canvas>
         <canvas id="paint-layer"></canvas>
         <canvas id="ruler-layer"></canvas>
-    <div id="preview-media-container"></div>
+        <div id="preview-media-container"></div>
     </div>
-<script src="/socket.io/socket.io.js"></script>
-<div id="generic-modal-overlay" class="c-modal-overlay"></div>
-<script type="module" src="../js/media_desktop.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
-<script type="module" src="../js/main.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    
+    <script type="module" src="../js/media_desktop.js"></script>
+    
+    <script type="module" src="../js/main.js"></script>
 </body>
 </html>

@@ -17,7 +17,7 @@
 
 /* Colonne Knobs */
 .control-panel {
-    width: 200px;
+    width: 685px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid #2a2a2a;
